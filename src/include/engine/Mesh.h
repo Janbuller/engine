@@ -14,11 +14,9 @@ namespace engine {
       Material MeshMaterial;
 
         Mesh(std::vector<Vertex> Vertices, std::vector<unsigned int> Indicies, Material MeshMaterial);
-        void Draw(glcore::Shader &shader);
 
         void SetupBuffers();
-    private:
-        unsigned int VAO, VBO, EBO;
 
+        unsigned int VAO, VBO, EBO;
     };
 }// namespace engine

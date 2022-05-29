@@ -36,27 +36,4 @@ namespace engine {
         glVertexArrayAttribBinding(VAO, 1, 0);
         glVertexArrayAttribBinding(VAO, 2, 0);
     }
-
-    void Mesh::Draw(glcore::Shader &shader) {
-        int diffuseNr = 1;
-
-        for (unsigned int i = 0; i < MeshMaterial.Textures.size(); i++) {
-            glActiveTexture(GL_TEXTURE0 + i);
-
-            std::string number;
-            std::string type = "texture_diffuse";
-            if (type == "texture_diffuse") {
-                number = std::to_string(diffuseNr++);
-
-                shader.SetInt(("material." + type + number).c_str(), i);
-                glBindTexture(GL_TEXTURE_2D, MeshMaterial.Textures[i].second.id);
-            }
-            glActiveTexture(GL_TEXTURE0);
-
-            glBindVertexArray(VAO);
-            glDrawElements(GL_TRIANGLES, Indicies.size(), GL_UNSIGNED_INT, 0);
-            glBindVertexArray(0);
-        }
-    }
-
 }// namespace engine

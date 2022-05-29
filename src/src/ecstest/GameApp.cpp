@@ -10,6 +10,7 @@
 #include <glad/glad.h>
 #include "engine/components/Model.h"
 #include "engine/components/Transform.h"
+#include "engine/systems/ModelRenderer.h"
 #include "engine/systems/MoveDown.h"
 #include "glcore/Shader.h"
 #include "glcore/Window.h"
@@ -30,16 +31,12 @@ namespace ecstest  {
   using namespace engine::systems;
     void GameApp::onCreate() {
         AppWindow.CaptureMouse(true);
-        glEnable(GL_DEPTH_TEST);
-        glEnable(GL_CULL_FACE);
-        glCullFace(GL_FRONT);
-        glFrontFace(GL_CW);
 
 	engine::ModelLoader::DefaultShader = MainShader;
 
 	// MainScene->Entities.push_back(engine::Entity{0, std::bitset<32>{}});
 	std::default_random_engine Gen;
-	std::uniform_real_distribution<float>  PosDist  {-2, 2};
+	std::uniform_real_distribution<float>  PosDist  {-10, 10};
 	std::uniform_real_distribution<float>  RotDist  { 0,   6.283};
 	std::uniform_real_distribution<double> ScaleDist{ 1.0, 4.0};
 
@@ -47,13 +44,17 @@ namespace ecstest  {
 	MainScene->RegisterComponentType<Model>();
 
 	MainScene->RegisterSystem<MoveDown>();
-
 	auto MoveDownSignature = std::bitset<engine::MAX_COMPONENTS>();
 	MoveDownSignature.set(MainScene->GetComponentId<Transform>(), true);
-
 	MainScene->SetSystemSignature<MoveDown>(MoveDownSignature);
 
-	for(int i = 0; i < 2; i++) {
+	MainScene->RegisterSystem<ModelRenderer>();
+	auto ModelRendererSignature = std::bitset<engine::MAX_COMPONENTS>();
+	MoveDownSignature.set(MainScene->GetComponentId<Transform>(), true);
+	MoveDownSignature.set(MainScene->GetComponentId<Model>(), true);
+	MainScene->SetSystemSignature<ModelRenderer>(ModelRendererSignature);
+
+	for(int i = 0; i < 20; i++) {
 	  auto& E = MainScene->AddEntity();
 	  MainScene->AddComponent<Transform>(E);
 	  MainScene->AddComponent<Model>(E);
@@ -70,6 +71,8 @@ namespace ecstest  {
 	  auto& EModel = MainScene->GetComponent<Model>(E);
 	  EModel = *engine::ModelLoader::LoadModel("res/models/cube/cube.obj");
 	}
+
+	MainScene->Init();
     }
 
     bool GameApp::onUpdate() {
@@ -80,26 +83,7 @@ namespace ecstest  {
         glm::mat4 projection = MainCam.GetProjectionMatrix(AppWindow.width, AppWindow.height);
         glm::mat4 view = MainCam.GetViewMatrix();
 
-        MainShader.Bind();
-        MainShader.SetMat4("view", view);
-        MainShader.SetMat4("projection", projection);
-
-	for(int i = 0; i < 2; i++) {
-	  const auto& E = MainScene->Entities[i];
-	  const auto& EntityTransform = MainScene->GetComponent<Transform>(E);
-	  auto& EntityModel = MainScene->GetComponent<Model>(E);
-	  
-	  glm::mat4 model = glm::mat4{1.0};
-	  
-	  model = glm::translate(model, EntityTransform.Position);
-	  model = glm::scale(model, EntityTransform.Scale);
-	  model *= glm::mat4_cast(EntityTransform.Rotation);
-	  
-	  MainShader.SetMat4("model", model);
-	  
-	  EntityModel.Meshes[0].Draw(MainShader);
-	  // Cube.Draw(MainShader);
-	}
+	MainScene->GetSystem<ModelRenderer>()->Render(MainScene, view, projection);
 
 	MainScene->Update(DeltaTime);
 

@@ -30,6 +30,7 @@ namespace engine {
         Entity &AddEntity() {
             auto NewId = EGen.GetNextId();
             Entities.push_back(Entity{NewId, std::bitset<MAX_COMPONENTS>()});
+
             return Entities.back();
         }
 
@@ -46,7 +47,7 @@ namespace engine {
         }
 
         template<typename T>
-        void AddComponent(Entity E) {
+        void AddComponent(Entity& E) {
             Components.AddComponent<T>(E);
 
             auto &Signature = E.ComponentSignature;
@@ -56,7 +57,7 @@ namespace engine {
         }
 
         template<typename T>
-        void AddComponent(Entity E, T Component) {
+        void AddComponent(Entity& E, T Component) {
             Components.AddComponent<T>(E, Component);
 
             auto &Signature = E.ComponentSignature;
@@ -92,7 +93,7 @@ namespace engine {
 
         template<typename T>
         sptr<T> GetSystem() {
-            Systems.GetSystem<T>();
+            return Systems.GetSystem<T>();
         }
 
         template<typename T>

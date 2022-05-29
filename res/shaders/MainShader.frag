@@ -8,6 +8,7 @@ in vec2 TexCoords;
 
 struct Material {
     sampler2D texture_diffuse1;
+    sampler2D texture_specular1;
 };
 
 uniform Material material;

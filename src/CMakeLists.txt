@@ -1,0 +1,104 @@
+cmake_minimum_required(VERSION 3.11)
+project(ecs-test VERSION 0.1.0)
+
+include(FetchContent)
+
+# Include glfw #
+#==============#
+FetchContent_Declare(
+        glfw
+        GIT_REPOSITORY https://github.com/glfw/glfw
+)
+
+FetchContent_GetProperties(glfw)
+if(NOT glfw_POPULATED)
+    FetchContent_Populate(glfw)
+
+    set(GLFW_BUILD_EXAMPLES OFF CACHE INTERNAL "Build the GLFW example programs")
+    set(GLFW_BUILD_TESTS OFF CACHE INTERNAL "Build the GLFW test programs")
+    set(GLFW_BUILD_DOCS OFF CACHE INTERNAL "Build the GLFW documentation")
+    set(GLFW_INSTALL OFF CACHE INTERNAL "Generate installation target")
+
+    add_subdirectory(${glfw_SOURCE_DIR} ${glfw_BINARY_DIR})
+endif()
+
+# Include glad #
+#==============#
+FetchContent_Declare(
+        glad
+        GIT_REPOSITORY https://github.com/Dav1dde/glad.git
+)
+
+FetchContent_GetProperties(glad)
+if(NOT glad_POPULATED)
+    FetchContent_Populate(glad)
+    set(GLAD_PROFILE "core" CACHE STRING "OpenGL profile")
+    set(GLAD_API "gl=4.6" CACHE STRING "API type/version pairs, like \"gl=3.2,gles=\", no version means latest")
+    set(GLAD_GENERATOR "c" CACHE STRING "Language to generate the binding for")
+    add_subdirectory(${glad_SOURCE_DIR} ${glad_BINARY_DIR})
+endif()
+
+# Include glm #
+#=============#
+FetchContent_Declare(
+  glm
+  GIT_REPOSITORY https://github.com/g-truc/glm.git
+)
+
+FetchContent_GetProperties(glm)
+if(NOT glm_POPULATED)
+  FetchContent_Populate(glm)
+  add_subdirectory(${glm_SOURCE_DIR} ${glm_BINARY_DIR})
+endif()
+
+# Include spdlog #
+#================#
+FetchContent_Declare(
+  spdlog
+  GIT_REPOSITORY https://github.com/gabime/spdlog
+  GIT_TAG v1.x
+)
+
+FetchContent_GetProperties(spdlog)
+if(NOT spdlog_POPULATED)
+  FetchContent_Populate(spdlog)
+
+  add_subdirectory(${spdlog_SOURCE_DIR} ${spdlog_BINARY_DIR})
+endif()
+
+FetchContent_Declare(
+  assimp
+  GIT_REPOSITORY https://github.com/assimp/assimp.git
+  GIT_TAG v5.1.3
+)
+
+FetchContent_GetProperties(assimp)
+if(NOT assimp_POPULATED)
+  FetchContent_Populate(assimp)
+
+  set( ASSIMP_BUILD_TESTS OFF CACHE INTERNAL "If the test suite for Assimp is built in addition to the library." )
+  set( ASSIMP_INSTALL OFF CACHE INTERNAL "Disable this if you want to use assimp as a submodule." )
+  set( ASSIMP_NO_EXPORT ON CACHE INTERNAL "Disable Assimp's export functionality." )
+
+  set( ASSIMP_BUILD_SMD_IMPORTER OFF )
+  set( ASSIMP_BUILD_X3D_IMPORTER OFF )
+
+  add_subdirectory(${assimp_SOURCE_DIR} ${assimp_BINARY_DIR})
+endif()
+
+file(GLOB_RECURSE ecs-test_src
+  "src/*.cpp"
+)
+
+add_executable(ecs-test
+  ${ecs-test_src}
+)
+
+set_target_properties(ecs-test PROPERTIES
+  CXX_STANDARD 17
+  CXX_STANDARD_REQUIRED ON
+  CXX_EXTENSIONS OFF)
+
+target_include_directories(ecs-test PRIVATE include)
+
+target_link_libraries(ecs-test glfw glm glad pthread tbb spdlog assimp)

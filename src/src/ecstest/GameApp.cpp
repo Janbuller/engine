@@ -4,9 +4,11 @@
 #include "engine/Camera.h"
 #include "engine/Entity.h"
 #include "engine/Mesh.h"
+#include "engine/ModelLoader.h"
 #include "engine/Vertex.h"
 #include <bitset>
 #include <glad/glad.h>
+#include "engine/components/Model.h"
 #include "engine/components/Transform.h"
 #include "engine/systems/MoveDown.h"
 #include "glcore/Shader.h"
@@ -33,13 +35,17 @@ namespace ecstest  {
         glCullFace(GL_FRONT);
         glFrontFace(GL_CW);
 
+	engine::ModelLoader::DefaultShader = MainShader;
+
 	// MainScene->Entities.push_back(engine::Entity{0, std::bitset<32>{}});
 	std::default_random_engine Gen;
-	std::uniform_real_distribution<float>  PosDist  {-30,  30};
+	std::uniform_real_distribution<float>  PosDist  {-2, 2};
 	std::uniform_real_distribution<float>  RotDist  { 0,   6.283};
-	std::uniform_real_distribution<double> ScaleDist{ 0.1, 4.0};
+	std::uniform_real_distribution<double> ScaleDist{ 1.0, 4.0};
 
 	MainScene->RegisterComponentType<Transform>();
+	MainScene->RegisterComponentType<Model>();
+
 	MainScene->RegisterSystem<MoveDown>();
 
 	auto MoveDownSignature = std::bitset<engine::MAX_COMPONENTS>();
@@ -47,9 +53,11 @@ namespace ecstest  {
 
 	MainScene->SetSystemSignature<MoveDown>(MoveDownSignature);
 
-	for(int i = 0; i < 2000; i++) {
+	for(int i = 0; i < 2; i++) {
 	  auto& E = MainScene->AddEntity();
 	  MainScene->AddComponent<Transform>(E);
+	  MainScene->AddComponent<Model>(E);
+
 	  auto& ET = MainScene->GetComponent<Transform>(E);
 	  ET.Position = {PosDist(Gen), PosDist(Gen), PosDist(Gen)};
 	  auto Scalar = ScaleDist(Gen);
@@ -58,6 +66,9 @@ namespace ecstest  {
 	  ET.Rotation = glm::rotate(ET.Rotation, RotDist(Gen), {1, 0, 0});
 	  ET.Rotation = glm::rotate(ET.Rotation, RotDist(Gen), {0, 1, 0});
 	  ET.Rotation = glm::rotate(ET.Rotation, RotDist(Gen), {0, 0, 1});
+
+	  auto& EModel = MainScene->GetComponent<Model>(E);
+	  EModel = *engine::ModelLoader::LoadModel("res/models/cube/cube.obj");
 	}
     }
 
@@ -73,8 +84,10 @@ namespace ecstest  {
         MainShader.SetMat4("view", view);
         MainShader.SetMat4("projection", projection);
 
-	for(int i = 0; i < 2000; i++) {
-	  const auto& EntityTransform = MainScene->GetComponent<Transform>(MainScene->Entities[i]);
+	for(int i = 0; i < 2; i++) {
+	  const auto& E = MainScene->Entities[i];
+	  const auto& EntityTransform = MainScene->GetComponent<Transform>(E);
+	  auto& EntityModel = MainScene->GetComponent<Model>(E);
 	  
 	  glm::mat4 model = glm::mat4{1.0};
 	  
@@ -84,6 +97,7 @@ namespace ecstest  {
 	  
 	  MainShader.SetMat4("model", model);
 	  
+	  EntityModel.Meshes[0].Draw(MainShader);
 	  // Cube.Draw(MainShader);
 	}
 
@@ -121,7 +135,7 @@ namespace ecstest  {
             MainCam.ProcessKeyboard(engine::Camera::MovDir::RIGHT, deltaTime);
 
 
-	for(int i = 0; i < 2000; i++) {
+	for(int i = 0; i < 2; i++) {
 	  auto& Entity = MainScene->Entities[i];
 	  auto& EntityTransform = MainScene->GetComponent<Transform>(Entity);
 	  auto& EntPos = EntityTransform.Position;

@@ -1,21 +1,26 @@
 #pragma once
 
+#include "engine/Base.h"
+#include "engine/Material.h"
 #include "engine/Mesh.h"
 #include "engine/components/Model.h"
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
+#include <assimp/scene.h>
 #include <string>
 #include <vector>
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
 
 namespace engine {
-  class ModelLoader {
-  public:
-    components::Model LoadModel(std::string path);
+    class ModelLoader {
+    public:
+        static sptr<components::Model> LoadModel(std::string Path);
 
-  private:
-    void ProcessNode(aiNode *node, const aiScene *scene);
-    Mesh ProcessMesh(aiMesh *mesh, const aiScene *scene);
-    std::vector<glcore::Texture> LoadMaterialTexture(aiMaterial *mat, aiTextureType type, std::string typeName);
-  };
-}
+        static glcore::Shader DefaultShader;
+
+    private:
+      static void ProcessNode(aiNode *Node, const aiScene *Scene, sptr<components::Model> Model, std::string BaseDir);
+      static Mesh ProcessMesh(aiMesh *Mesh, const aiScene *Scene, std::string BaseDir);
+      static Material ProcessMaterial(aiMaterial *Mat, std::string BaseDir);
+      static std::vector<std::pair<std::string, glcore::Texture>> LoadMaterialTexture(aiMaterial *Mat, aiTextureType Type, std::string TypeName, std::string BaseDir);
+    };
+}// namespace engine

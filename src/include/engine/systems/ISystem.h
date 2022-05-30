@@ -11,9 +11,9 @@ namespace engine {
         public:
 	  std::set<Entity> Entities;
 
-            virtual void Init() = 0;
+            virtual void Init(sptr<Scene> Scene) = 0;
             virtual void Update(sptr<Scene> Scene, double DeltaTime) = 0;
-            virtual void Exit() = 0;
+            virtual void Exit(sptr<Scene> Scene) = 0;
         };
     }// namespace systems
 }// namespace engine

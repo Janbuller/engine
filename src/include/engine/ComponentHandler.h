@@ -11,11 +11,12 @@ namespace engine {
     class ComponentHandler {
     private:
         std::unordered_map<std::string, int> ComponentIds{};
-        std::unordered_map<std::string, sptr<IComponentVector>> ComponentVectors{};
 
         int NextComponentId = 0;
 
     public:
+        std::unordered_map<std::string, sptr<IComponentVector>> ComponentVectors{};
+
         template<typename T>
         void RegisterComponentType() {
             const std::string TypeName = typeid(T).name();

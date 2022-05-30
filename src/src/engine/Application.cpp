@@ -36,8 +36,8 @@ namespace engine {
             AppWindow.SwapBuffers();
         }
 
-        LOG_ENGINE_TRACE("Application has been exited.");
         onExit();
+        LOG_ENGINE_TRACE("Application has been exited.");
     }
 
     void Application::onCreate() {

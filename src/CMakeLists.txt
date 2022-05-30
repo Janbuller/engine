@@ -72,6 +72,8 @@ FetchContent_Declare(
   GIT_TAG v5.1.3
 )
 
+# Include assimp #
+#================#
 FetchContent_GetProperties(assimp)
 if(NOT assimp_POPULATED)
   FetchContent_Populate(assimp)
@@ -86,6 +88,45 @@ if(NOT assimp_POPULATED)
   add_subdirectory(${assimp_SOURCE_DIR} ${assimp_BINARY_DIR})
 endif()
 
+# Include Lua #
+#=============#
+find_package(Lua REQUIRED)
+
+# Include LuaBridge #
+#===================#
+FetchContent_Declare(
+        luabridge
+        GIT_REPOSITORY https://github.com/vinniefalco/LuaBridge.git
+)
+
+FetchContent_GetProperties(luabridge)
+if(NOT luabridge_POPULATED)
+    FetchContent_Populate(luabridge)
+
+    set(LUABRIDGE_CXX17 ON CACHE INTERNAL "Use C++17 standard if supported by compiler")
+
+    add_subdirectory(${luabridge_SOURCE_DIR} ${luabridge_BINARY_DIR})
+endif()
+
+# Include re2 #
+#=============#
+FetchContent_Declare(
+        re2
+        GIT_REPOSITORY https://github.com/google/re2.git
+	GIT_TAG main
+)
+
+FetchContent_GetProperties(re2)
+
+if(NOT re2_POPULATED)
+    FetchContent_Populate(re2)
+
+    set(RE2_BUILD_TESTING OFF CACHE INTERNAL "enable testing for RE2")
+
+    add_subdirectory(${re2_SOURCE_DIR} ${re2_BINARY_DIR})
+endif()
+
+
 file(GLOB_RECURSE ecs-test_src
   "src/*.cpp"
 )
@@ -99,6 +140,6 @@ set_target_properties(ecs-test PROPERTIES
   CXX_STANDARD_REQUIRED ON
   CXX_EXTENSIONS OFF)
 
-target_include_directories(ecs-test PRIVATE include)
+target_include_directories(ecs-test PRIVATE include ${LUA_INCLUDE_DIR})
 
-target_link_libraries(ecs-test glfw glm glad pthread tbb spdlog assimp)
+target_link_libraries(ecs-test glfw glm glad pthread tbb spdlog assimp ${LUA_LIBRARIES} LuaBridge re2::re2)

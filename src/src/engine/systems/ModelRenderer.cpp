@@ -3,7 +3,7 @@
 #include <glad/glad.h>
 
 namespace engine::systems {
-    void ModelRenderer::Init() {
+    void ModelRenderer::Init(sptr<Scene> Scene) {
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
         glCullFace(GL_FRONT);

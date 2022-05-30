@@ -25,12 +25,14 @@ namespace ecstest {
 
         engine::Camera MainCam{};
 
-      // engine::Mesh Cube = engine::Mesh::FromRawMesh(engine::RawMesh::LoadOBJ("cube.obj", "res/"), {glcore::Texture::LoadTextureFromFile("res/texture.png")});
+        // engine::Mesh Cube = engine::Mesh::FromRawMesh(engine::RawMesh::LoadOBJ("cube.obj", "res/"), {glcore::Texture::LoadTextureFromFile("res/texture.png")});
 
-      engine::sptr<engine::Scene> MainScene = std::make_shared<engine::Scene>();
+        engine::sptr<engine::Scene> MainScene = std::make_shared<engine::Scene>();
+
     private:
         void onCreate() override;
         bool onUpdate() override;
+        void onExit() override;
 
         void DoInput(double deltaTime) {
             DoKeyboardInput(deltaTime);
@@ -43,4 +45,4 @@ namespace ecstest {
         void DoKeyboardInput(double deltaTime);
         void DoMouseInput();
     };
-}// namespace MarchingCubes
+}// namespace ecstest

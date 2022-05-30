@@ -9,7 +9,9 @@
 #include <bitset>
 #include <glad/glad.h>
 #include "engine/components/Model.h"
+#include "engine/components/Script.h"
 #include "engine/components/Transform.h"
+#include "engine/systems/LuaScriptRunner.h"
 #include "engine/systems/ModelRenderer.h"
 #include "engine/systems/MoveDown.h"
 #include "glcore/Shader.h"
@@ -36,28 +38,35 @@ namespace ecstest  {
 
 	// MainScene->Entities.push_back(engine::Entity{0, std::bitset<32>{}});
 	std::default_random_engine Gen;
-	std::uniform_real_distribution<float>  PosDist  {-10, 10};
+	std::uniform_real_distribution<float>  PosDist  {-10, 100};
 	std::uniform_real_distribution<float>  RotDist  { 0,   6.283};
-	std::uniform_real_distribution<double> ScaleDist{ 1.0, 4.0};
+	std::uniform_real_distribution<double> ScaleDist{ 1.0, 1.0};
 
 	MainScene->RegisterComponentType<Transform>();
 	MainScene->RegisterComponentType<Model>();
+	MainScene->RegisterComponentType<Script>();
 
-	MainScene->RegisterSystem<MoveDown>();
-	auto MoveDownSignature = std::bitset<engine::MAX_COMPONENTS>();
-	MoveDownSignature.set(MainScene->GetComponentId<Transform>(), true);
-	MainScene->SetSystemSignature<MoveDown>(MoveDownSignature);
+	// MainScene->RegisterSystem<MoveDown>();
+	// auto MoveDownSignature = std::bitset<engine::MAX_COMPONENTS>();
+	// MoveDownSignature.set(MainScene->GetComponentId<Transform>(), true);
+	// MainScene->SetSystemSignature<MoveDown>(MoveDownSignature);
 
 	MainScene->RegisterSystem<ModelRenderer>();
 	auto ModelRendererSignature = std::bitset<engine::MAX_COMPONENTS>();
-	MoveDownSignature.set(MainScene->GetComponentId<Transform>(), true);
-	MoveDownSignature.set(MainScene->GetComponentId<Model>(), true);
+	ModelRendererSignature.set(MainScene->GetComponentId<Transform>(), true);
+	ModelRendererSignature.set(MainScene->GetComponentId<Model>(), true);
 	MainScene->SetSystemSignature<ModelRenderer>(ModelRendererSignature);
 
-	for(int i = 0; i < 20; i++) {
+	MainScene->RegisterSystem<LuaScriptRunner>();
+	auto LuaScriptRunnerSignature = std::bitset<engine::MAX_COMPONENTS>();
+	LuaScriptRunnerSignature.set(MainScene->GetComponentId<Script>(), true);
+	MainScene->SetSystemSignature<LuaScriptRunner>(LuaScriptRunnerSignature);
+
+	for(int i = 0; i < 50; i++) {
 	  auto& E = MainScene->AddEntity();
 	  MainScene->AddComponent<Transform>(E);
 	  MainScene->AddComponent<Model>(E);
+	  MainScene->AddComponent<Script>(E);
 
 	  auto& ET = MainScene->GetComponent<Transform>(E);
 	  ET.Position = {PosDist(Gen), PosDist(Gen), PosDist(Gen)};
@@ -70,6 +79,9 @@ namespace ecstest  {
 
 	  auto& EModel = MainScene->GetComponent<Model>(E);
 	  EModel = *engine::ModelLoader::LoadModel("res/models/cube/cube.obj");
+
+	  auto& EScript = MainScene->GetComponent<Script>(E);
+	  EScript.ScriptPaths.push_back("res/scripts/TestThingy.lua");
 	}
 
 	MainScene->Init();
@@ -89,6 +101,10 @@ namespace ecstest  {
 
         return true;
     }
+
+  void GameApp::onExit() {
+    MainScene->Exit();
+  }
 
     void GameApp::onKeyPressed(int key, int scancode, int action, int mods) {
         if (key == KEY_R && action == GLFW_PRESS)
@@ -119,7 +135,7 @@ namespace ecstest  {
             MainCam.ProcessKeyboard(engine::Camera::MovDir::RIGHT, deltaTime);
 
 
-	for(int i = 0; i < 2; i++) {
+	for(int i = 0; i < 1; i++) {
 	  auto& Entity = MainScene->Entities[i];
 	  auto& EntityTransform = MainScene->GetComponent<Transform>(Entity);
 	  auto& EntPos = EntityTransform.Position;

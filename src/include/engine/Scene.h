@@ -47,7 +47,7 @@ namespace engine {
         }
 
         template<typename T>
-        void AddComponent(Entity& E) {
+        void AddComponent(Entity &E) {
             Components.AddComponent<T>(E);
 
             auto &Signature = E.ComponentSignature;
@@ -57,7 +57,7 @@ namespace engine {
         }
 
         template<typename T>
-        void AddComponent(Entity& E, T Component) {
+        void AddComponent(Entity &E, T Component) {
             Components.AddComponent<T>(E, Component);
 
             auto &Signature = E.ComponentSignature;
@@ -82,6 +82,14 @@ namespace engine {
         }
 
         template<typename T>
+        bool HasComponent(Entity E) {
+            const auto &EntSig = E.ComponentSignature;
+            const auto &ComponentId = GetComponentId<T>();
+
+            return EntSig[ComponentId];
+        }
+
+        template<typename T>
         int GetComponentId() {
             return Components.GetComponentId<T>();
         }
@@ -102,7 +110,7 @@ namespace engine {
         }
 
         void Init() {
-            Systems.InitSystems();
+            Systems.InitSystems(shared_from_this());
         }
 
         void Update(double DeltaTime) {
@@ -110,7 +118,7 @@ namespace engine {
         }
 
         void Exit() {
-            Systems.ExitSystems();
+            Systems.ExitSystems(shared_from_this());
         }
     };
 }// namespace engine

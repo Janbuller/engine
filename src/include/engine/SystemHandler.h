@@ -82,10 +82,10 @@ namespace engine {
             }
         }
 
-        void InitSystems() {
+        void InitSystems(sptr<Scene> Scene) {
             for (auto const &pair : Systems) {
                 const auto &System = pair.second;
-                System->Init();
+                System->Init(Scene);
             }
         }
 
@@ -96,10 +96,10 @@ namespace engine {
             }
         }
 
-        void ExitSystems() {
+        void ExitSystems(sptr<Scene> Scene) {
             for (auto const &pair : Systems) {
                 const auto &System = pair.second;
-                System->Exit();
+                System->Exit(Scene);
             }
         }
     };

@@ -82,6 +82,11 @@ namespace engine {
         }
 
         template<typename T>
+        T &GetComponent(EntityID E) {
+            return Components.GetComponent<T>(E);
+        }
+
+        template<typename T>
         bool HasComponent(Entity E) {
             const auto &EntSig = E.ComponentSignature;
             const auto &ComponentId = GetComponentId<T>();

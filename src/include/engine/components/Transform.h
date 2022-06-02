@@ -6,9 +6,9 @@
 #include <glm/gtc/quaternion.hpp>
 
 #include "LuaBridge/detail/LuaRef.h"
-#include <LuaBridge/LuaBridge.h>
-#include <lua.h>
 #include <lua.hpp>
+#include <LuaBridge/LuaBridge.h>
+#include "engine/Base.h"
 
 namespace engine::components {
     struct Transform {

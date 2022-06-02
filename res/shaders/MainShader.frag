@@ -16,10 +16,12 @@ uniform Material material;
 void main()
 {
   vec3 norm = normalize(Normal);
-  vec3 lightDir = normalize(vec3(1.75, 1.346, 0.74));
+  vec3 lightDir = -normalize(vec3(0.74, 1.346, 1.75));
 
-  float diff = max(dot(norm, lightDir), 0.0);
+  float diff = max(dot(norm, -lightDir), 0.0);
   diff = min(max(0.3, diff * 1.5), 1.0);
 
-  fragColor = vec4(texture(material.texture_diffuse1, TexCoords).xyz * diff, 1.0);
+  vec3 diffuse = texture(material.texture_diffuse1, TexCoords).xyz * diff;
+
+  fragColor = vec4(diffuse, 1.0);
 }

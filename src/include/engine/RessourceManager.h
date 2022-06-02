@@ -40,5 +40,17 @@ namespace engine {
 
             return std::static_pointer_cast<SpecificRessourceManager<T>>(RessourceManagers.at(TypeName))->Get(Path);
         }
+
+        template<class T>
+        static void Set(std::string Path, T Ressource) {
+            std::string TypeName = typeid(T).name();
+
+            if (!RessourceManagers.count(TypeName)) {
+                LOG_ENGINE_ERROR("Failed to set ressource of non-registered ressource type {0}!", TypeName);
+                throw std::invalid_argument("Tried to set ressource of non-registered ressource type!");
+            }
+
+            return std::static_pointer_cast<SpecificRessourceManager<T>>(RessourceManagers.at(TypeName))->Set(Path, Ressource);
+        }
     };
 }// namespace engine

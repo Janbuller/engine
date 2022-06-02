@@ -80,6 +80,15 @@ namespace engine {
             return Components[EntityToComponentIdx[E.Id]];
         }
 
+        T &GetComponent(EntityID E) {
+            if (EntityToComponentIdx.find(E) == EntityToComponentIdx.end()) {
+                LOG_ENGINE_ERROR("Failed to get a non-existant \"{0}\" component from an entity with id \"{1}\".", typeid(T).name(), E);
+                throw std::invalid_argument("Tried to get non-existant component from entity");
+            }
+
+            return Components[EntityToComponentIdx[E]];
+        }
+
         void TryRemoveComponent(Entity E) {
             if (EntityToComponentIdx.find(E.Id) != EntityToComponentIdx.end()) {
                 RemoveComponent(E);

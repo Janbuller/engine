@@ -1,6 +1,6 @@
 Vector2 = {x = 0, y = 0}
 
-function Vector2:new(o, x, y)
+function Vector2:new(x, y)
   o = {}
   setmetatable(o, self)
   self.__index = self

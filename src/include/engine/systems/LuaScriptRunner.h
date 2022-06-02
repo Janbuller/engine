@@ -1,14 +1,12 @@
 #pragma once
 
-#include <lua.hpp>
-#include <LuaBridge/LuaBridge.h>
 #include "engine/Base.h"
 #include "engine/Keys.h"
 #include "engine/Scene.h"
 #include "engine/components/Script.h"
 #include "engine/systems/ISystem.h"
-#include <lua.h>
 #include <lua.hpp>
+#include <LuaBridge/LuaBridge.h>
 
 namespace engine::systems {
   class LuaScriptRunner : public ISystem {
@@ -17,6 +15,8 @@ namespace engine::systems {
 
   public: 
     LuaScriptRunner();
+
+    void InitializeScripting(sptr<Scene> Scene);
     
     void Init(sptr<Scene> Scene) override;
     void Update(sptr<Scene> Scene, double DeltaTime) override;
@@ -39,6 +39,8 @@ namespace engine::systems {
     void SetComponentsInLua(sptr<Scene> Scene, const Entity& E);
     void SetComponentsInEngine(sptr<Scene> Scene, const Entity& E);
 
+    void SetupGettersAndSetters(sptr<Scene> Scene);
+
     template<typename... Arguments>
     void RunFunctionForAll(sptr<Scene> Scene, std::string Function, Arguments&&... Args) {
         for (const auto &Entity : Entities) {
@@ -57,9 +59,7 @@ namespace engine::systems {
                 auto L_Func = L_EntityScript[Function];
                 if (!(L_Func == luabridge::Nil())) {
                     try {
-                        SetComponentsInLua(Scene, Entity);
                         L_Func(Args...);
-                        SetComponentsInEngine(Scene, Entity);
                     } catch (luabridge::LuaException e) {
                         LOG_ENGINE_ERROR("Failed to run function on lua script \"{0}\"", EScript.ScriptPaths[ScriptIdx]);
 		      LOG_ENGINE_ERROR("Lua Error: {}", e.what());

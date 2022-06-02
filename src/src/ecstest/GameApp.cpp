@@ -65,25 +65,19 @@ namespace ecstest {
         LuaScriptRunnerSignature.set(MainScene->GetComponentId<Script>(), true);
         MainScene->SetSystemSignature<LuaScriptRunner>(LuaScriptRunnerSignature);
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 1; i++) {
             auto &E = MainScene->AddEntity();
             MainScene->AddComponent<Transform>(E);
             MainScene->AddComponent<Model>(E);
             MainScene->AddComponent<Script>(E);
 
             auto &ET = MainScene->GetComponent<Transform>(E);
-            // ET.Position = {PosDist(Gen), PosDist(Gen), PosDist(Gen)};
 
-            // auto Scalar = ScaleDist(Gen);
-            auto Scalar = 5.0;
+            auto Scalar = 1.0;
             ET.Scale = {Scalar, Scalar, Scalar};
 
-            // ET.Rotation = glm::rotate(ET.Rotation, RotDist(Gen), {1, 0, 0});
-            // ET.Rotation = glm::rotate(ET.Rotation, RotDist(Gen), {0, 1, 0});
-            // ET.Rotation = glm::rotate(ET.Rotation, RotDist(Gen), {0, 0, 1});
-
             auto &EModel = MainScene->GetComponent<Model>(E);
-            EModel = engine::RessourceManager::Get<Model>("res/models/autumn_house_obj/house.obj");
+            EModel = engine::RessourceManager::Get<Model>("res/models/cube/cube.obj");
 
             // if (i == 0) {
                 auto &EScript = MainScene->GetComponent<Script>(E);
@@ -91,7 +85,7 @@ namespace ecstest {
             // }
         }
 
-        MainScene->Init();
+	MainScene->GetSystem<LuaScriptRunner>()->InitializeScripting(MainScene);
 
         std::function<bool(int)> IsKeyDownFn = [this](int KeyNum) {
             return AppWindow.GetKeyState(KeyNum) == glcore::Window::KeyState::KEY_PRESS;
@@ -112,8 +106,9 @@ namespace ecstest {
             auto EndQuat = glm::rotate(StartQuat, Angle, Axis);
             return std::vector<float>{EndQuat[0], EndQuat[1], EndQuat[2], EndQuat[3]};
         };
-
         MainScene->GetSystem<LuaScriptRunner>()->AddLuaFunction(RotateFn, "GMath", "Rotate");
+
+        MainScene->Init();
     }
 
     bool GameApp::onUpdate() {

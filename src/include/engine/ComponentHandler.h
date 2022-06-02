@@ -76,6 +76,11 @@ namespace engine {
             return GetComponentVector<T>()->GetComponent(E);
         }
 
+        template<typename T>
+        T &GetComponent(EntityID E) {
+            return GetComponentVector<T>()->GetComponent(E);
+        }
+
         void RemoveEntity(Entity entity) {
             for (auto const &pair : ComponentVectors) {
                 auto const &component = pair.second;

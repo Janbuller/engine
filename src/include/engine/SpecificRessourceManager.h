@@ -22,5 +22,8 @@ namespace engine {
 	return Loaded;
       }
 
+      void Set(std::string Path, T Ressource) {
+	LoadedRessources.insert_or_assign({Path, Ressource});
+      }
     };
 }// namespace engine

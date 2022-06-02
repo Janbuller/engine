@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.11)
+cmake_minimum_required(VERSION 3.12)
 project(ecs-test VERSION 0.1.0)
 
 include(FetchContent)
@@ -82,8 +82,10 @@ if(NOT assimp_POPULATED)
   set( ASSIMP_INSTALL OFF CACHE INTERNAL "Disable this if you want to use assimp as a submodule." )
   set( ASSIMP_NO_EXPORT ON CACHE INTERNAL "Disable Assimp's export functionality." )
 
-  set( ASSIMP_BUILD_SMD_IMPORTER OFF )
-  set( ASSIMP_BUILD_X3D_IMPORTER OFF )
+  set( ASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT OFF )
+  set( ASSIMP_BUILD_FBX_IMPORTER ON )
+  set( ASSIMP_BUILD_OBJ_IMPORTER ON )
+  set( ASSIMP_BUILD_GLTF_IMPORTER ON )
 
   add_subdirectory(${assimp_SOURCE_DIR} ${assimp_BINARY_DIR})
 endif()
@@ -126,6 +128,15 @@ if(NOT re2_POPULATED)
     add_subdirectory(${re2_SOURCE_DIR} ${re2_BINARY_DIR})
 endif()
 
+option (FORCE_COLORED_OUTPUT "Always produce ANSI-colored output (GNU/Clang only)." TRUE)
+
+if (${FORCE_COLORED_OUTPUT})
+    if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+       add_compile_options (-fdiagnostics-color=always)
+    elseif ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+       add_compile_options (-fcolor-diagnostics)
+    endif ()
+endif ()
 
 file(GLOB_RECURSE ecs-test_src
   "src/*.cpp"
@@ -142,4 +153,4 @@ set_target_properties(ecs-test PROPERTIES
 
 target_include_directories(ecs-test PRIVATE include ${LUA_INCLUDE_DIR})
 
-target_link_libraries(ecs-test glfw glm glad pthread tbb spdlog assimp ${LUA_LIBRARIES} LuaBridge re2::re2)
+target_link_libraries(ecs-test glfw glm glad spdlog assimp ${LUA_LIBRARIES} LuaBridge re2::re2)

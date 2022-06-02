@@ -77,7 +77,6 @@ namespace engine {
                 }
                 else {
                     System->Entities.erase(entity);
-		    LOG_ENGINE_INFO("{0} : {1}", entitySignature.to_string(), SystemSignature.to_string());
                 }
             }
         }

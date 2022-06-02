@@ -7,6 +7,7 @@
 
 #include "LuaBridge/detail/LuaRef.h"
 #include <LuaBridge/LuaBridge.h>
+#include <lua.h>
 #include <lua.hpp>
 
 namespace engine::components {
@@ -18,19 +19,20 @@ namespace engine::components {
         Transform() {}
 
         luabridge::LuaRef GetTable(lua_State *L) const {
-            auto L_Transform = luabridge::newTable(L);
-            L_Transform["Position"] = luabridge::newTable(L);
+	  lua_getglobal(L, "Transform");
+	  auto L_TransformClass = luabridge::LuaRef::fromStack(L, -1);
+	  lua_pop(L, -1);
+
+	  auto L_Transform = L_TransformClass["new"](L_TransformClass);
             L_Transform["Position"]["x"] = Position.x;
             L_Transform["Position"]["y"] = Position.y;
             L_Transform["Position"]["z"] = Position.z;
 
-            L_Transform["Rotation"] = luabridge::newTable(L);
             L_Transform["Rotation"]["x"] = Rotation.x;
             L_Transform["Rotation"]["y"] = Rotation.y;
             L_Transform["Rotation"]["z"] = Rotation.z;
             L_Transform["Rotation"]["w"] = Rotation.w;
 
-            L_Transform["Scale"] = luabridge::newTable(L);
             L_Transform["Scale"]["x"] = Scale.x;
             L_Transform["Scale"]["y"] = Scale.y;
             L_Transform["Scale"]["z"] = Scale.z;

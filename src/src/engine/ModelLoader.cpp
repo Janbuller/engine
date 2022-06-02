@@ -1,6 +1,7 @@
 #include "engine/ModelLoader.h"
 #include "engine/Base.h"
 #include "engine/Material.h"
+#include "engine/RessourceManager.h"
 #include "engine/components/Model.h"
 #include "glcore/Shader.h"
 #include <memory>
@@ -23,6 +24,7 @@ namespace engine {
 
         auto CreatedModel = std::make_shared<components::Model>();
         ProcessNode(Scene->mRootNode, Scene, CreatedModel, BaseDir);
+
         return CreatedModel;
     }
 
@@ -93,7 +95,11 @@ namespace engine {
         for (unsigned int i = 0; i < Mat->GetTextureCount(Type); i++) {
             aiString str;
             Mat->GetTexture(Type, i, &str);
-            glcore::Texture texture = glcore::Texture::LoadTextureFromFile(str.C_Str(), BaseDir);
+
+	    std::string filename = str.C_Str();
+	    filename = BaseDir + '/' + filename;
+
+            glcore::Texture texture = RessourceManager::Get<glcore::Texture>(filename);
             Textures.push_back({TypeName, texture});
         }
         return Textures;

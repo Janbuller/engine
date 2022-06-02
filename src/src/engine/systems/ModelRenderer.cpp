@@ -15,6 +15,10 @@ namespace engine::systems {
             auto &ET = Scene->GetComponent<Transform>(Entity);
             auto &EM = Scene->GetComponent<Model>(Entity);
 
+	    if(!EM.Visible) {
+	      continue;
+	    }
+
             glm::mat4 Model = glm::mat4{1.0};
 
             Model = glm::translate(Model, ET.Position);

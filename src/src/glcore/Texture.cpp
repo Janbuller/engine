@@ -9,6 +9,10 @@ namespace glcore {
         : id{id}, path{path}, width{width}, height{height} {
     }
 
+  Texture Texture::Load(std::string path) {
+    return LoadTextureFromFile(path.c_str());
+  }
+
     Texture Texture::LoadTextureFromFile(const char *path) {
         unsigned int textureID;
         glGenTextures(1, &textureID);

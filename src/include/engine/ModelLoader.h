@@ -7,6 +7,7 @@
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
+#include "engine/components/Model.h"
 #include <string>
 #include <vector>
 

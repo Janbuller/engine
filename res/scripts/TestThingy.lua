@@ -1,37 +1,67 @@
 time = 0;
 
+StartHeight = {}
+size = 8
+
 function Init()
+   if not (EntityID == 0) then
+      local model =  Entity.Model
+      model.Visible = false
+      Entity.Model = model
+   end
+   
    time = math.random(1000)/10;
 
+   for x = 1, size do
+      StartHeight[x] = {}
+      for z = 1, size do
+	 StartHeight[x][z] = math.random(1000)/1000
+      end
+   end
+   
 end
 
 function Update(dt)
-   time += dt;
+   if EntityID == 0 then
+      time += dt;
+      
+      local EntModel = Model:new();
+      EntModel.Meshes[1] = Mesh:new();
 
-   local Trans = Entity.Transform;
+      local Verts = {}
 
-   Trans.Position.x = math.cos(time)*(Trans.Position.y * 0.5 + 1);
-   Trans.Position.y = math.cos(time*1.42)*20 + 20;
-   Trans.Position.z = math.sin(time)*(Trans.Position.y * 0.5 + 1);
+      for x = 1, size do
+	 for z = 1, size do
+	    local vertex = Vertex:new()
+	    local pos = vertex.Position
 
-   Trans.Rotation:Rotate(dt * math.random(100)/100, Vector3:new(0, 1, 0));
-   Trans.Rotation:Rotate(dt * math.random(100)/100, Vector3:new(1, 0, 0));
+	    pos.x = x-1
+	    pos.y = StartHeight[x][z] * math.cos(time*StartHeight[x][z])
+	    pos.z = z-1
 
-   Trans.Scale.x = (math.cos(time*4)*0.5) + 1
-   Trans.Scale.y = (math.cos(time*4)*0.5) + 1
-   Trans.Scale.z = (math.cos(time*4)*0.5) + 1
+	    vertex.Normal.x = -1;
+	    vertex.Normal.y = 0;
+	    vertex.Normal.z = 0;
 
-   -- Entity.Transform = Trans
+	    vertex.TexCoords.x = (x-1)/(size-1);
+	    vertex.TexCoords.y = (z-1)/(size-1);
 
-   local EntModel = Entity.Model;
-   EntModel.Meshes[1].Vertices[7].Position = Vector3:new(math.sin(time)*2, 1.0, math.cos(time)*2);
-   EntModel.Meshes[1].Vertices[11].Position = Vector3:new(math.sin(time)*2, 1.0, math.cos(time)*2);
-   Entity.Model = EntModel;
+	    for i = 1, (size-1)^2*2 do
+	       table.insert(EntModel.Meshes[1].Indicies, i)
+	       table.insert(EntModel.Meshes[1].Indicies, i+1)
+	       table.insert(EntModel.Meshes[1].Indicies, i+8)
+	       table.insert(EntModel.Meshes[1].Indicies, i+9)
+	       table.insert(EntModel.Meshes[1].Indicies, i+1)
+	       table.insert(EntModel.Meshes[1].Indicies, i+8)
+	    end
+	    table.insert(Verts, vertex)
+	 end
+      end
 
-   if(Input.KeyDown.F) then
-      time += dt * 4
+      EntModel.Meshes[1].Vertices = Verts
+
+      Entity.Model = EntModel
    end
-
 end
 
 function OnKeyPressed(Key, Action)

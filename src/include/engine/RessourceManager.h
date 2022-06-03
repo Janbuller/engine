@@ -1,7 +1,6 @@
 #pragma once
 
 #include "engine/Base.h"
-#include "engine/ILoadable.h"
 #include "engine/SpecificRessourceManager.h"
 #include <memory>
 #include <stdexcept>

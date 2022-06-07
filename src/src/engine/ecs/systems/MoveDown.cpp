@@ -1,7 +1,7 @@
-#include "engine/systems/MoveDown.h"
+#include "engine/ecs/systems/MoveDown.h"
 #include "engine/Base.h"
-#include "engine/Scene.h"
-#include "engine/components/Transform.h"
+#include "engine/ecs/Scene.h"
+#include "engine/ecs/components/Transform.h"
 
 namespace engine::systems {
   void MoveDown::Update(sptr<Scene> Scene, double DeltaTime) {

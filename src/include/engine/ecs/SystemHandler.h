@@ -1,9 +1,9 @@
 #pragma once
 
 #include "engine/Base.h"
-#include "engine/Entity.h"
-#include "engine/Scene.h"
-#include "engine/systems/ISystem.h"
+#include "Entity.h"
+#include "Scene.h"
+#include "engine/ecs/systems/ISystem.h"
 #include <bitset>
 #include <stdexcept>
 #include <unordered_map>

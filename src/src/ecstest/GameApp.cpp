@@ -1,20 +1,21 @@
 #include "ecstest/GameApp.h"
 #include "GLFW/glfw3.h"
 #include "engine/Application.h"
-#include "engine/Camera.h"
-#include "engine/Entity.h"
 #include "engine/Keys.h"
 #include "engine/Logger.h"
 #include "engine/Mesh.h"
 #include "engine/ModelLoader.h"
 #include "engine/RessourceManager.h"
+#include "engine/SpecificRessourceManager.h"
 #include "engine/Vertex.h"
-#include "engine/components/Model.h"
-#include "engine/components/Script.h"
-#include "engine/components/Transform.h"
-#include "engine/systems/LuaScriptRunner.h"
-#include "engine/systems/ModelRenderer.h"
-#include "engine/systems/MoveDown.h"
+#include "engine/ecs/Entity.h"
+#include "engine/ecs/components/Camera.h"
+#include "engine/ecs/components/Model.h"
+#include "engine/ecs/components/Script.h"
+#include "engine/ecs/components/Transform.h"
+#include "engine/ecs/systems/LuaScriptRunner.h"
+#include "engine/ecs/systems/ModelRenderer.h"
+#include "engine/ecs/systems/MoveDown.h"
 #include "glcore/Shader.h"
 #include "glcore/Texture.h"
 #include "glcore/Window.h"
@@ -22,17 +23,21 @@
 #include "glm/ext/quaternion_transform.hpp"
 #include "glm/gtc/quaternion.hpp"
 #include "glm/gtx/string_cast.hpp"
+#include "glm/gtx/quaternion.hpp"
 #include "siv/PerlinNoise.hpp"
+
+// clang-format off
+#include <lua.hpp>
+#include <LuaBridge/LuaBridge.h>
+#include <LuaBridge/Vector.h>
+// clang-format on
+
 #include <bitset>
 #include <functional>
 #include <glad/glad.h>
 #include <random>
 #include <utility>
 #include <vector>
-#include <lua.hpp>
-#include <LuaBridge/LuaBridge.h>
-#include <LuaBridge/Vector.h>
-#include "engine/SpecificRessourceManager.h"
 
 namespace ecstest {
     using namespace engine::components;
@@ -40,8 +45,8 @@ namespace ecstest {
     void GameApp::onCreate() {
         AppWindow.CaptureMouse(true);
 
-	engine::RessourceManager::RegisterRessourceType<Model>();
-	engine::RessourceManager::RegisterRessourceType<glcore::Texture>();
+        engine::RessourceManager::RegisterRessourceType<Model>();
+        engine::RessourceManager::RegisterRessourceType<glcore::Texture>();
 
         engine::ModelLoader::DefaultShader = MainShader;
 
@@ -53,6 +58,7 @@ namespace ecstest {
         MainScene->RegisterComponentType<Transform>();
         MainScene->RegisterComponentType<Model>();
         MainScene->RegisterComponentType<Script>();
+        MainScene->RegisterComponentType<Camera>();
 
         MainScene->RegisterSystem<ModelRenderer>();
         auto ModelRendererSignature = std::bitset<engine::MAX_COMPONENTS>();
@@ -80,12 +86,22 @@ namespace ecstest {
             EModel = engine::RessourceManager::Get<Model>("res/models/cube/cube.obj");
 
             // if (i == 0) {
-                auto &EScript = MainScene->GetComponent<Script>(E);
-                EScript.ScriptPaths.push_back("res/scripts/TestThingy.lua");
+            auto &EScript = MainScene->GetComponent<Script>(E);
+            EScript.ScriptPaths.push_back("res/scripts/TestThingy.lua");
             // }
         }
 
-	MainScene->GetSystem<LuaScriptRunner>()->InitializeScripting(MainScene);
+        auto &Cam = MainScene->AddEntity();
+        MainScene->AddComponent<Transform>(Cam);
+        MainScene->AddComponent<Camera>(Cam);
+        MainScene->AddComponent<Script>(Cam);
+
+        auto& CamScript = MainScene->GetComponent<Script>(Cam);
+        CamScript.ScriptPaths.push_back("res/scripts/CameraController.lua");
+
+        MainScene->MainCam = Cam;
+
+        MainScene->GetSystem<LuaScriptRunner>()->InitializeScripting(MainScene);
 
         std::function<bool(int)> IsKeyDownFn = [this](int KeyNum) {
             return AppWindow.GetKeyState(KeyNum) == glcore::Window::KeyState::KEY_PRESS;
@@ -98,15 +114,36 @@ namespace ecstest {
         };
         MainScene->GetSystem<LuaScriptRunner>()->AddLuaFunction(GetMousePosFn, "Input", "GetMousePos");
 
-        std::function<std::vector<float>(std::vector<float>, float, std::vector<float>)> RotateFn = [this](std::vector<float> IQuat, float IAngle, std::vector<float> IAxis) {
-            glm::quat StartQuat{IQuat[0], IQuat[1], IQuat[2], IQuat[3]};
-            const auto &Angle = IAngle;
-            glm::vec3 Axis{IAxis[0], IAxis[1], IAxis[2]};
+        std::function<std::vector<float>(std::vector<float>, float, std::vector<float>)> RotateFn =
+                [this](std::vector<float> IQuat, float IAngle, std::vector<float> IAxis) {
+                    glm::quat StartQuat{IQuat[0], IQuat[1], IQuat[2], IQuat[3]};
+                    const auto &Angle = IAngle;
+                    glm::vec3 Axis{IAxis[0], IAxis[1], IAxis[2]};
 
-            auto EndQuat = glm::rotate(StartQuat, Angle, Axis);
-            return std::vector<float>{EndQuat[0], EndQuat[1], EndQuat[2], EndQuat[3]};
-        };
+                    auto EndQuat = glm::rotate(StartQuat, Angle, Axis);
+                    return std::vector<float>{EndQuat[0], EndQuat[1], EndQuat[2], EndQuat[3]};
+                };
         MainScene->GetSystem<LuaScriptRunner>()->AddLuaFunction(RotateFn, "GMath", "Rotate");
+
+        std::function<std::vector<float>(std::vector<float>, std::vector<float>)> RotatePointFn =
+                [this](std::vector<float> IPoint, std::vector<float> IQuat) {
+                    glm::quat Quat{IQuat[0], IQuat[1], IQuat[2], IQuat[3]};
+                    glm::vec3 Point{IPoint[0], IPoint[1], IPoint[2]};
+
+                    auto Rotated = glm::rotate(Quat, Point);
+                    /* auto Rotated = Quat * Point; */
+                    return std::vector<float>{Rotated[0], Rotated[1], Rotated[2]};
+                };
+        MainScene->GetSystem<LuaScriptRunner>()->AddLuaFunction(RotatePointFn, "GMath", "RotatePoint");
+
+        std::function<std::vector<float>(std::vector<float>)> InverseQuatFn =
+                [this](std::vector<float> IQuat) {
+                    glm::quat Quat{IQuat[3], IQuat[0], IQuat[1], IQuat[2]};
+
+                    auto Inverse = glm::inverse(Quat);
+                    return std::vector<float>{Inverse[0], Inverse[1], Inverse[2], Inverse[3]};
+                };
+        MainScene->GetSystem<LuaScriptRunner>()->AddLuaFunction(InverseQuatFn, "GMath", "InverseQuat");
 
         MainScene->Init();
     }
@@ -116,10 +153,7 @@ namespace ecstest {
         glClearColor(0.0, 0.3, 0.4, 1.0);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        glm::mat4 projection = MainCam.GetProjectionMatrix(AppWindow.width, AppWindow.height);
-        glm::mat4 view = MainCam.GetViewMatrix();
-
-        MainScene->GetSystem<ModelRenderer>()->Render(MainScene, view, projection);
+        MainScene->GetSystem<ModelRenderer>()->Render(MainScene, AppWindow.Width, AppWindow.Height);
 
         MainScene->Update(DeltaTime);
 
@@ -137,50 +171,10 @@ namespace ecstest {
         if (key == KEY_ESCAPE && action == GLFW_PRESS)
             AppWindow.CaptureMouse(!AppWindow.IsMouseCaptured());
 
-        if (key == KEY_LEFT_SHIFT && action == GLFW_PRESS) {
-            MainCam.SetSpeed(125);
-        }
-        if (key == KEY_LEFT_SHIFT && action == GLFW_RELEASE) {
-            MainCam.SetSpeed(5);
-        }
-
         MainScene->GetSystem<LuaScriptRunner>()->OnKeyPressed(MainScene, Keys(key), action);
     }
 
     void GameApp::onMouseButtonPressed(int button, int action, int mods) {
-    }
-
-    void GameApp::DoKeyboardInput(double deltaTime) {
-        using namespace engine;
-        using KeyState = glcore::Window::KeyState;
-        if (AppWindow.GetKeyState(KEY_W) == KeyState::KEY_PRESS)
-            MainCam.ProcessKeyboard(engine::Camera::MovDir::FORWARD, deltaTime);
-        if (AppWindow.GetKeyState(KEY_S) == KeyState::KEY_PRESS)
-            MainCam.ProcessKeyboard(engine::Camera::MovDir::BACKWARD, deltaTime);
-        if (AppWindow.GetKeyState(KEY_A) == KeyState::KEY_PRESS)
-            MainCam.ProcessKeyboard(engine::Camera::MovDir::LEFT, deltaTime);
-        if (AppWindow.GetKeyState(KEY_D) == KeyState::KEY_PRESS)
-            MainCam.ProcessKeyboard(engine::Camera::MovDir::RIGHT, deltaTime);
-
-
-        for (int i = 0; i < 1; i++) {
-            auto &Entity = MainScene->Entities[i];
-            auto &EntityTransform = MainScene->GetComponent<Transform>(Entity);
-            auto &EntPos = EntityTransform.Position;
-            auto &EntRot = EntityTransform.Rotation;
-            auto &EntScale = EntityTransform.Scale;
-
-            if (AppWindow.GetKeyState(KEY_UP) == KeyState::KEY_PRESS)
-                EntPos += glm::vec3{1, 0, 0} * EntRot * (float) DeltaTime * 10.0f;
-            if (AppWindow.GetKeyState(KEY_LEFT) == KeyState::KEY_PRESS)
-                EntRot = glm::rotate(EntRot, (float) -deltaTime, {0.0f, 1.0f, 0.0f});
-            if (AppWindow.GetKeyState(KEY_RIGHT) == KeyState::KEY_PRESS)
-                EntRot = glm::rotate(EntRot, (float) deltaTime, {0.0f, 1.0f, 0.0f});
-            if (AppWindow.GetKeyState(KEY_PAGE_DOWN) == KeyState::KEY_PRESS)
-                EntScale -= DeltaTime;
-            if (AppWindow.GetKeyState(KEY_PAGE_UP) == KeyState::KEY_PRESS)
-                EntScale += DeltaTime;
-        }
     }
 
     void GameApp::DoMouseInput() {
@@ -188,6 +182,6 @@ namespace ecstest {
         // DeltaVariable.
         auto [x, y] = RelativeMouse.GetDelta(AppWindow.GetCursorPos());
 
-        MainCam.ProcessMouseMovement(x, -y, true);
+        /* MainCam.ProcessMouseMovement(x, -y, true); */
     }
 }// namespace ecstest

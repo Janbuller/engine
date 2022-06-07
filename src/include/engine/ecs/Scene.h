@@ -1,11 +1,11 @@
 #pragma once
 
-#include "engine/ComponentHandler.h"
-#include "engine/ComponentVector.h"
-#include "engine/Entity.h"
-#include "engine/EntityGenerator.h"
-#include "engine/SystemHandler.h"
-#include "engine/components/Transform.h"
+#include "ComponentHandler.h"
+#include "ComponentVector.h"
+#include "Entity.h"
+#include "EntityGenerator.h"
+#include "SystemHandler.h"
+#include "engine/ecs/components/Transform.h"
 #include <algorithm>
 #include <bitset>
 #include <memory>
@@ -19,6 +19,9 @@ namespace engine {
     // class SystemHandler;
 
     class Scene : public std::enable_shared_from_this<Scene> {
+    public:
+        Entity MainCam;
+
     public:
         std::vector<Entity> Entities;
 

@@ -23,12 +23,12 @@ namespace glcore {
     engine::DeltaVariable<double, 1> deltaTime;
 
   public:
-    int width = 640, height = 480;
-    std::string title;
+    int Width = 640, Height = 480;
+    std::string Title;
 
-    GLFWwindow* window;
+    GLFWwindow* WindowHandle;
     
-    Window(int width = 640, int height = 480, std::string title = "Window");
+    Window(int Width = 640, int Height = 480, std::string Title = "Window");
     ~Window();
     void SwapBuffers();
     void Update();

@@ -7,8 +7,8 @@
 
 namespace glcore {
   void Window::onWindowResize(int width, int height) {
-    this->width = width;
-    this->height = height;
+    this->Width = width;
+    this->Height = height;
     
     glViewport(0, 0, width, height);
   }
@@ -25,8 +25,8 @@ namespace glcore {
     }
   }
 
-  Window::Window(int width, int height, std::string title) :
-    width(width), height(height), title(title),
+  Window::Window(int Width, int Height, std::string Title) :
+    Width(Width), Height(Height), Title(Title),
     deltaTime(std::array<double, 1>{ glfwGetTime() }){
     if (!glfwInit())
       throw -1;
@@ -34,55 +34,56 @@ namespace glcore {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_SAMPLES, 4);
 
-    window = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
-    if (!window) {
+    WindowHandle = glfwCreateWindow(Width, Height, Title.c_str(), NULL, NULL);
+    if (!WindowHandle) {
         glfwTerminate();
         throw -1;
     }
 
-    glfwMakeContextCurrent(window);
+    glfwMakeContextCurrent(WindowHandle);
     
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
       std::cerr << "Failed to initialize GLAD." << std::endl;
       throw -1;
     }
 
-    glViewport(0, 0, width, height);
+    glViewport(0, 0, Width, Height);
     lastFrame = glfwGetTime();
 
     // Use c++ lambda function as callback for glfw, forwarding it to
     // the onWindowResize function of this class, since glfw is a
     // c-library and doesn't support methods.
 
-    glfwSetWindowUserPointer(window, this);
+    glfwSetWindowUserPointer(WindowHandle, this);
 
     auto windowSizeCallback = [](GLFWwindow* w, int width, int height)
     {
       static_cast<Window*>(glfwGetWindowUserPointer(w))->onWindowResize(width, height);
     };
-    glfwSetWindowSizeCallback(window, windowSizeCallback);
+    glfwSetWindowSizeCallback(WindowHandle, windowSizeCallback);
 
     auto keyCallback = [](GLFWwindow* w, int key, int scancode, int action, int mods)
     {
       static_cast<Window*>(glfwGetWindowUserPointer(w))->onKeyPressed(key, scancode, action, mods);
     };
-    glfwSetKeyCallback(window, keyCallback);
+    glfwSetKeyCallback(WindowHandle, keyCallback);
 
     auto mouseButtonCallback = [](GLFWwindow* w, int button, int action, int mods)
     {
       static_cast<Window*>(glfwGetWindowUserPointer(w))->onMouseButtonPressed(button, action, mods);
     };
-    glfwSetMouseButtonCallback(window, mouseButtonCallback);
+    glfwSetMouseButtonCallback(WindowHandle, mouseButtonCallback);
   }
 
   Window::~Window() {
-    glfwDestroyWindow(window);
+    glfwDestroyWindow(WindowHandle);
     glfwTerminate();
   }
 
   void Window::SwapBuffers() {
-    glfwSwapBuffers(window);
+    glfwSwapBuffers(WindowHandle);
     glfwPollEvents();
   }
 
@@ -94,32 +95,32 @@ namespace glcore {
   }
 
   bool Window::ShouldClose() {
-    return glfwWindowShouldClose(window);
+    return glfwWindowShouldClose(WindowHandle);
   }
 
   void Window::SetShouldClose(bool close) {
-    glfwSetWindowShouldClose(window, close);
+    glfwSetWindowShouldClose(WindowHandle, close);
   }
     
 
   void Window::CaptureMouse(bool capture) {
     if(capture)
-      glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+      glfwSetInputMode(WindowHandle, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     else
-      glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+      glfwSetInputMode(WindowHandle, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
   }
 
   bool Window::IsMouseCaptured() {
-    int inputMode = glfwGetInputMode(window, GLFW_CURSOR);
+    int inputMode = glfwGetInputMode(WindowHandle, GLFW_CURSOR);
     return inputMode == GLFW_CURSOR_NORMAL ? false : true;
   }
 
   void Window::SetTitle(std::string title) {
-    glfwSetWindowTitle(window, title.c_str());
+    glfwSetWindowTitle(WindowHandle, title.c_str());
   }
 
   Window::KeyState Window::GetKeyState(int key) {
-    int state = glfwGetKey(window, key);
+    int state = glfwGetKey(WindowHandle, key);
 
     if(state == GLFW_PRESS)
       return Window::KeyState::KEY_PRESS;
@@ -131,7 +132,7 @@ namespace glcore {
 
   std::array<double, 2> Window::GetCursorPos() {
     double x, y;
-    glfwGetCursorPos(window, &x, &y);
+    glfwGetCursorPos(WindowHandle, &x, &y);
 
     return {x, y};
   }

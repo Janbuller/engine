@@ -1,9 +1,8 @@
 #pragma once
 
 #include "engine/Base.h"
-#include "engine/Camera.h"
-#include "engine/Scene.h"
-#include "engine/systems/ISystem.h"
+#include "engine/ecs/Scene.h"
+#include "ISystem.h"
 
 namespace engine::systems {
   class ModelRenderer : public ISystem {
@@ -13,6 +12,6 @@ namespace engine::systems {
     void Exit(sptr<Scene> Scene) override {}
     
   public:
-    void Render(sptr<Scene> Scene, glm::mat4 View, glm::mat4 Projection);
+    void Render(sptr<Scene> Scene, int Width, int Height);
   };
 }

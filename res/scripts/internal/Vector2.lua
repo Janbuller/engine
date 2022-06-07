@@ -16,29 +16,29 @@ function Vector2:new(x, y)
   return o
 end
 
-function Vector2:add(vector1, vector2)
-  return Vector2:new(nil, vector1.x + vector2.x, vector1.y + vector2.y)
+function Vector2.add(vector1, vector2)
+  return Vector2:new(vector1.x + vector2.x, vector1.y + vector2.y)
 end
 
-function Vector2:subtract(vector1, vector2)
-  return Vector2:new(nil, vector1.x - vector2.x, vector1.y - vector2.y)
+function Vector2.subtract(vector1, vector2)
+  return Vector2:new(vector1.x - vector2.x, vector1.y - vector2.y)
 end
 
-function Vector2:multiply(vector1, vector2)
-  return Vector2:new(nil, vector1.x * vector2.x, vector1.y * vector2.y)
+function Vector2.multiply(vector1, vector2)
+  return Vector2:new(vector1.x * vector2.x, vector1.y * vector2.y)
 end
 
-function Vector2:divide(vector1, vector2)
-  return Vector2:new(nil, vector1.x / vector2.x, vector1.y / vector2.y)
+function Vector2.divide(vector1, vector2)
+  return Vector2:new(vector1.x / vector2.x, vector1.y / vector2.y)
 end
 
-function Vector2:length(vector)
+function Vector2.length(vector)
   return math.sqrt(vector.x * vector.x + vector.y * vector.y)
 end
 
-function Vector2:normalize(vector)
+function Vector2.normalize(vector)
   local len = Vector2:length(vector)
-  return Vector2:divide(vector, Vector2:new(nil, len, len))
+  return Vector2:divide(vector, Vector2:new(len, len))
 end
 
 return Vector2

@@ -35,4 +35,38 @@ function Quaternion:Rotate(Angle, Axis)
    self.w = RotTable[4]
 end
 
+function Quaternion.RotatePoint(Quat, Point)
+   local RotTable = {
+      Quat.x,
+      Quat.y,
+      Quat.z,
+      Quat.w
+   }
+
+   local PointTable = {
+      Point.x,
+      Point.y,
+      Point.z
+   }
+
+   local Rotated = GMath.RotatePoint(PointTable, RotTable)
+
+
+   Rotated = Vector3:new(Rotated[1], Rotated[2], Rotated[3]);
+   return Rotated
+end
+
+function Quaternion.Inverse(Quat)
+   local QuatTable = {
+      Quat.x,
+      Quat.y,
+      Quat.z,
+      Quat.w
+   }
+
+   QuatTable = GMath.InverseQuat(QuatTable);
+
+   return Quaternion:new(QuatTable[1], QuatTable[2], QuatTable[3], QuatTable[4]);
+end
+
 return Quaternion

@@ -1,8 +1,8 @@
 #pragma once
 
 #include "engine/Base.h"
-#include "engine/Scene.h"
-#include "engine/systems/ISystem.h"
+#include "engine/ecs/Scene.h"
+#include "ISystem.h"
 
 namespace engine::systems {
   class MoveDown : public ISystem {

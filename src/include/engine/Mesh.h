@@ -11,11 +11,13 @@ namespace engine {
     public:
         std::vector<Vertex> Vertices;
         std::vector<unsigned int> Indicies;
-      Material MeshMaterial;
+        Material MeshMaterial;
 
         Mesh(std::vector<Vertex> Vertices, std::vector<unsigned int> Indicies, Material MeshMaterial);
+        ~Mesh();
 
         void SetupBuffers();
+        void DeleteBuffers();
 
         unsigned int VAO, VBO, EBO;
     };

@@ -1,16 +1,20 @@
-#include "engine/systems/ModelRenderer.h"
-#include "engine/components/Model.h"
+#include "engine/ecs/systems/ModelRenderer.h"
+#include "engine/ecs/components/Model.h"
+#include "engine/ecs/components/Camera.h"
 #include <glad/glad.h>
 
 namespace engine::systems {
     void ModelRenderer::Init(sptr<Scene> Scene) {
         glEnable(GL_DEPTH_TEST);
+
         // glEnable(GL_CULL_FACE);
         glCullFace(GL_FRONT);
         glFrontFace(GL_CW);
+
+	glEnable(GL_MULTISAMPLE);
     }
 
-    void ModelRenderer::Render(sptr<Scene> Scene, glm::mat4 View, glm::mat4 Projection) {
+    void ModelRenderer::Render(sptr<Scene> Scene, int Width, int Height) {
         for (const auto &Entity : Entities) {
             auto &ET = Scene->GetComponent<Transform>(Entity);
             auto &EM = Scene->GetComponent<Model>(Entity);
@@ -19,11 +23,9 @@ namespace engine::systems {
 	      continue;
 	    }
 
-            glm::mat4 Model = glm::mat4{1.0};
-
-            Model = glm::translate(Model, ET.Position);
-            Model = glm::scale(Model, ET.Scale);
-            Model *= glm::mat4_cast(ET.Rotation);
+            glm::mat4 Projection = Camera::GetProjectionMatrix(Scene, Scene->MainCam.Id, Width, Height);
+            glm::mat4 View = Camera::GetViewMatrix(Scene, Scene->MainCam.Id);
+            glm::mat4 Model = ET.GetTransformMatrix();
 
             for (auto &Mesh : EM.Meshes) {
                 auto &Mat = Mesh.MeshMaterial;

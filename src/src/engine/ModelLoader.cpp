@@ -2,7 +2,7 @@
 #include "engine/Base.h"
 #include "engine/Material.h"
 #include "engine/RessourceManager.h"
-#include "engine/components/Model.h"
+#include "engine/ecs/components/Model.h"
 #include "glcore/Shader.h"
 #include <memory>
 #include <stdexcept>

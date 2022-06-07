@@ -2,9 +2,9 @@
 
 #include "engine/Base.h"
 #include "engine/Keys.h"
-#include "engine/Scene.h"
-#include "engine/components/Script.h"
-#include "engine/systems/ISystem.h"
+#include "engine/ecs/Scene.h"
+#include "engine/ecs/components/Script.h"
+#include "ISystem.h"
 #include <lua.hpp>
 #include <LuaBridge/LuaBridge.h>
 

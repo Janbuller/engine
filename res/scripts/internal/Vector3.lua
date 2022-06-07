@@ -17,33 +17,33 @@ end
 
 function Vector3.add(vector1, operand2)
   if type(operand2) == "table" then
-    return Vector3:new(nil, vector1.x + operand2.x, vector1.y + operand2.y, vector1.z + operand2.z)
+    return Vector3:new(vector1.x + operand2.x, vector1.y + operand2.y, vector1.z + operand2.z)
   elseif type(operand2) == "number" then
-    return Vector3:new(nil, vector1.x + operand2, vector1.y + operand2, vector1.z + operand2)
+    return Vector3:new(vector1.x + operand2, vector1.y + operand2, vector1.z + operand2)
   end
 end
 
 function Vector3.subtract(vector1, operand2)
   if type(operand2) == "table" then
-    return Vector3:new(nil, vector1.x - operand2.x, vector1.y - operand2.y, vector1.z - operand2.z)
+    return Vector3:new(vector1.x - operand2.x, vector1.y - operand2.y, vector1.z - operand2.z)
   elseif type(operand2) == "number" then
-    return Vector3:new(nil, vector1.x - operand2, vector1.y - operand2, vector1.z - operand2)
+    return Vector3:new(vector1.x - operand2, vector1.y - operand2, vector1.z - operand2)
   end
 end
 
 function Vector3.multiply(vector1, operand2)
   if type(operand2) == "table" then
-    return Vector3:new(nil, vector1.x * operand2.x, vector1.y * operand2.y, vector1.z * operand2.z)
+    return Vector3:new(vector1.x * operand2.x, vector1.y * operand2.y, vector1.z * operand2.z)
   elseif type(operand2) == "number" then
-    return Vector3:new(nil, vector1.x * operand2, vector1.y * operand2, vector1.z * operand2)
+    return Vector3:new(vector1.x * operand2, vector1.y * operand2, vector1.z * operand2)
   end
 end
 
 function Vector3.divide(vector1, operand2)
   if type(operand2) == "table" then
-    return Vector3:new(nil, vector1.x / operand2.x, vector1.y / operand2.y, vector1.z / operand2.z)
+    return Vector3:new(vector1.x / operand2.x, vector1.y / operand2.y, vector1.z / operand2.z)
   elseif type(operand2) == "number" then
-    return Vector3:new(nil, vector1.x / operand2, vector1.y / operand2, vector1.z / operand2)
+    return Vector3:new(vector1.x / operand2, vector1.y / operand2, vector1.z / operand2)
   end
 end
 
@@ -53,11 +53,11 @@ end
 
 function Vector3.normalize(vector)
   local len = Vector3.length(vector)
-  return Vector3.divide(vector, Vector3:new(nil, len, len, len))
+  return Vector3.divide(vector, Vector3:new(len, len, len))
 end
 
 function Vector3.cross(vector1, vector2)
-    result = Vector3:new(nil, 0, 0, 0)
+    result = Vector3:new(0, 0, 0)
     result.x = l1.y * l2.z - l1.z * l2.y
     result.y = l1.z * l2.x - l1.x * l2.z
     result.z = l1.x * l2.y - l1.y * l2.x

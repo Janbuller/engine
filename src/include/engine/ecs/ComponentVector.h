@@ -1,6 +1,6 @@
 #pragma once
 
-#include "engine/Entity.h"
+#include "Entity.h"
 #include "engine/Logger.h"
 #include <stdexcept>
 #include <unordered_map>

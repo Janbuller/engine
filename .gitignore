@@ -1,4 +1,3 @@
-
 # Created by https://www.toptal.com/developers/gitignore/api/kdevelop4,clion,emacs,cmake,c++,linux,windows
 # Edit at https://www.toptal.com/developers/gitignore?templates=kdevelop4,clion,emacs,cmake,c++,linux,windows
 
@@ -264,3 +263,5 @@ $RECYCLE.BIN/
 
 .idea
 .cache
+
+.vim

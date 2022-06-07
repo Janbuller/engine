@@ -1,6 +1,6 @@
 #pragma once
 
-#include "engine/Entity.h"
+#include "Entity.h"
 #include <vector>
 namespace engine {
   class EntityGenerator {

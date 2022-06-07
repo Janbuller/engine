@@ -1,6 +1,7 @@
 #include "engine/Mesh.h"
 #include "engine/Material.h"
 #include "engine/Vertex.h"
+#include "engine/Base.h"
 #include "glcore/Shader.h"
 #include "glcore/Texture.h"
 #include <fstream>
@@ -12,6 +13,10 @@ namespace engine {
     Mesh::Mesh(std::vector<Vertex> Vertices, std::vector<unsigned int> Indicies, Material MeshMaterial) : Vertices(Vertices), Indicies(Indicies), MeshMaterial(MeshMaterial) {
         SetupBuffers();
     }
+
+  Mesh::~Mesh() {
+    DeleteBuffers();
+  }
 
     void Mesh::SetupBuffers() {
         glCreateVertexArrays(1, &VAO);
@@ -36,4 +41,10 @@ namespace engine {
         glVertexArrayAttribBinding(VAO, 1, 0);
         glVertexArrayAttribBinding(VAO, 2, 0);
     }
+
+  void Mesh::DeleteBuffers() {
+    // glDeleteBuffers(1, &EBO);
+    // glDeleteBuffers(1, &VBO);
+    // glDeleteVertexArrays(1, &VAO);
+  }
 }// namespace engine

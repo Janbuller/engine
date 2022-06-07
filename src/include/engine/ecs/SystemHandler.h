@@ -1,20 +1,20 @@
 #pragma once
 
-#include "engine/Base.h"
 #include "Entity.h"
-#include "Scene.h"
 #include "engine/ecs/systems/ISystem.h"
+#include "Scene.h"
+#include "engine/Base.h"
 #include <bitset>
 #include <stdexcept>
 #include <unordered_map>
 
 namespace engine {
-  class Scene;
+    class Scene;
 
     class SystemHandler {
     private:
         std::unordered_map<std::string, std::bitset<MAX_COMPONENTS>> Signatures{};
-        std::unordered_map<std::string, sptr<systems::ISystem>> Systems{};
+        std::unordered_map<std::string, sptr<::engine::systems::ISystem>> Systems{};
 
     public:
         template<typename T>
@@ -22,7 +22,7 @@ namespace engine {
             std::string TypeName = typeid(T).name();
 
             if (Systems.find(TypeName) != Systems.end()) {
-	      LOG_ENGINE_ERROR("Failed to register already existing \"{0}\" system.", TypeName);
+                LOG_ENGINE_ERROR("Failed to register already existing \"{0}\" system.", TypeName);
                 throw std::invalid_argument("Tried to register already existing system.");
             }
 
@@ -39,7 +39,7 @@ namespace engine {
             std::string TypeName = typeid(T).name();
 
             if (Systems.find(TypeName) == Systems.end()) {
-	      LOG_ENGINE_ERROR("Failed to get non-existant system \"{0}\".", TypeName);
+                LOG_ENGINE_ERROR("Failed to get non-existant system \"{0}\".", TypeName);
                 throw std::invalid_argument("Tried to get non-existant system.");
             }
 
@@ -52,7 +52,7 @@ namespace engine {
             std::string TypeName = typeid(T).name();
 
             if (Systems.find(TypeName) == Systems.end()) {
-	      LOG_ENGINE_ERROR("Failed to set signature of non-existant system \"{0}\"", TypeName);
+                LOG_ENGINE_ERROR("Failed to set signature of non-existant system \"{0}\"", TypeName);
                 throw std::invalid_argument("Tried to set signature of non-existant system.");
             }
 
@@ -74,8 +74,7 @@ namespace engine {
 
                 if ((entitySignature & SystemSignature) == SystemSignature) {
                     System->Entities.insert(entity);
-                }
-                else {
+                } else {
                     System->Entities.erase(entity);
                 }
             }
@@ -88,7 +87,7 @@ namespace engine {
             }
         }
 
-      void UpdateSystems(sptr<Scene> Scene, double DeltaTime) {
+        void UpdateSystems(sptr<Scene> Scene, double DeltaTime) {
             for (auto const &pair : Systems) {
                 const auto &System = pair.second;
                 System->Update(Scene, DeltaTime);

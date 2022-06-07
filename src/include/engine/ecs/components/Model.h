@@ -2,10 +2,14 @@
 
 #include "engine/Mesh.h"
 #include "engine/Vertex.h"
+#include "engine/Base.h"
+
+// clang-format off
 #include <lua.hpp>
 #include <LuaBridge/LuaBridge.h>
+// clang-format on
+
 #include <vector>
-#include "engine/Base.h"
 
 namespace engine::components {
     struct Model {

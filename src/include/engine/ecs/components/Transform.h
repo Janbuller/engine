@@ -1,12 +1,15 @@
 #pragma once
 
+#include "engine/Base.h"
+
+// clang-format off
+#include <lua.hpp>
+#include <LuaBridge/LuaBridge.h>
+// clang-format on
+
 #include <glm/fwd.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
-
-#include <lua.hpp>
-#include <LuaBridge/LuaBridge.h>
-#include "engine/Base.h"
 
 namespace engine::components {
     struct Transform {

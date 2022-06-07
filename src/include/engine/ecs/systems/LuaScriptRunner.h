@@ -4,69 +4,73 @@
 #include "engine/Keys.h"
 #include "engine/ecs/Scene.h"
 #include "engine/ecs/components/Script.h"
-#include "ISystem.h"
+#include "engine/ecs/systems/ISystem.h"
+
+// clang-format off
 #include <lua.hpp>
 #include <LuaBridge/LuaBridge.h>
+// clang-format on
+
 
 namespace engine::systems {
-  class LuaScriptRunner : public ISystem {
-  private:
-    lua_State* L;
+    class LuaScriptRunner : public ISystem {
+    private:
+        lua_State *L;
 
-  public: 
-    LuaScriptRunner();
+    public:
+        LuaScriptRunner();
 
-    void InitializeScripting(sptr<Scene> Scene);
-    
-    void Init(sptr<Scene> Scene) override;
-    void Update(sptr<Scene> Scene, double DeltaTime) override;
-    void Exit(sptr<Scene> Scene) override;
+        void InitializeScripting(sptr<Scene> Scene);
 
-    void OnKeyPressed(sptr<Scene> Scene, Keys Key, int Action);
+        void Init(sptr<Scene> Scene) override;
+        void Update(sptr<Scene> Scene, double DeltaTime) override;
+        void Exit(sptr<Scene> Scene) override;
 
-    template< class R, class... Args >
-    void AddLuaFunction(std::function<R(Args...)> Func, std::string NS, std::string Name) {
-        luabridge::getGlobalNamespace(L)
-                .beginNamespace(NS.c_str())
-                .addFunction(Name.c_str(), Func)
-                .endNamespace();
-    }
+        void OnKeyPressed(sptr<Scene> Scene, Keys Key, int Action);
 
-  private:
-    bool CheckLua(lua_State *L, int r);
-    std::string LoadAndReplaceFile(std::string filename);
+        template<class R, class... Args>
+        void AddLuaFunction(std::function<R(Args...)> Func, std::string NS, std::string Name) {
+            luabridge::getGlobalNamespace(L)
+                    .beginNamespace(NS.c_str())
+                    .addFunction(Name.c_str(), Func)
+                    .endNamespace();
+        }
 
-    void SetComponentsInLua(sptr<Scene> Scene, const Entity& E);
-    void SetComponentsInEngine(sptr<Scene> Scene, const Entity& E);
+    private:
+        bool CheckLua(lua_State *L, int r);
+        std::string LoadAndReplaceFile(std::string filename);
 
-    void SetupGettersAndSetters(sptr<Scene> Scene);
+        void SetComponentsInLua(sptr<Scene> Scene, const Entity &E);
+        void SetComponentsInEngine(sptr<Scene> Scene, const Entity &E);
 
-    template<typename... Arguments>
-    void RunFunctionForAll(sptr<Scene> Scene, std::string Function, Arguments&&... Args) {
-        for (const auto &Entity : Entities) {
-            auto &EScript = Scene->GetComponent<Script>(Entity);
+        void SetupGettersAndSetters(sptr<Scene> Scene);
 
-            for (int ScriptIdx = 0; ScriptIdx < EScript.ScriptPaths.size(); ScriptIdx++) {
-                lua_getglobal(L, "Entities");
-                auto L_EntityScript = luabridge::LuaRef::fromStack(L, -1)[Entity.Id][ScriptIdx];
-		lua_pop(L, -1);
+        template<typename... Arguments>
+        void RunFunctionForAll(sptr<Scene> Scene, std::string Function, Arguments &&...Args) {
+            for (const auto &Entity : Entities) {
+                auto &EScript = Scene->GetComponent<Script>(Entity);
 
-                luabridge::push(L, Entity.Id);
-                lua_setglobal(L, "EntityID");
-                luabridge::push(L, ScriptIdx);
-                lua_setglobal(L, "ScriptID");
+                for (int ScriptIdx = 0; ScriptIdx < EScript.ScriptPaths.size(); ScriptIdx++) {
+                    lua_getglobal(L, "Entities");
+                    auto L_EntityScript = luabridge::LuaRef::fromStack(L, -1)[Entity.Id][ScriptIdx];
+                    lua_pop(L, -1);
 
-                auto L_Func = L_EntityScript[Function];
-                if (!(L_Func == luabridge::Nil())) {
-                    try {
-                        L_Func(Args...);
-                    } catch (luabridge::LuaException e) {
-                        LOG_ENGINE_ERROR("Failed to run function on lua script \"{0}\"", EScript.ScriptPaths[ScriptIdx]);
-		      LOG_ENGINE_ERROR("Lua Error: {}", e.what());
+                    luabridge::push(L, Entity.Id);
+                    lua_setglobal(L, "EntityID");
+                    luabridge::push(L, ScriptIdx);
+                    lua_setglobal(L, "ScriptID");
+
+                    auto L_Func = L_EntityScript[Function];
+                    if (!(L_Func == luabridge::Nil())) {
+                        try {
+                            L_Func(Args...);
+                        } catch (luabridge::LuaException e) {
+                            LOG_ENGINE_ERROR("Failed to run function on lua script \"{0}\"", EScript.ScriptPaths[ScriptIdx]);
+                            LOG_ENGINE_ERROR("Lua Error: {}", e.what());
+                        }
                     }
                 }
             }
         }
-    }
-  };
-}
+    };
+}// namespace engine::systems

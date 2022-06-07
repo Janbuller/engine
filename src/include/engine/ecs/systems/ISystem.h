@@ -5,11 +5,11 @@
 #include <set>
 
 namespace engine {
-  class Scene;
+    class Scene;
     namespace systems {
         class ISystem {
         public:
-	  std::set<Entity> Entities;
+            std::set<Entity> Entities;
 
             virtual void Init(sptr<Scene> Scene) = 0;
             virtual void Update(sptr<Scene> Scene, double DeltaTime) = 0;

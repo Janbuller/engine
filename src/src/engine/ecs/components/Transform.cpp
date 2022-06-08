@@ -1,6 +1,6 @@
 #include "engine/ecs/components/Transform.h"
 #include "engine/ecs/components/Model.h"
-#include "engine/ModelLoader.h"
+#include "engine/model/ModelLoader.h"
 
 namespace engine::components {
 

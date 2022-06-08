@@ -1,7 +1,7 @@
 #pragma once
 
 #include "engine/Base.h"
-#include "engine/SpecificRessourceManager.h"
+#include "engine/ressources/SpecificRessourceManager.h"
 #include <memory>
 #include <stdexcept>
 #include <string>

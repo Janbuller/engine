@@ -1,6 +1,6 @@
 
-#include "engine/Keys.h"
-#include "engine/Logger.h"
+#include "engine/core/Keys.h"
+#include "engine/core/Logger.h"
 namespace engine {
     stde::bimap<std::string, int> engine::KeyConverter::KeysToString{
             {"KEY_SPACE", 32},

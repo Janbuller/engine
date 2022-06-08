@@ -1,7 +1,7 @@
 #pragma once
-#include "engine/Application.h"
-#include "engine/DeltaVariable.h"
-#include "engine/Mesh.h"
+#include "engine/core/Application.h"
+#include "engine/utils/DeltaVariable.h"
+#include "engine/model/Mesh.h"
 #include "engine/ecs/Scene.h"
 #include "glcore/Shader.h"
 #include "glcore/Texture.h"

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Vertex.h"
-#include "engine/Material.h"
+#include "engine/model/Material.h"
 #include "glcore/Shader.h"
 #include "glcore/Texture.h"
 #include <vector>

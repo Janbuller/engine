@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Entity.h"
-#include "engine/Logger.h"
+#include "engine/core/Logger.h"
 #include <stdexcept>
 #include <unordered_map>
 #include <vector>

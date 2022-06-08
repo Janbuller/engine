@@ -1,8 +1,8 @@
 #pragma once
 
 #include "engine/Base.h"
-#include "engine/Material.h"
-#include "engine/Mesh.h"
+#include "engine/model/Material.h"
+#include "engine/model/Mesh.h"
 #include "engine/ecs/components/Model.h"
 #include <assimp/Importer.hpp>
 #include <assimp/postprocess.h>

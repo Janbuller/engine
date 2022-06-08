@@ -1,5 +1,5 @@
-#include "engine/Application.h"
-#include "engine/Logger.h"
+#include "engine/core/Application.h"
+#include "engine/core/Logger.h"
 #include "glcore/Window.h"
 #include <iostream>
 #include <string>

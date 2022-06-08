@@ -1,7 +1,7 @@
-#include "engine/ModelLoader.h"
+#include "engine/model/ModelLoader.h"
 #include "engine/Base.h"
-#include "engine/Material.h"
-#include "engine/RessourceManager.h"
+#include "engine/model/Material.h"
+#include "engine/ressources/RessourceManager.h"
 #include "engine/ecs/components/Model.h"
 #include "glcore/Shader.h"
 #include <memory>

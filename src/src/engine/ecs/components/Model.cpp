@@ -1,5 +1,5 @@
 #include "engine/ecs/components/Model.h"
-#include "engine/ModelLoader.h"
+#include "engine/model/ModelLoader.h"
 
 namespace engine::components {
     Model Model::Load(std::string Path) {

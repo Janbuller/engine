@@ -1,7 +1,7 @@
 #pragma once
 
-#include "engine/Mesh.h"
-#include "engine/Vertex.h"
+#include "engine/model/Mesh.h"
+#include "engine/model/Vertex.h"
 #include "engine/Base.h"
 
 // clang-format off

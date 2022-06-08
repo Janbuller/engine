@@ -1,13 +1,8 @@
 #include "ecstest/GameApp.h"
 #include "GLFW/glfw3.h"
-#include "engine/Application.h"
-#include "engine/Keys.h"
-#include "engine/Logger.h"
-#include "engine/Mesh.h"
-#include "engine/ModelLoader.h"
-#include "engine/RessourceManager.h"
-#include "engine/SpecificRessourceManager.h"
-#include "engine/Vertex.h"
+#include "engine/core/Application.h"
+#include "engine/core/Keys.h"
+#include "engine/core/Logger.h"
 #include "engine/ecs/Entity.h"
 #include "engine/ecs/components/Camera.h"
 #include "engine/ecs/components/Model.h"
@@ -16,14 +11,19 @@
 #include "engine/ecs/systems/LuaScriptRunner.h"
 #include "engine/ecs/systems/ModelRenderer.h"
 #include "engine/ecs/systems/MoveDown.h"
+#include "engine/model/Mesh.h"
+#include "engine/model/ModelLoader.h"
+#include "engine/model/Vertex.h"
+#include "engine/ressources/RessourceManager.h"
+#include "engine/ressources/SpecificRessourceManager.h"
 #include "glcore/Shader.h"
 #include "glcore/Texture.h"
 #include "glcore/Window.h"
 #include "glm/ext/matrix_transform.hpp"
 #include "glm/ext/quaternion_transform.hpp"
 #include "glm/gtc/quaternion.hpp"
-#include "glm/gtx/string_cast.hpp"
 #include "glm/gtx/quaternion.hpp"
+#include "glm/gtx/string_cast.hpp"
 #include "siv/PerlinNoise.hpp"
 
 // clang-format off
@@ -96,7 +96,7 @@ namespace ecstest {
         MainScene->AddComponent<Camera>(Cam);
         MainScene->AddComponent<Script>(Cam);
 
-        auto& CamScript = MainScene->GetComponent<Script>(Cam);
+        auto &CamScript = MainScene->GetComponent<Script>(Cam);
         CamScript.ScriptPaths.push_back("res/scripts/CameraController.lua");
 
         MainScene->MainCam = Cam;

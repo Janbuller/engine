@@ -1,7 +1,7 @@
 #include "engine/ecs/systems/LuaScriptRunner.h"
 #include "LuaBridge/detail/LuaRef.h"
 #include "engine/Base.h"
-#include "engine/Keys.h"
+#include "engine/core/Keys.h"
 #include "engine/ecs/components/Model.h"
 #include "engine/ecs/components/Script.h"
 #include "engine/ecs/components/Transform.h"
@@ -229,6 +229,35 @@ namespace engine::systems {
                 .addFunction("GetModel", GetModelFn)
                 .addFunction("SetModel", SetModelFn)
                 .endNamespace();
+    }
+
+
+    template<typename... Arguments>
+    void LuaScriptRunner::RunFunctionForAll(sptr<Scene> Scene, std::string Function, Arguments &&...Args) {
+        for (const auto &Entity : Entities) {
+            auto &EScript = Scene->GetComponent<Script>(Entity);
+
+            for (int ScriptIdx = 0; ScriptIdx < EScript.ScriptPaths.size(); ScriptIdx++) {
+                lua_getglobal(L, "Entities");
+                auto L_EntityScript = luabridge::LuaRef::fromStack(L, -1)[Entity.Id][ScriptIdx];
+                lua_pop(L, -1);
+
+                luabridge::push(L, Entity.Id);
+                lua_setglobal(L, "EntityID");
+                luabridge::push(L, ScriptIdx);
+                lua_setglobal(L, "ScriptID");
+
+                auto L_Func = L_EntityScript[Function];
+                if (!(L_Func == luabridge::Nil())) {
+                    try {
+                        L_Func(Args...);
+                    } catch (luabridge::LuaException e) {
+                        LOG_ENGINE_ERROR("Failed to run function on lua script \"{0}\"", EScript.ScriptPaths[ScriptIdx]);
+                        LOG_ENGINE_ERROR("Lua Error: {}", e.what());
+                    }
+                }
+            }
+        }
     }
 
 }// namespace engine::systems

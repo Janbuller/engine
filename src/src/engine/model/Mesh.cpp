@@ -2,8 +2,8 @@
 #include "engine/model/Material.h"
 #include "engine/model/Vertex.h"
 #include "engine/Base.h"
-#include "glcore/Shader.h"
-#include "glcore/Texture.h"
+#include "engine/glcore/Shader.h"
+#include "engine/glcore/Texture.h"
 #include <fstream>
 #include <glad/glad.h>
 #include <sstream>

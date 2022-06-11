@@ -16,9 +16,9 @@
 #include "engine/model/Vertex.h"
 #include "engine/ressources/RessourceManager.h"
 #include "engine/ressources/SpecificRessourceManager.h"
-#include "glcore/Shader.h"
-#include "glcore/Texture.h"
-#include "glcore/Window.h"
+#include "engine/glcore/Shader.h"
+#include "engine/glcore/Texture.h"
+#include "engine/glcore/Window.h"
 #include "glm/ext/matrix_transform.hpp"
 #include "glm/ext/quaternion_transform.hpp"
 #include "glm/gtc/quaternion.hpp"
@@ -46,7 +46,7 @@ namespace ecstest {
         AppWindow.CaptureMouse(true);
 
         engine::RessourceManager::RegisterRessourceType<Model>();
-        engine::RessourceManager::RegisterRessourceType<glcore::Texture>();
+        engine::RessourceManager::RegisterRessourceType<engine::glcore::Texture>();
 
         engine::ModelLoader::DefaultShader = MainShader;
 
@@ -104,7 +104,7 @@ namespace ecstest {
         MainScene->GetSystem<LuaScriptRunner>()->InitializeScripting(MainScene);
 
         std::function<bool(int)> IsKeyDownFn = [this](int KeyNum) {
-            return AppWindow.GetKeyState(KeyNum) == glcore::Window::KeyState::KEY_PRESS;
+            return AppWindow.GetKeyState(KeyNum) == engine::glcore::Window::KeyState::KEY_PRESS;
         };
         MainScene->GetSystem<LuaScriptRunner>()->AddLuaFunction(IsKeyDownFn, "Input", "IsKeyDown");
 

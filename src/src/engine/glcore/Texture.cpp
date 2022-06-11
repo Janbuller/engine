@@ -1,17 +1,18 @@
-#include "glcore/Texture.h"
+#include "engine/glcore/Texture.h"
+#include "engine/Base.h"
 #include "stb/stb_image.h"
 #include <glad/glad.h>
 #include <iostream>
 #include <string>
 
-namespace glcore {
+namespace engine::glcore {
     Texture::Texture(unsigned int id, std::string path, int width, int height)
         : id{id}, path{path}, width{width}, height{height} {
     }
 
-  Texture Texture::Load(std::string path) {
-    return LoadTextureFromFile(path.c_str());
-  }
+    Texture Texture::Load(std::string path) {
+        return LoadTextureFromFile(path.c_str());
+    }
 
     Texture Texture::LoadTextureFromFile(const char *path) {
         unsigned int textureID;
@@ -43,7 +44,7 @@ namespace glcore {
 
             stbi_image_free(data);
         } else {
-            std::cout << "Failed to load texture: " << path << std::endl;
+            LOG_ENGINE_ERROR("Failed to load texture: {0}", path);
             stbi_image_free(data);
         }
 
@@ -57,4 +58,4 @@ namespace glcore {
 
         return LoadTextureFromFile(filename.c_str());
     }
-}// namespace glcore
+}// namespace engine::glcore

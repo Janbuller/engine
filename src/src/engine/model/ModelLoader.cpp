@@ -3,7 +3,7 @@
 #include "engine/model/Material.h"
 #include "engine/ressources/RessourceManager.h"
 #include "engine/ecs/components/Model.h"
-#include "glcore/Shader.h"
+#include "engine/glcore/Shader.h"
 #include <memory>
 #include <stdexcept>
 

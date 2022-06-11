@@ -2,8 +2,8 @@
 
 #include "Vertex.h"
 #include "engine/model/Material.h"
-#include "glcore/Shader.h"
-#include "glcore/Texture.h"
+#include "engine/glcore/Shader.h"
+#include "engine/glcore/Texture.h"
 #include <vector>
 
 namespace engine {

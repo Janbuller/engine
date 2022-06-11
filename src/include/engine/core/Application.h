@@ -1,6 +1,6 @@
 #pragma once
 
-#include "glcore/Window.h"
+#include "engine/glcore/Window.h"
 #include <string>
 
 namespace engine {

@@ -3,8 +3,8 @@
 #include "engine/utils/DeltaVariable.h"
 #include "engine/model/Mesh.h"
 #include "engine/ecs/Scene.h"
-#include "glcore/Shader.h"
-#include "glcore/Texture.h"
+#include "engine/glcore/Shader.h"
+#include "engine/glcore/Texture.h"
 #include <algorithm>
 #include <array>
 #include <map>
@@ -17,7 +17,7 @@ namespace ecstest {
         using engine::Application::Application;
 
     private:
-        glcore::Shader MainShader{"res/shaders/MainShader.vert", "res/shaders/MainShader.frag"};
+        engine::glcore::Shader MainShader{"res/shaders/MainShader.vert", "res/shaders/MainShader.frag"};
 
         engine::DeltaVariable<double, 2> RelativeMouse{std::array<double, 2>{0, 0}};
 

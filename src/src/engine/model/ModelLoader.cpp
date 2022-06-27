@@ -101,7 +101,6 @@ namespace engine {
 
             const auto &Data = RessourceManager::Get<glcore::TextureData>(filename);
             glcore::Texture2D Texture = glcore::Texture2D::FromTextureData(Data);
-            LOG_ENGINE_ERROR("{0}, {1} : {2}", TypeName, filename, Texture.Handle);
             Textures.push_back({TypeName, Texture});
         }
         return Textures;

@@ -82,8 +82,6 @@ namespace engine::systems {
 
                     Mat.Shader.SetInt(("material." + type + number).c_str(), i);
                     glBindTexture(GL_TEXTURE_2D, Textures[i].second.Handle);
-
-                    /* LOG_ENGINE_CRITICAL("{0}", Textures[i].second.Handle); */
                 }
                 glActiveTexture(GL_TEXTURE0);
 

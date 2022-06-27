@@ -22,9 +22,6 @@ namespace engine::glcore {
             LOG_ENGINE_ERROR("Failed to load texturedata: {0}", Path);
         }
 
-        LOG_ENGINE_CRITICAL("{0}", ComponentAmount);
-        LOG_ENGINE_ERROR("{0}", Data[Width * Height * ComponentAmount - 1]);
-        LOG_ENGINE_ERROR("{0}", Width * Height * ComponentAmount - 1);
         return TextureData{Data, Width, Height, ComponentAmount};
     }
 

@@ -22,6 +22,6 @@ namespace engine {
       static void ProcessNode(aiNode *Node, const aiScene *Scene, sptr<components::Model> Model, std::string BaseDir);
       static Mesh ProcessMesh(aiMesh *Mesh, const aiScene *Scene, std::string BaseDir);
       static Material ProcessMaterial(aiMaterial *Mat, std::string BaseDir);
-      static std::vector<std::pair<std::string, glcore::Texture>> LoadMaterialTexture(aiMaterial *Mat, aiTextureType Type, std::string TypeName, std::string BaseDir);
+      static std::vector<std::pair<std::string, glcore::Texture2D>> LoadMaterialTexture(aiMaterial *Mat, aiTextureType Type, std::string TypeName, std::string BaseDir);
     };
 }// namespace engine

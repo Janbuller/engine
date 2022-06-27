@@ -3,6 +3,8 @@ time = 0;
 StartHeight = {}
 size = 8
 
+Quality = 1;
+
 function Init()
    if not (EntityID == 0) then
       local model =  Entity.Model
@@ -19,17 +21,14 @@ function Init()
       end
    end
 
-   local ET = Entity.Transform;
-   ET.Position.z -= 5;
-   ET.Position.y -= 2.5;
-   ET.Position.x += 2.5;
+   -- local ET = Entity.Transform;
+   -- ET.Position.z -= 5;
+   -- ET.Position.y -= 2.5;
+   -- ET.Position.x += 2.5;
 
-   ET.Rotation:Rotate(1.57, Vector3:new(0, 0, 1));
+   -- ET.Rotation:Rotate(1.57, Vector3:new(0, 0, 1));
 
-   Entity.Transform = ET;
-end
-
-function Update(dt)
+   -- Entity.Transform = ET;
    -- time += dt;
 
    -- local EntModel = Model:new();
@@ -42,9 +41,10 @@ function Update(dt)
    --       local vertex = Vertex:new()
    --       local pos = vertex.Position
 
-   --       pos.x = x-1
-   --       pos.y = StartHeight[x][z] * math.cos(time*StartHeight[x][z])
-   --       pos.z = z-1
+   --       pos.x = (x-1) / Quality;
+   --       -- pos.y = StartHeight[x][z] * math.cos(time*StartHeight[x][z])
+   --       pos.y = math.min(0, math.sin(x+time));
+   --       pos.z = (z-1) / Quality;
 
    --       vertex.Normal.x = -1;
    --       vertex.Normal.y = 0;
@@ -53,14 +53,16 @@ function Update(dt)
    --       vertex.TexCoords.x = (x-1)/(size-1);
    --       vertex.TexCoords.y = (z-1)/(size-1);
 
-   --       for i = 1, (size-1)^2*2 do
+   --       if(x < size) and (z < size) then
+   --          local i = (x-1) + (z-1) * size;
    --          table.insert(EntModel.Meshes[1].Indicies, i)
+   --          table.insert(EntModel.Meshes[1].Indicies, i+size)
    --          table.insert(EntModel.Meshes[1].Indicies, i+1)
-   --          table.insert(EntModel.Meshes[1].Indicies, i+8)
-   --          table.insert(EntModel.Meshes[1].Indicies, i+9)
    --          table.insert(EntModel.Meshes[1].Indicies, i+1)
-   --          table.insert(EntModel.Meshes[1].Indicies, i+8)
+   --          table.insert(EntModel.Meshes[1].Indicies, i+size)
+   --          table.insert(EntModel.Meshes[1].Indicies, i+size+1)
    --       end
+
    --       table.insert(Verts, vertex)
    --    end
    -- end

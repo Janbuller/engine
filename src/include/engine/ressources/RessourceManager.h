@@ -11,7 +11,6 @@
 namespace engine {
     class RessourceManager {
     private:
-
     public:
         static inline std::unordered_map<std::string, sptr<ISpecificRessourceManager>> RessourceManagers{};
 
@@ -25,7 +24,7 @@ namespace engine {
             }
 
             RessourceManagers.insert({TypeName, std::make_shared<SpecificRessourceManager<T>>()});
-	    LOG_ENGINE_TRACE("Registered ressource type {0}", TypeName);
+            LOG_ENGINE_TRACE("Registered ressource type {0}", TypeName);
         }
 
         template<class T>

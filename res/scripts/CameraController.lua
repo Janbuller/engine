@@ -8,6 +8,13 @@ Pitch = 0;
 function Init()
    LastMousePos.x = Input.GetMousePos(1);
    LastMousePos.y = Input.GetMousePos(2);
+
+   local ET = Entity.Transform;
+
+   ET.Position.x = -5;
+   ET.Position.z = 5;
+
+   Entity.Transform = ET;
 end
 
 function Update(dt)

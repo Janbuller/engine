@@ -9,8 +9,12 @@ namespace engine {
     EntityID Id;
     std::bitset<MAX_COMPONENTS> ComponentSignature;
 
-    bool operator< (const Entity& t) const {
-      return Id < t.Id;
+    bool operator< (const Entity& Other) const {
+      return Id < Other.Id;
+    }
+
+    bool operator== (const Entity& Other) const {
+      return Id == Other.Id;
     }
   };
 }

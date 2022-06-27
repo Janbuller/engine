@@ -1,9 +1,9 @@
 #include "engine/model/ModelLoader.h"
 #include "engine/Base.h"
-#include "engine/model/Material.h"
-#include "engine/ressources/RessourceManager.h"
 #include "engine/ecs/components/Model.h"
 #include "engine/glcore/Shader.h"
+#include "engine/model/Material.h"
+#include "engine/ressources/RessourceManager.h"
 #include <memory>
 #include <stdexcept>
 
@@ -80,7 +80,7 @@ namespace engine {
     }
 
     Material ModelLoader::ProcessMaterial(aiMaterial *Mat, std::string BaseDir) {
-        std::vector<std::pair<std::string, glcore::Texture>> Textures;
+        std::vector<std::pair<std::string, glcore::Texture2D>> Textures;
         auto diffuseMaps = LoadMaterialTexture(Mat, aiTextureType_DIFFUSE, "texture_diffuse", BaseDir);
         Textures.insert(Textures.end(), diffuseMaps.begin(), diffuseMaps.end());
         auto specularMaps = LoadMaterialTexture(Mat, aiTextureType_SPECULAR, "texture_specular", BaseDir);
@@ -89,18 +89,20 @@ namespace engine {
         return Material{DefaultShader, Textures};
     }
 
-    std::vector<std::pair<std::string, glcore::Texture>> ModelLoader::LoadMaterialTexture(aiMaterial *Mat, aiTextureType Type, std::string TypeName, std::string BaseDir) {
-        std::vector<std::pair<std::string, glcore::Texture>> Textures;
+    std::vector<std::pair<std::string, glcore::Texture2D>> ModelLoader::LoadMaterialTexture(aiMaterial *Mat, aiTextureType Type, std::string TypeName, std::string BaseDir) {
+        std::vector<std::pair<std::string, glcore::Texture2D>> Textures;
 
         for (unsigned int i = 0; i < Mat->GetTextureCount(Type); i++) {
             aiString str;
             Mat->GetTexture(Type, i, &str);
 
-	    std::string filename = str.C_Str();
-	    filename = BaseDir + '/' + filename;
+            std::string filename = str.C_Str();
+            filename = BaseDir + '/' + filename;
 
-            glcore::Texture texture = RessourceManager::Get<glcore::Texture>(filename);
-            Textures.push_back({TypeName, texture});
+            const auto &Data = RessourceManager::Get<glcore::TextureData>(filename);
+            glcore::Texture2D Texture = glcore::Texture2D::FromTextureData(Data);
+            LOG_ENGINE_ERROR("{0}, {1} : {2}", TypeName, filename, Texture.Handle);
+            Textures.push_back({TypeName, Texture});
         }
         return Textures;
     }

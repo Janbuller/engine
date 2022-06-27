@@ -4,7 +4,7 @@
 #include "engine/model/Mesh.h"
 #include "engine/ecs/Scene.h"
 #include "engine/glcore/Shader.h"
-#include "engine/glcore/Texture.h"
+#include "engine/glcore/Texture2D.h"
 #include <algorithm>
 #include <array>
 #include <map>

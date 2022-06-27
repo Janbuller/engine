@@ -4,6 +4,7 @@
 #include "engine/core/Keys.h"
 #include "engine/core/Logger.h"
 #include "engine/ecs/Entity.h"
+#include "engine/ecs/SceneView.h"
 #include "engine/ecs/components/Camera.h"
 #include "engine/ecs/components/Model.h"
 #include "engine/ecs/components/Script.h"
@@ -11,14 +12,14 @@
 #include "engine/ecs/systems/LuaScriptRunner.h"
 #include "engine/ecs/systems/ModelRenderer.h"
 #include "engine/ecs/systems/MoveDown.h"
+#include "engine/glcore/Shader.h"
+#include "engine/glcore/Texture2D.h"
+#include "engine/glcore/Window.h"
 #include "engine/model/Mesh.h"
 #include "engine/model/ModelLoader.h"
 #include "engine/model/Vertex.h"
 #include "engine/ressources/RessourceManager.h"
 #include "engine/ressources/SpecificRessourceManager.h"
-#include "engine/glcore/Shader.h"
-#include "engine/glcore/Texture.h"
-#include "engine/glcore/Window.h"
 #include "glm/ext/matrix_transform.hpp"
 #include "glm/ext/quaternion_transform.hpp"
 #include "glm/gtc/quaternion.hpp"
@@ -46,7 +47,7 @@ namespace ecstest {
         AppWindow.CaptureMouse(true);
 
         engine::RessourceManager::RegisterRessourceType<Model>();
-        engine::RessourceManager::RegisterRessourceType<engine::glcore::Texture>();
+        engine::RessourceManager::RegisterRessourceType<engine::glcore::TextureData>();
 
         engine::ModelLoader::DefaultShader = MainShader;
 
@@ -70,36 +71,31 @@ namespace ecstest {
         auto LuaScriptRunnerSignature = std::bitset<engine::MAX_COMPONENTS>();
         LuaScriptRunnerSignature.set(MainScene->GetComponentId<Script>(), true);
         MainScene->SetSystemSignature<LuaScriptRunner>(LuaScriptRunnerSignature);
-
-        for (int i = 0; i < 1; i++) {
+        {
             auto &E = MainScene->AddEntity();
             MainScene->AddComponent<Transform>(E);
             MainScene->AddComponent<Model>(E);
-            MainScene->AddComponent<Script>(E);
 
             auto &ET = MainScene->GetComponent<Transform>(E);
+            ET.Position.y -= 2;
 
-            auto Scalar = 1.0;
-            ET.Scale = {Scalar, Scalar, Scalar};
+            ET.Rotation = glm::rotate(ET.Rotation, 3.141592654f, {1, 0, 0});
 
             auto &EModel = MainScene->GetComponent<Model>(E);
-            EModel = engine::RessourceManager::Get<Model>("res/models/cube/cube.obj");
-
-            // if (i == 0) {
-            auto &EScript = MainScene->GetComponent<Script>(E);
-            EScript.ScriptPaths.push_back("res/scripts/TestThingy.lua");
-            // }
+            EModel = engine::RessourceManager::Get<Model>("res/models/wood_floor/floor.obj");
         }
 
-        auto &Cam = MainScene->AddEntity();
-        MainScene->AddComponent<Transform>(Cam);
-        MainScene->AddComponent<Camera>(Cam);
-        MainScene->AddComponent<Script>(Cam);
+        {
+            auto &Cam = MainScene->AddEntity();
+            auto &CT = MainScene->AddComponent<Transform>(Cam);
+            auto &CC = MainScene->AddComponent<Camera>(Cam);
+            auto &CS = MainScene->AddComponent<Script>(Cam);
 
-        auto &CamScript = MainScene->GetComponent<Script>(Cam);
-        CamScript.ScriptPaths.push_back("res/scripts/CameraController.lua");
+            /* CC.Projection = engine::components::Camera::ProjectionType::ORTHOGRAPHIC; */
+            CS.ScriptPaths.push_back("res/scripts/CameraController.lua");
 
-        MainScene->MainCam = Cam;
+            MainScene->MainCam = Cam;
+        }
 
         MainScene->GetSystem<LuaScriptRunner>()->InitializeScripting(MainScene);
 
@@ -131,7 +127,6 @@ namespace ecstest {
                     glm::vec3 Point{IPoint[0], IPoint[1], IPoint[2]};
 
                     auto Rotated = glm::rotate(Quat, Point);
-                    /* auto Rotated = Quat * Point; */
                     return std::vector<float>{Rotated[0], Rotated[1], Rotated[2]};
                 };
         MainScene->GetSystem<LuaScriptRunner>()->AddLuaFunction(RotatePointFn, "GMath", "RotatePoint");
@@ -144,6 +139,12 @@ namespace ecstest {
                     return std::vector<float>{Inverse[0], Inverse[1], Inverse[2], Inverse[3]};
                 };
         MainScene->GetSystem<LuaScriptRunner>()->AddLuaFunction(InverseQuatFn, "GMath", "InverseQuat");
+
+        /* std::function<int()> AddEntitiyFn = */
+        /*         [this]() { */
+        /*             return MainScene->AddEntity().Id; */
+        /*         }; */
+        /* MainScene->GetSystem<LuaScriptRunner>()->AddLuaFunction(AddEntitiyFn, "Scene", "AddEntity"); */
 
         MainScene->Init();
     }

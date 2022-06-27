@@ -1,19 +1,14 @@
 #pragma once
 
-#include <string>
+#include <glad/glad.h>
 
 namespace engine::glcore {
     struct Texture {
-        unsigned int id;
-        std::string path;
+        GLuint Handle;
 
-        int width, height;
+        int Width, Height;
 
         Texture() = default;
-        Texture(unsigned int id, std::string path, int width, int height);
-
-        static Texture Load(std::string path);
-        static Texture LoadTextureFromFile(const char *path);
-        static Texture LoadTextureFromFile(const char *path, const std::string &directory);
+        Texture(GLuint Handle, int Width, int Height);
     };
-}// namespace engine::glcore
+}

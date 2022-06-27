@@ -3,7 +3,7 @@
 #include "engine/model/Vertex.h"
 #include "engine/Base.h"
 #include "engine/glcore/Shader.h"
-#include "engine/glcore/Texture.h"
+#include "engine/glcore/Texture2D.h"
 #include <fstream>
 #include <glad/glad.h>
 #include <sstream>

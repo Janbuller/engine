@@ -38,8 +38,9 @@ namespace engine {
         }
 
         void RemoveEntity(Entity E) {
-            // Entities.erase(std::find(Entities.begin(), Entities.end(), E));
-            // EGen.RemoveEntityId(E.Id);
+            Entities.erase(std::find(Entities.begin(), Entities.end(), E));
+            EGen.RemoveEntityId(E.Id);
+
             Components.RemoveEntity(E);
             Systems.RemoveEntity(E);
         }
@@ -50,23 +51,25 @@ namespace engine {
         }
 
         template<typename T>
-        void AddComponent(Entity &E) {
-            Components.AddComponent<T>(E);
+        T& AddComponent(Entity &E) {
+            auto& NewComponent = Components.AddComponent<T>(E);
 
             auto &Signature = E.ComponentSignature;
             Signature.set(GetComponentId<T>(), true);
 
             Systems.EntitySignatureChanged(E, Signature);
+            return NewComponent;
         }
 
         template<typename T>
-        void AddComponent(Entity &E, T Component) {
-            Components.AddComponent<T>(E, Component);
+        T& AddComponent(Entity &E, T Component) {
+            auto& NewComponent = Components.AddComponent<T>(E, Component);
 
             auto &Signature = E.ComponentSignature;
             Signature.set(GetComponentId<T>(), true);
 
             Systems.EntitySignatureChanged(E, Signature);
+            return NewComponent;
         }
 
         template<typename T>

@@ -21,7 +21,7 @@ namespace engine {
         std::vector<T> Components;
 
     public:
-        void AddComponent(Entity E) {
+        T &AddComponent(Entity E) {
             if (EntityToComponentIdx.find(E.Id) != EntityToComponentIdx.end()) {
                 LOG_ENGINE_ERROR("Failed to remove add an already existing \"{0}\" component to an entity with id \"{1}\".", typeid(T).name(), E.Id);
                 throw std::invalid_argument("Tried to add existing component to entity");
@@ -32,9 +32,10 @@ namespace engine {
             ComponentToEntityIdx.insert_or_assign(Components.size(), E.Id);
 
             Components.push_back(T{});
+            return Components.back();
         }
 
-        void AddComponent(Entity E, T Component) {
+        T& AddComponent(Entity E, T Component) {
             if (EntityToComponentIdx.find(E.Id) != EntityToComponentIdx.end()) {
                 LOG_ENGINE_ERROR("Failed to remove add an already existing \"{0}\" component to an entity with id \"{1}\".", typeid(T).name(), E.Id);
                 throw std::invalid_argument("Tried to add existing component to entity");
@@ -45,6 +46,7 @@ namespace engine {
             ComponentToEntityIdx.insert_or_assign(Components.size(), E.Id);
 
             Components.push_back(Component);
+            return Components.back();
         }
 
         void RemoveComponent(Entity E) {

@@ -1,11 +1,11 @@
 #pragma once
 
 #include "ComponentVector.h"
+#include "engine/Base.h"
 #include <memory>
 #include <stdexcept>
 #include <string>
 #include <unordered_map>
-#include "engine/Base.h"
 
 namespace engine {
     class ComponentHandler {
@@ -57,13 +57,13 @@ namespace engine {
         }
 
         template<typename T>
-        void AddComponent(Entity E) {
-            GetComponentVector<T>()->AddComponent(E);
+        T &AddComponent(Entity E) {
+            return GetComponentVector<T>()->AddComponent(E);
         }
 
         template<typename T>
-        void AddComponent(Entity E, T Component) {
-	  GetComponentVector<T>()->AddComponent(E, Component);
+        T &AddComponent(Entity E, T Component) {
+            return GetComponentVector<T>()->AddComponent(E, Component);
         }
 
         template<typename T>

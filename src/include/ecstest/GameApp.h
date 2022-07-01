@@ -17,7 +17,7 @@ namespace ecstest {
         using engine::Application::Application;
 
     private:
-        engine::glcore::Shader MainShader{"res/shaders/MainShader.vert", "res/shaders/MainShader.frag"};
+        engine::glcore::Shader MainShader{"res/Application/Shaders/MainShader.vert", "res/Application/Shaders/MainShader.frag"};
 
         engine::DeltaVariable<double, 2> RelativeMouse{std::array<double, 2>{0, 0}};
 

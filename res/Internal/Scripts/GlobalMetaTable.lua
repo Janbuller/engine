@@ -1,4 +1,4 @@
-require("res/scripts/internal/Input")
+require("res/Internal/Scripts/Input")
 
 setmetatable(_G, {
 		__newindex = function (_G, key, val)

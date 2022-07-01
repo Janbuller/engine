@@ -2,7 +2,7 @@
 #include "engine/core/Logger.h"
 
 namespace engine::glcore {
-    Texture::Texture(GLuint Handle, int Width, int Height)
-        : Handle{Handle}, Width{Width}, Height{Height} {
+    Texture::Texture(GLuint Handle)
+        : Handle{Handle} {
     }
 }

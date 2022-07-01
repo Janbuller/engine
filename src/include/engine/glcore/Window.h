@@ -1,8 +1,10 @@
 #pragma once
 
 #include "engine/utils/DeltaVariable.h"
+// clang-format off
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+// clang-format on
 #include <functional>
 #include <string>
 #include <tuple>
@@ -23,13 +25,16 @@ namespace engine::glcore {
         engine::DeltaVariable<double, 1> deltaTime;
 
     public:
-        int Width = 640, Height = 480;
+        int Width = 640;
+        int Height = 480;
+
         std::string Title;
 
         GLFWwindow *WindowHandle;
 
         Window(int Width = 640, int Height = 480, std::string Title = "Window");
         ~Window();
+
         void SwapBuffers();
         void Update();
 

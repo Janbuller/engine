@@ -2,6 +2,7 @@
 #include "engine/ecs/components/Camera.h"
 #include "engine/ecs/components/Model.h"
 #include "engine/lighting/Light.h"
+#include "engine/ressources/RessourceManager.h"
 #include <glad/glad.h>
 
 namespace engine::systems {
@@ -17,30 +18,71 @@ namespace engine::systems {
         glEnable(GL_FRAMEBUFFER_SRGB);
 
         glGenBuffers(1, &LightSSBO);
+
+        Skybox = RessourceManager::Get<Model>("res/Internal/Models/Skybox.obj");
+        Skybox.Meshes[0].MeshMaterial.Shader = glcore::Shader{"res/Internal/Shaders/Skybox.vert", "res/Internal/Shaders/Skybox.frag"};
     }
 
     void ModelRenderer::Render(sptr<Scene> Scene, int Width, int Height) {
         Light Lights[2];
-        Lights[0] = Light{
-                {-1, 1, 0, 1},
-                {1, 0.97, 0.94},
-                10.0,
-                1.0,
-                0.35,
-                0.44};
 
-        Lights[1] = Light{
-                {-0.74, -1.346, -1.75, 0},
-                {0.9, 0.9, 1.0},
-                0.2,
-                1.0,
-                0.35,
-                0.44};
+        Lights[0] = Light{};
+        Lights[0].Position  = {-1, 1, 0, 1};
+        Lights[0].Color     = {1, 0.97, 0.94};
+        Lights[0].Intensity = 10.0;
+        Lights[0].Constant  = 1.0;
+        Lights[0].Linear    = 0.35;
+        Lights[0].Quadratic = 0.44;
+
+        Lights[1] = Light{};
+        Lights[1].Position  = {-0.74, -1.346, -1.75, 0};
+        Lights[1].Color     = {0.9, 0.9, 1.0};
+        Lights[1].Intensity = 0.2;
+        Lights[1].Constant  = 1.0;
+        Lights[1].Linear    = 0.35;
+        Lights[1].Quadratic = 0.44;
 
         glNamedBufferData(LightSSBO, sizeof(Lights), Lights, GL_DYNAMIC_DRAW);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, LightSSBO);
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 10, LightSSBO);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+        auto Projection = Camera::GetProjectionMatrix(Scene, Scene->MainCam.Id, Width, Height);
+        auto View = Camera::GetViewMatrix(Scene, Scene->MainCam.Id);
+
+        // Get camera component
+        auto &CC = Scene->GetComponent<Camera>(Scene->MainCam.Id);
+
+        // Set and clear background color
+        if(CC.BackgroundColor) {
+            auto& BG = CC.BackgroundColor.value();
+            glClearColor(BG.r, BG.g, BG.b, BG.a);
+        }
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        // Draw skybox if existing
+        if(CC.Skybox) {
+            auto& SkyboxTex = CC.Skybox.value();
+            auto& Mat = Skybox.Meshes[0].MeshMaterial;
+
+            Mat.Shader.Bind();
+            auto SkyboxView = glm::mat4{glm::mat3{View}};
+            Mat.Shader.SetMat4("view", SkyboxView);
+            Mat.Shader.SetMat4("projection", Projection);
+
+            glDepthMask(GL_FALSE);
+            glDisable(GL_CULL_FACE);
+
+            glBindVertexArray(Skybox.Meshes[0].VAO);
+            Mat.Shader.SetInt("Skybox", 0);
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_CUBE_MAP, SkyboxTex.Handle);
+            glDrawElements(GL_TRIANGLES, Skybox.Meshes[0].Indicies.size(), GL_UNSIGNED_INT, 0);
+            glBindVertexArray(0);
+
+            glDepthMask(GL_TRUE);
+            glEnable(GL_CULL_FACE);
+        }
 
         for (const auto &Entity : Entities) {
             auto &ET = Scene->GetComponent<Transform>(Entity);
@@ -50,8 +92,6 @@ namespace engine::systems {
                 continue;
             }
 
-            auto Projection = Camera::GetProjectionMatrix(Scene, Scene->MainCam.Id, Width, Height);
-            auto View = Camera::GetViewMatrix(Scene, Scene->MainCam.Id);
             auto Model = ET.GetTransformMatrix();
 
             for (auto &Mesh : EM.Meshes) {

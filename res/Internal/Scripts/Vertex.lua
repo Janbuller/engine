@@ -1,5 +1,5 @@
-local Vector3 = require("res/scripts/internal/Vector3")
-local Vector2 = require("res/scripts/internal/Vector2")
+local Vector3 = require("res/Internal/Scripts/Vector3")
+local Vector2 = require("res/Internal/Scripts/Vector2")
 
 local Vertex = {}
 

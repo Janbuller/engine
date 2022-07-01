@@ -21,14 +21,17 @@ function Init()
       end
    end
 
-   -- local ET = Entity.Transform;
+   local ET = Entity.Transform;
    -- ET.Position.z -= 5;
    -- ET.Position.y -= 2.5;
    -- ET.Position.x += 2.5;
 
+   ET.Scale.x = 10;
+   ET.Scale.z = 10;
+
    -- ET.Rotation:Rotate(1.57, Vector3:new(0, 0, 1));
 
-   -- Entity.Transform = ET;
+   Entity.Transform = ET;
    -- time += dt;
 
    -- local EntModel = Model:new();

@@ -29,10 +29,10 @@ namespace engine::systems {
 
     void LuaScriptRunner::InitializeScripting(sptr<Scene> Scene) {
 
-        std::function<void(std::string)> TraceFn = [](std::string ToPrint) { LOG_TRACE(ToPrint); };
-        std::function<void(std::string)> InfoFn = [](std::string ToPrint) { LOG_INFO(ToPrint); };
-        std::function<void(std::string)> WarnFn = [](std::string ToPrint) { LOG_WARN(ToPrint); };
-        std::function<void(std::string)> ErrorFn = [](std::string ToPrint) { LOG_ERROR(ToPrint); };
+        std::function<void(std::string)> TraceFn    = [](std::string ToPrint) { LOG_TRACE(ToPrint); };
+        std::function<void(std::string)> InfoFn     = [](std::string ToPrint) { LOG_INFO(ToPrint); };
+        std::function<void(std::string)> WarnFn     = [](std::string ToPrint) { LOG_WARN(ToPrint); };
+        std::function<void(std::string)> ErrorFn    = [](std::string ToPrint) { LOG_ERROR(ToPrint); };
         std::function<void(std::string)> CriticalFn = [](std::string ToPrint) { LOG_CRITICAL(ToPrint); };
 
         luabridge::getGlobalNamespace(L)
@@ -51,7 +51,7 @@ namespace engine::systems {
 
         // auto L_NewEntity = luabridge::getGlobal(L, "NewEntity");
 
-        auto EntityScript = LoadAndReplaceFile("res/scripts/internal/Entity.lua");
+        auto EntityScript = LoadAndReplaceFile("res/Internal/Scripts/Entity.lua");
         if (!CheckLua(L, luaL_dostring(L, EntityScript.c_str()))) {
             LOG_ENGINE_ERROR("Failed to create the entity creator!");
             throw std::runtime_error("Failed to create the entity creator!");
@@ -75,7 +75,7 @@ namespace engine::systems {
             }
         }
 
-        auto Classes = LoadAndReplaceFile("res/scripts/internal/Classes.lua");
+        auto Classes = LoadAndReplaceFile("res/Internal/Scripts/Classes.lua");
         if (!CheckLua(L, luaL_dostring(L, Classes.c_str()))) {
             LOG_ENGINE_ERROR("Failed to load lua classes!");
             throw std::runtime_error("Failed to load lua classes!");
@@ -90,7 +90,7 @@ namespace engine::systems {
         luabridge::push(L, 0);
         lua_setglobal(L, "ScriptID");
 
-        auto GlobalMetaTable = LoadAndReplaceFile("res/scripts/internal/GlobalMetaTable.lua");
+        auto GlobalMetaTable = LoadAndReplaceFile("res/Internal/Scripts/GlobalMetaTable.lua");
         if (!CheckLua(L, luaL_dostring(L, GlobalMetaTable.c_str()))) {
             LOG_ENGINE_ERROR("Failed to set the global lua metatable!");
             throw std::runtime_error("Failed to set the global lua metatable!");

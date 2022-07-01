@@ -9,9 +9,9 @@
 namespace engine {
   struct Material {
     glcore::Shader Shader;
-    std::vector<std::pair<std::string, glcore::Texture2D>> Textures;
+    std::vector<std::pair<std::string, glcore::Texture>> Textures;
 
     Material() {}
-    Material(glcore::Shader Shader, std::vector<std::pair<std::string, glcore::Texture2D>> Textures) : Shader(Shader), Textures(Textures) {}
+    Material(glcore::Shader Shader, std::vector<std::pair<std::string, glcore::Texture>> Textures) : Shader(Shader), Textures(Textures) {}
   };
 }

@@ -1,5 +1,5 @@
-local Vector3 = require("res/scripts/internal/Vector3")
-local Quaternion = require("res/scripts/internal/Quaternion")
+local Vector3    = require("res/Internal/Scripts/Vector3")
+local Quaternion = require("res/Internal/Scripts/Quaternion")
 
 local Transform = {}
 

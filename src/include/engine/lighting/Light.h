@@ -5,13 +5,13 @@
 
 namespace engine {
     struct Light {
-        alignas(16) glm::vec4 position;
+        alignas(16) glm::vec4 Position;
 
-        alignas(16) glm::vec3 color;
-        GLfloat intensity;
+        alignas(16) glm::vec3 Color;
+        GLfloat Intensity;
 
-        GLfloat constant;
-        GLfloat linear;
-        GLfloat quadratic;
+        GLfloat Constant;
+        GLfloat Linear;
+        GLfloat Quadratic;
     };
 }// namespace engine

@@ -9,7 +9,7 @@
 
 namespace engine::glcore {
     Texture2D::Texture2D(GLuint Handle, int Width, int Height)
-        : Texture{Handle, Width, Height} {
+        : Texture{Handle}, Width{Width}, Height{Height} {
     }
 
     Texture2D Texture2D::FromTextureData(TextureData TD) {

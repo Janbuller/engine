@@ -80,7 +80,7 @@ namespace engine {
     }
 
     Material ModelLoader::ProcessMaterial(aiMaterial *Mat, std::string BaseDir) {
-        std::vector<std::pair<std::string, glcore::Texture2D>> Textures;
+        std::vector<std::pair<std::string, glcore::Texture>> Textures;
         auto diffuseMaps = LoadMaterialTexture(Mat, aiTextureType_DIFFUSE, "texture_diffuse", BaseDir);
         Textures.insert(Textures.end(), diffuseMaps.begin(), diffuseMaps.end());
         auto specularMaps = LoadMaterialTexture(Mat, aiTextureType_SPECULAR, "texture_specular", BaseDir);

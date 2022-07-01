@@ -14,6 +14,7 @@
 #include "engine/ecs/systems/MoveDown.h"
 #include "engine/glcore/Shader.h"
 #include "engine/glcore/Texture2D.h"
+#include "engine/glcore/TextureCubemap.h"
 #include "engine/glcore/Window.h"
 #include "engine/model/Mesh.h"
 #include "engine/model/ModelLoader.h"
@@ -72,17 +73,17 @@ namespace ecstest {
         LuaScriptRunnerSignature.set(MainScene->GetComponentId<Script>(), true);
         MainScene->SetSystemSignature<LuaScriptRunner>(LuaScriptRunnerSignature);
         {
-            auto &E = MainScene->AddEntity();
-            MainScene->AddComponent<Transform>(E);
-            MainScene->AddComponent<Model>(E);
+            auto &E  = MainScene->AddEntity();
+            auto &ET = MainScene->AddComponent<Transform>(E);
+            auto &EM = MainScene->AddComponent<Model>(E);
+            auto &ES = MainScene->AddComponent<Script>(E);
 
-            auto &ET = MainScene->GetComponent<Transform>(E);
             ET.Position.y -= 2;
-
             ET.Rotation = glm::rotate(ET.Rotation, 3.141592654f, {1, 0, 0});
 
-            auto &EModel = MainScene->GetComponent<Model>(E);
-            EModel = engine::RessourceManager::Get<Model>("res/models/wood_floor/floor.obj");
+            EM = engine::RessourceManager::Get<Model>("res/Application/Models/wood_floor/floor.obj");
+
+            ES.ScriptPaths.push_back("res/Application/Scripts/TestThingy.lua");
         }
 
         {
@@ -92,7 +93,21 @@ namespace ecstest {
             auto &CS = MainScene->AddComponent<Script>(Cam);
 
             /* CC.Projection = engine::components::Camera::ProjectionType::ORTHOGRAPHIC; */
-            CS.ScriptPaths.push_back("res/scripts/CameraController.lua");
+            CS.ScriptPaths.push_back("res/Application/Scripts/CameraController.lua");
+
+            // Cubemap loading
+            {
+                using namespace engine;
+                using namespace engine::glcore;
+                auto CubeMap = TextureCubemap::FromTextureData({RessourceManager::Get<TextureData>("res/Application/Skybox/Evening Meadow/2048/xp.png"),
+                                                                RessourceManager::Get<TextureData>("res/Application/Skybox/Evening Meadow/2048/xn.png"),
+                                                                RessourceManager::Get<TextureData>("res/Application/Skybox/Evening Meadow/2048/yp.png"),
+                                                                RessourceManager::Get<TextureData>("res/Application/Skybox/Evening Meadow/2048/yn.png"),
+                                                                RessourceManager::Get<TextureData>("res/Application/Skybox/Evening Meadow/2048/zp.png"),
+                                                                RessourceManager::Get<TextureData>("res/Application/Skybox/Evening Meadow/2048/zn.png")});
+                CC.Skybox = CubeMap;
+            }
+            CC.BackgroundColor = glm::vec4{0.0, 0.3, 0.4, 1.0};
 
             MainScene->MainCam = Cam;
         }
@@ -151,8 +166,6 @@ namespace ecstest {
 
     bool GameApp::onUpdate() {
         DoInput(DeltaTime);
-        glClearColor(0.0, 0.3, 0.4, 1.0);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         MainScene->GetSystem<ModelRenderer>()->Render(MainScene, AppWindow.Width, AppWindow.Height);
 

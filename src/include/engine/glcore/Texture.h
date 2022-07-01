@@ -6,9 +6,7 @@ namespace engine::glcore {
     struct Texture {
         GLuint Handle;
 
-        int Width, Height;
-
         Texture() = default;
-        Texture(GLuint Handle, int Width, int Height);
+        Texture(GLuint Handle);
     };
 }

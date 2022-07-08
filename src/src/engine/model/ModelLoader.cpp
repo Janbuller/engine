@@ -6,6 +6,7 @@
 #include "engine/ressources/RessourceManager.h"
 #include <memory>
 #include <stdexcept>
+#include <glm/gtx/string_cast.hpp>
 
 namespace engine {
     glcore::Shader ModelLoader::DefaultShader{};
@@ -13,7 +14,7 @@ namespace engine {
         LOG_ENGINE_TRACE("Loading model \"{0}\"", Path);
 
         Assimp::Importer Importer;
-        const aiScene *Scene = Importer.ReadFile(Path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals | aiProcess_JoinIdenticalVertices);
+        const aiScene *Scene = Importer.ReadFile(Path, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals | aiProcess_JoinIdenticalVertices | aiProcess_CalcTangentSpace);
 
         if (!Scene || Scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !Scene->mRootNode) {
             LOG_ENGINE_ERROR("Failed to load model (\"{0}\")! Assimp Error: {1}", Path, Importer.GetErrorString());
@@ -61,6 +62,10 @@ namespace engine {
                 Vert.TexCoords = glm::vec2{0, 0};
             }
 
+            Vert.Tangent.x = ProcessedMesh->mTangents[i].x;
+            Vert.Tangent.y = ProcessedMesh->mTangents[i].y;
+            Vert.Tangent.z = ProcessedMesh->mTangents[i].z;
+
             Vertices.push_back(Vert);
         }
 
@@ -71,7 +76,7 @@ namespace engine {
             }
         }
 
-        if (ProcessedMesh->mMaterialIndex > 0) {
+        if (ProcessedMesh->mMaterialIndex >= 0) {
             aiMaterial *Mat = Scene->mMaterials[ProcessedMesh->mMaterialIndex];
             MeshMaterial = ProcessMaterial(Mat, BaseDir);
         }
@@ -85,6 +90,10 @@ namespace engine {
         Textures.insert(Textures.end(), diffuseMaps.begin(), diffuseMaps.end());
         auto specularMaps = LoadMaterialTexture(Mat, aiTextureType_SPECULAR, "texture_specular", BaseDir);
         Textures.insert(Textures.end(), specularMaps.begin(), specularMaps.end());
+        auto normalMaps = LoadMaterialTexture(Mat, aiTextureType_NORMALS, "texture_normal", BaseDir);
+        Textures.insert(Textures.end(), normalMaps.begin(), normalMaps.end());
+
+        LOG_ENGINE_ERROR("dMap = {0} : sMap = {1} : nMap = {2}", diffuseMaps.size(), specularMaps.size(), normalMaps.size());
 
         return Material{DefaultShader, Textures};
     }

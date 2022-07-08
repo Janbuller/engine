@@ -1,7 +1,7 @@
 #include "engine/ecs/systems/ModelRenderer.h"
 #include "engine/ecs/components/Camera.h"
 #include "engine/ecs/components/Model.h"
-#include "engine/lighting/Light.h"
+#include "engine/ecs/components/Light.h"
 #include "engine/ressources/RessourceManager.h"
 #include <glad/glad.h>
 
@@ -29,10 +29,10 @@ namespace engine::systems {
         Lights[0] = Light{};
         Lights[0].Position  = {-1, 1, 0, 1};
         Lights[0].Color     = {1, 0.97, 0.94};
-        Lights[0].Intensity = 10.0;
+        Lights[0].Intensity = 5.0;
         Lights[0].Constant  = 1.0;
-        Lights[0].Linear    = 0.35;
-        Lights[0].Quadratic = 0.44;
+        Lights[0].Linear    = 0.14;
+        Lights[0].Quadratic = 0.07;
 
         Lights[1] = Light{};
         Lights[1].Position  = {-0.74, -1.346, -1.75, 0};
@@ -107,6 +107,7 @@ namespace engine::systems {
 
                 int DiffuseIdx = 1;
                 int SpecularIdx = 1;
+                int NormalIdx = 1;
 
                 for (unsigned int i = 0; i < Textures.size(); i++) {
                     glActiveTexture(GL_TEXTURE0 + i);
@@ -118,6 +119,8 @@ namespace engine::systems {
                         number = std::to_string(DiffuseIdx++);
                     } else if (type == "texture_specular") {
                         number = std::to_string(SpecularIdx++);
+                    } else if (type == "texture_normal") {
+                        number = std::to_string(NormalIdx++);
                     }
 
                     Mat.Shader.SetInt(("material." + type + number).c_str(), i);

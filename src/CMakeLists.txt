@@ -86,6 +86,7 @@ if(NOT assimp_POPULATED)
   set( ASSIMP_BUILD_FBX_IMPORTER ON )
   set( ASSIMP_BUILD_OBJ_IMPORTER ON )
   set( ASSIMP_BUILD_GLTF_IMPORTER ON )
+  set( ASSIMP_BUILD_BLEND_IMPORTER ON )
 
   add_subdirectory(${assimp_SOURCE_DIR} ${assimp_BINARY_DIR})
 endif()

@@ -32,14 +32,17 @@ namespace engine {
         glEnableVertexArrayAttrib(VAO, 0);
         glEnableVertexArrayAttrib(VAO, 1);
         glEnableVertexArrayAttrib(VAO, 2);
+        glEnableVertexArrayAttrib(VAO, 3);
 
         glVertexArrayAttribFormat(VAO, 0, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, Position));
         glVertexArrayAttribFormat(VAO, 1, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, Normal));
         glVertexArrayAttribFormat(VAO, 2, 2, GL_FLOAT, GL_FALSE, offsetof(Vertex, TexCoords));
+        glVertexArrayAttribFormat(VAO, 3, 3, GL_FLOAT, GL_FALSE, offsetof(Vertex, Tangent));
 
         glVertexArrayAttribBinding(VAO, 0, 0);
         glVertexArrayAttribBinding(VAO, 1, 0);
         glVertexArrayAttribBinding(VAO, 2, 0);
+        glVertexArrayAttribBinding(VAO, 3, 0);
     }
 
   void Mesh::DeleteBuffers() {

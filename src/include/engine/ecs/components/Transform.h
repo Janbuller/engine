@@ -17,7 +17,7 @@ namespace engine::components {
         glm::quat Rotation = glm::quat{0, 0, 0, 1};
         glm::vec3 Scale = glm::vec3{1};
 
-        Transform() {}
+        Transform() = default;
 
         glm::mat4 GetTransformMatrix();
 

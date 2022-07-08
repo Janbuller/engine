@@ -6,11 +6,11 @@ size = 8
 Quality = 1;
 
 function Init()
-   if not (EntityID == 0) then
-      local model =  Entity.Model
-      model.Visible = false
-      Entity.Model = model
-   end
+   -- if not (EntityID == 0) then
+   --    local model =  Entity.Model
+   --    model.Visible = false
+   --    Entity.Model = model
+   -- end
 
    time = math.random(1000)/10;
 
@@ -26,10 +26,10 @@ function Init()
    -- ET.Position.y -= 2.5;
    -- ET.Position.x += 2.5;
 
-   ET.Scale.x = 10;
-   ET.Scale.z = 10;
+   ET.Scale.x = 64;
+   ET.Scale.z = 64;
 
-   -- ET.Rotation:Rotate(1.57, Vector3:new(0, 0, 1));
+   ET.Rotation:Rotate(3.1415, Vector3:new(0, 0, 1));
 
    Entity.Transform = ET;
    -- time += dt;
@@ -76,6 +76,7 @@ function Init()
 end
 
 function OnKeyPressed(Key, Action)
+
    -- if Key == Input.Keys["KEY_F"] then
    --    Log.Trace(Key .. " : " .. Action);
    -- end

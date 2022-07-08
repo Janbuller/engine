@@ -73,19 +73,34 @@ namespace ecstest {
         LuaScriptRunnerSignature.set(MainScene->GetComponentId<Script>(), true);
         MainScene->SetSystemSignature<LuaScriptRunner>(LuaScriptRunnerSignature);
         {
+            /*
             auto &E  = MainScene->AddEntity();
             auto &ET = MainScene->AddComponent<Transform>(E);
             auto &EM = MainScene->AddComponent<Model>(E);
             auto &ES = MainScene->AddComponent<Script>(E);
 
+            ET.Position.x = 64;
             ET.Position.y -= 2;
             ET.Rotation = glm::rotate(ET.Rotation, 3.141592654f, {1, 0, 0});
 
             EM = engine::RessourceManager::Get<Model>("res/Application/Models/wood_floor/floor.obj");
 
             ES.ScriptPaths.push_back("res/Application/Scripts/TestThingy.lua");
+            */
         }
+        {
+            auto &E  = MainScene->AddEntity();
+            auto &ET = MainScene->AddComponent<Transform>(E);
+            auto &EM = MainScene->AddComponent<Model>(E);
+            auto &ES = MainScene->AddComponent<Script>(E);
 
+            ET.Position.y -= 2;
+            /* ET.Rotation = glm::rotate(ET.Rotation, 3.141592654f, {1, 0, 0}); */
+
+            EM = engine::RessourceManager::Get<Model>("res/Application/Models/pavement_floor/floor.fbx");
+
+            ES.ScriptPaths.push_back("res/Application/Scripts/TestThingy.lua");
+        }
         {
             auto &Cam = MainScene->AddEntity();
             auto &CT = MainScene->AddComponent<Transform>(Cam);
@@ -126,7 +141,7 @@ namespace ecstest {
         MainScene->GetSystem<LuaScriptRunner>()->AddLuaFunction(GetMousePosFn, "Input", "GetMousePos");
 
         std::function<std::vector<float>(std::vector<float>, float, std::vector<float>)> RotateFn =
-                [this](std::vector<float> IQuat, float IAngle, std::vector<float> IAxis) {
+                [](std::vector<float> IQuat, float IAngle, std::vector<float> IAxis) {
                     glm::quat StartQuat{IQuat[0], IQuat[1], IQuat[2], IQuat[3]};
                     const auto &Angle = IAngle;
                     glm::vec3 Axis{IAxis[0], IAxis[1], IAxis[2]};
@@ -137,7 +152,7 @@ namespace ecstest {
         MainScene->GetSystem<LuaScriptRunner>()->AddLuaFunction(RotateFn, "GMath", "Rotate");
 
         std::function<std::vector<float>(std::vector<float>, std::vector<float>)> RotatePointFn =
-                [this](std::vector<float> IPoint, std::vector<float> IQuat) {
+                [](std::vector<float> IPoint, std::vector<float> IQuat) {
                     glm::quat Quat{IQuat[0], IQuat[1], IQuat[2], IQuat[3]};
                     glm::vec3 Point{IPoint[0], IPoint[1], IPoint[2]};
 
@@ -147,7 +162,7 @@ namespace ecstest {
         MainScene->GetSystem<LuaScriptRunner>()->AddLuaFunction(RotatePointFn, "GMath", "RotatePoint");
 
         std::function<std::vector<float>(std::vector<float>)> InverseQuatFn =
-                [this](std::vector<float> IQuat) {
+                [](std::vector<float> IQuat) {
                     glm::quat Quat{IQuat[3], IQuat[0], IQuat[1], IQuat[2]};
 
                     auto Inverse = glm::inverse(Quat);

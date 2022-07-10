@@ -93,7 +93,7 @@ namespace engine {
         auto normalMaps = LoadMaterialTexture(Mat, aiTextureType_NORMALS, "texture_normal", BaseDir);
         Textures.insert(Textures.end(), normalMaps.begin(), normalMaps.end());
 
-        LOG_ENGINE_ERROR("dMap = {0} : sMap = {1} : nMap = {2}", diffuseMaps.size(), specularMaps.size(), normalMaps.size());
+        /* LOG_ENGINE_TRACE("dMap = {0} : sMap = {1} : nMap = {2}", diffuseMaps.size(), specularMaps.size(), normalMaps.size()); */
 
         return Material{DefaultShader, Textures};
     }

@@ -1,19 +1,20 @@
 #pragma once
 
-#include <glm/fwd.hpp>
 #include <glm/glm.hpp>
-#include <glm/gtc/quaternion.hpp>
-#include <glad/glad.h>
 
 namespace engine::components {
     struct Light {
-        alignas(16) glm::vec4 Position;
+        glm::vec3 Color;
+        float Intensity;
 
-        alignas(16) glm::vec3 Color;
-        GLfloat Intensity;
+        float Constant;
+        float Linear;
+        float Quadratic;
 
-        GLfloat Constant;
-        GLfloat Linear;
-        GLfloat Quadratic;
+        enum LightType {
+            PointLight,
+            DirectionalLight
+        };
+        LightType Type;
     };
 }// namespace engine::components

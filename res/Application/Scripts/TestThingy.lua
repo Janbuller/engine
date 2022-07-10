@@ -27,6 +27,7 @@ function Init()
    -- ET.Position.x += 2.5;
 
    ET.Scale.x = 64;
+   ET.Scale.y = 64;
    ET.Scale.z = 64;
 
    ET.Rotation:Rotate(3.1415, Vector3:new(0, 0, 1));

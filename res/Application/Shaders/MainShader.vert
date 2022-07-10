@@ -4,31 +4,36 @@ layout (location = 1) in vec3 aNormal;
 layout (location = 2) in vec2 aTexCoords;
 layout (location = 3) in vec3 aTangent;
 
-out vec3 FragPos;
-out vec3 Normal;
-out vec2 TexCoords;
-out mat3 TBN;
+out VSOUT {
+    vec3 FragPos;
+    vec3 Normal;
+    vec2 TexCoords;
+    mat3 TBN;
+} VSOut;
 
-uniform mat4 model;
-uniform mat4 view;
-uniform mat4 projection;
+uniform mat4 Model;
+uniform mat4 View;
+uniform mat4 Projection;
 
 void main()
 {
-    FragPos = vec3(model * vec4(aPos, 1.0));
+    VSOut.FragPos = vec3(Model * vec4(aPos, 1.0));
 
-    mat4 pvm = projection * view * model;
+    mat4 PVM = Projection * View * Model;
 
-    Normal = mat3(transpose(inverse(model))) * aNormal;  
+    VSOut.Normal = mat3(transpose(inverse(Model))) * aNormal;  
 
-    TexCoords = aTexCoords;
+    VSOut.TexCoords = aTexCoords;
 
-    vec3 T = normalize(vec3(model * vec4(aTangent,   0.0)));
-    vec3 N = normalize(vec3(model * vec4(aNormal,    0.0)));
-    // Reorthogonalize T vector
+    // Calculate the T and N vectors based on the vertex inputs and the model
+    // matrix.
+    vec3 T = normalize(vec3(Model * vec4(aTangent,   0.0)));
+    vec3 N = normalize(vec3(Model * vec4(aNormal,    0.0)));
+    // Reorthogonalize T vector based on the N vector.
     T = normalize(T - dot(T, N) * N);
+    // Calculate the B Vector.
     vec3 B = cross(N, T);
-    TBN = mat3(T, B, N);
+    VSOut.TBN = mat3(T, B, N);
 
-    gl_Position = pvm * vec4(aPos, 1.0);
+    gl_Position = PVM * vec4(aPos, 1.0);
 }

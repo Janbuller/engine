@@ -6,6 +6,7 @@
 #include "engine/ecs/Entity.h"
 #include "engine/ecs/SceneView.h"
 #include "engine/ecs/components/Camera.h"
+#include "engine/ecs/components/Light.h"
 #include "engine/ecs/components/Model.h"
 #include "engine/ecs/components/Script.h"
 #include "engine/ecs/components/Transform.h"
@@ -61,6 +62,7 @@ namespace ecstest {
         MainScene->RegisterComponentType<Model>();
         MainScene->RegisterComponentType<Script>();
         MainScene->RegisterComponentType<Camera>();
+        MainScene->RegisterComponentType<Light>();
 
         MainScene->RegisterSystem<ModelRenderer>();
         auto ModelRendererSignature = std::bitset<engine::MAX_COMPONENTS>();
@@ -95,12 +97,47 @@ namespace ecstest {
             auto &ES = MainScene->AddComponent<Script>(E);
 
             ET.Position.y -= 2;
-            /* ET.Rotation = glm::rotate(ET.Rotation, 3.141592654f, {1, 0, 0}); */
+            ET.Rotation = glm::rotate(ET.Rotation, 3.141592654f, {1, 0, 0});
 
             EM = engine::RessourceManager::Get<Model>("res/Application/Models/pavement_floor/floor.fbx");
 
             ES.ScriptPaths.push_back("res/Application/Scripts/TestThingy.lua");
         }
+
+        {
+            auto &E  = MainScene->AddEntity();
+            auto& ET = MainScene->AddComponent<Transform>(E);
+            auto &EL = MainScene->AddComponent<Light>(E);
+
+            ET.Rotation = glm::rotate(ET.Rotation, 0.66f,  glm::vec3{1, 0, 0});
+            ET.Rotation = glm::rotate(ET.Rotation, 0.4f,  glm::vec3{0, 0, 1});
+
+            EL.Color     = {0.9, 0.9, 1.0};
+            EL.Intensity = 0.2;
+
+            EL.Constant  = 1.0;
+            EL.Linear    = 0.35;
+            EL.Quadratic = 0.44;
+
+            EL.Type = Light::DirectionalLight;
+        }
+        {
+            auto &E  = MainScene->AddEntity();
+            auto& ET = MainScene->AddComponent<Transform>(E);
+            auto &EL = MainScene->AddComponent<Light>(E);
+
+            ET.Position  = {-1, 1, 0};
+
+            EL.Color     = {1, 0.97, 0.94};
+            EL.Intensity = 5.0;
+
+            EL.Constant  = 1.0;
+            EL.Linear    = 0.14;
+            EL.Quadratic = 0.07;
+
+            EL.Type = Light::PointLight;
+        }
+
         {
             auto &Cam = MainScene->AddEntity();
             auto &CT = MainScene->AddComponent<Transform>(Cam);
@@ -114,12 +151,12 @@ namespace ecstest {
             {
                 using namespace engine;
                 using namespace engine::glcore;
-                auto CubeMap = TextureCubemap::FromTextureData({RessourceManager::Get<TextureData>("res/Application/Skybox/Evening Meadow/2048/xp.png"),
-                                                                RessourceManager::Get<TextureData>("res/Application/Skybox/Evening Meadow/2048/xn.png"),
-                                                                RessourceManager::Get<TextureData>("res/Application/Skybox/Evening Meadow/2048/yp.png"),
-                                                                RessourceManager::Get<TextureData>("res/Application/Skybox/Evening Meadow/2048/yn.png"),
-                                                                RessourceManager::Get<TextureData>("res/Application/Skybox/Evening Meadow/2048/zp.png"),
-                                                                RessourceManager::Get<TextureData>("res/Application/Skybox/Evening Meadow/2048/zn.png")});
+                auto CubeMap = TextureCubemap::FromTextureData({RessourceManager::Get<TextureData>("res/Application/Skybox/Evening Meadow/2048/xp.jpg"),
+                                                                RessourceManager::Get<TextureData>("res/Application/Skybox/Evening Meadow/2048/xn.jpg"),
+                                                                RessourceManager::Get<TextureData>("res/Application/Skybox/Evening Meadow/2048/yp.jpg"),
+                                                                RessourceManager::Get<TextureData>("res/Application/Skybox/Evening Meadow/2048/yn.jpg"),
+                                                                RessourceManager::Get<TextureData>("res/Application/Skybox/Evening Meadow/2048/zp.jpg"),
+                                                                RessourceManager::Get<TextureData>("res/Application/Skybox/Evening Meadow/2048/zn.jpg")});
                 CC.Skybox = CubeMap;
             }
             CC.BackgroundColor = glm::vec4{0.0, 0.3, 0.4, 1.0};

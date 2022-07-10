@@ -4,7 +4,7 @@
 
 namespace engine::components {
 
-    glm::mat4 Transform::GetTransformMatrix() {
+    glm::mat4 Transform::GetTransformMatrix() const {
         glm::mat4 TransMat = glm::mat4{1.0};
 
         TransMat = glm::translate(TransMat, Position);

@@ -23,7 +23,7 @@ namespace engine::glcore {
 
         void LoadShaderFromFiles(const unsigned int ID, const char *VertexPath, const char *FragmentPath);
 
-        void Bind();
+        void Bind() const;
 
         void SetBool(const std::string &name, bool value) const;
         void SetInt(const std::string &name, int value) const;

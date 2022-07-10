@@ -2,91 +2,103 @@
 precision mediump float;
 out vec4 fragColor;
 
-in vec3 Normal;
-in vec3 FragPos;
-in vec2 TexCoords;
-in mat3 TBN;
+in VSOUT {
+  vec3 FragPos;
+  vec3 Normal;
+  vec2 TexCoords;
+  mat3 TBN;
+} FSIn;
 
 struct Light {
-  vec4 position;
+  vec4 Position;
 
-  vec3 color;
-  float intensity;
+  vec3 Color;
+  float Intensity;
 
-  float constant;
-  float linear;
-  float quadratic;
-};
-
-layout(std430, binding = 10) buffer lightSSBO
-{
-    Light lights[];
+  float Constant;
+  float Linear;
+  float Quadratic;
 };
 
 struct Material {
-    sampler2D texture_diffuse1;
-    sampler2D texture_specular1;
-    sampler2D texture_normal1;
+    sampler2D T_Diffuse1;
+    sampler2D T_Specular1;
+    sampler2D T_Normal1;
 };
-uniform Material material;
 
 struct Camera {
   vec3 CamPos;
 };
-uniform Camera camera;
 
-float gamma = 2.2;
+layout(std430, binding = 10) buffer lightSSBO
+{
+    Light Lights[];
+};
+uniform Material MeshMat;
+uniform Camera MainCam;
 
-vec3 CalcLight(Light light, vec3 normal, vec3 viewDir);
+float Gamma = 2.2;
+
+vec3 CalcLight(Light Light, vec3 Normal, vec3 ViewDir);
 
 void main()
 {
-  vec3 Norm = texture(material.texture_normal1, TexCoords).rgb;
-  Norm = Norm * 2.0 - 1.0;
-  Norm = normalize(TBN * Norm);
-  /* Norm = normalize(Normal); */
+  // Calculate the surface normal using the first normal map and the TBN
+  // matrix.
+  vec3 Normal = texture(MeshMat.T_Normal1, FSIn.TexCoords).rgb;
+  Normal = Normal * 2.0 - 1.0;
+  Normal = normalize(FSIn.TBN * Normal);
 
-  vec3 ViewDir = normalize(camera.CamPos - FragPos);
+  // Uncomment to test without normal map.
+  /* Normal = normalize(FSIn.Normal); */
 
-  vec3 Result = vec3(texture(material.texture_diffuse1, TexCoords)) * 0.01;
+  // The direction from the camera to the fragment world-space position.
+  vec3 ViewDir = normalize(MainCam.CamPos - FSIn.FragPos);
 
-  for(int i = 0; i < lights.length(); i++) {
-    Result += CalcLight(lights[i], Norm, ViewDir);
+  // The resulting color.
+  // Set to the first diffuse texture with a small coefficient. This simulates
+  // ambient light.
+  vec3 Result = vec3(texture(MeshMat.T_Diffuse1, FSIn.TexCoords)) * 0.01;
+
+  // Loop through all lights and calculate the lights change to the fragment.
+  for(int i = 0; i < Lights.length(); i++) {
+    Result += CalcLight(Lights[i], Normal, ViewDir);
   }
 
+  // Set the final color.
   fragColor = vec4(Result, 1.0);
 }
 
-vec3 CalcLight(Light light, vec3 normal, vec3 viewDir) {
+vec3 CalcLight(Light Light, vec3 Normal, vec3 ViewDir) {
   vec3 LightDir;
   float Attenuationr = 1.0;
 
   // Check the w-parameter of the position vector, to determine light type.
-  if(light.position.w == 0) {
+  if(Light.Position.w == 0) {
     // Dir Light
     // The position is actually the direction.
-    LightDir = normalize(-light.position.xyz);
+    LightDir = normalize(-Light.Position.xyz);
   } else {
     // Point Light
     // The direction is from the position to the fragment position.
-    LightDir = normalize(light.position.xyz - FragPos);
+    LightDir = normalize(Light.Position.xyz - FSIn.FragPos);
     // Calc distance between position and fragment position. Use for
     // calculating attenuation.
-    float Dist = length(light.position.xyz - FragPos);
-    Attenuationr = 1.0 / (light.constant + light.linear * Dist + light.quadratic * (Dist * Dist));
+    float Dist = length(Light.Position.xyz - FSIn.FragPos);
+    Attenuationr = 1.0 / (Light.Constant + Light.Linear * Dist + Light.Quadratic * (Dist * Dist));
   }
 
-  vec3 HalfwayDir = normalize(LightDir + viewDir);
+  vec3 HalfwayDir = normalize(LightDir + ViewDir);
 
-  float Diff = max(dot(normal, LightDir), 0.0);
+  float Diff = max(dot(Normal, LightDir), 0.0);
 
-  vec3 ReflectDir = reflect(-LightDir, normal);
-  float Spec = pow(max(dot(normal, HalfwayDir), 0.0), 16);
+  vec3 ReflectDir = reflect(-LightDir, Normal);
+  float Spec = pow(max(dot(Normal, HalfwayDir), 0.0), 16);
 
-  vec3 LightCol = light.color * light.intensity;
+  vec3 LightCol = Light.Color * Light.Intensity;
 
-  vec3 Diffuse  = LightCol * Diff * vec3(pow(texture(material.texture_diffuse1, TexCoords).xyz, vec3(gamma)));
-  vec3 Specular = LightCol * Spec * vec3(texture(material.texture_specular1, TexCoords).rrr);
+  vec3 Diffuse  = LightCol * Diff * vec3(pow(texture(MeshMat.T_Diffuse1, FSIn.TexCoords).xyz, vec3(Gamma)));
+  vec3 Specular = LightCol * Spec * vec3(texture(MeshMat.T_Specular1, FSIn.TexCoords).rrr);
 
   Diffuse *= Attenuationr;
   Specular *= Attenuationr;

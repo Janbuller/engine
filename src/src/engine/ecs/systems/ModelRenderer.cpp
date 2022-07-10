@@ -1,8 +1,10 @@
 #include "engine/ecs/systems/ModelRenderer.h"
+#include "engine/ecs/SceneView.h"
 #include "engine/ecs/components/Camera.h"
 #include "engine/ecs/components/Model.h"
 #include "engine/ecs/components/Light.h"
 #include "engine/ressources/RessourceManager.h"
+#include "engine/lighting/ShaderLight.h"
 #include <glad/glad.h>
 
 namespace engine::systems {
@@ -24,34 +26,15 @@ namespace engine::systems {
     }
 
     void ModelRenderer::Render(sptr<Scene> Scene, int Width, int Height) {
-        Light Lights[2];
+        // BACKGROUND
+        // ==========
+        // Gets camera component of the main scene camera.
+        auto &CC = Scene->GetComponent<Camera>(Scene->MainCam.Id);
 
-        Lights[0] = Light{};
-        Lights[0].Position  = {-1, 1, 0, 1};
-        Lights[0].Color     = {1, 0.97, 0.94};
-        Lights[0].Intensity = 5.0;
-        Lights[0].Constant  = 1.0;
-        Lights[0].Linear    = 0.14;
-        Lights[0].Quadratic = 0.07;
-
-        Lights[1] = Light{};
-        Lights[1].Position  = {-0.74, -1.346, -1.75, 0};
-        Lights[1].Color     = {0.9, 0.9, 1.0};
-        Lights[1].Intensity = 0.2;
-        Lights[1].Constant  = 1.0;
-        Lights[1].Linear    = 0.35;
-        Lights[1].Quadratic = 0.44;
-
-        glNamedBufferData(LightSSBO, sizeof(Lights), Lights, GL_DYNAMIC_DRAW);
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, LightSSBO);
-        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 10, LightSSBO);
-        glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
-
+        // Get the projection and view matrix, which will be used for skybox
+        // rendering and later for rendering of all other entities.
         auto Projection = Camera::GetProjectionMatrix(Scene, Scene->MainCam.Id, Width, Height);
         auto View = Camera::GetViewMatrix(Scene, Scene->MainCam.Id);
-
-        // Get camera component
-        auto &CC = Scene->GetComponent<Camera>(Scene->MainCam.Id);
 
         // Set and clear background color
         if(CC.BackgroundColor) {
@@ -62,14 +45,19 @@ namespace engine::systems {
 
         // Draw skybox if existing
         if(CC.Skybox) {
+            // Get the texture and material
             auto& SkyboxTex = CC.Skybox.value();
             auto& Mat = Skybox.Meshes[0].MeshMaterial;
 
+            // Bind the matrices to the shader.
+            // For the view matrix, the translation is removed by doing
+            // glm::mat4{glm::mat3{View}}.
             Mat.Shader.Bind();
             auto SkyboxView = glm::mat4{glm::mat3{View}};
-            Mat.Shader.SetMat4("view", SkyboxView);
-            Mat.Shader.SetMat4("projection", Projection);
+            Mat.Shader.SetMat4("View", SkyboxView);
+            Mat.Shader.SetMat4("Projection", Projection);
 
+            // Render the actual skybox
             glDepthMask(GL_FALSE);
             glDisable(GL_CULL_FACE);
 
@@ -84,10 +72,49 @@ namespace engine::systems {
             glEnable(GL_CULL_FACE);
         }
 
-        for (const auto &Entity : Entities) {
-            auto &ET = Scene->GetComponent<Transform>(Entity);
-            auto &EM = Scene->GetComponent<Model>(Entity);
+        // LIGHTING
+        // ========
+        // Generate vector of all light components in scene using SceneView.
+        std::vector<lighting::ShaderLight> Lights;
+        
+        auto LightsView = SceneView<Transform, Light>{Scene};
+        for(const auto& L : LightsView) {
+            lighting::ShaderLight Light{};
+            auto& LT = Scene->GetComponent<Transform>(L);
+            auto& LL = Scene->GetComponent<engine::components::Light>(L);
+            if(LL.Type == Light::PointLight) {
+                Light.Position = glm::vec4(LT.Position, 1.0f);
+            } else if (LL.Type == Light::DirectionalLight) {
+                glm::vec3 Forward = glm::rotate(glm::inverse(LT.Rotation), glm::vec3(0.0, 0.0, -1.0));
+                Light.Position = glm::vec4{Forward, 0.0f};
+            }
 
+            Light.Color = LL.Color;
+            Light.Intensity = LL.Intensity;
+
+            Light.Constant = LL.Constant;
+            Light.Linear = LL.Linear;
+            Light.Quadratic = LL.Quadratic;
+
+            Lights.push_back(Light);
+        }
+
+        // Generate the light SSBO, which holds all the lights in the scene.
+        // SSBO is used for the variable array size feature.
+        glNamedBufferData(LightSSBO, sizeof(lighting::ShaderLight) * Lights.size(), Lights.data(), GL_DYNAMIC_DRAW);
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, LightSSBO);
+        glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 10, LightSSBO);
+        glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+
+        // ENTITY RENDERING
+        // ================
+        // Loop through all the entities affected by the ModelRenderer system.
+        for (const auto &Entity : Entities) {
+            // Grab the transform and model components.
+            const auto &ET = Scene->GetComponent<Transform>(Entity);
+            const auto &EM = Scene->GetComponent<Model>(Entity);
+
+            // Ignore object if invisible.
             if (!EM.Visible) {
                 continue;
             }
@@ -98,12 +125,14 @@ namespace engine::systems {
                 auto &Mat = Mesh.MeshMaterial;
                 auto &Textures = Mat.Textures;
 
+                // Set the MVP-matrices and the main camera position uniforms
+                // in the shader.
                 Mat.Shader.Bind();
-                Mat.Shader.SetMat4("view", View);
-                Mat.Shader.SetMat4("projection", Projection);
-                Mat.Shader.SetMat4("model", Model);
+                Mat.Shader.SetMat4("View", View);
+                Mat.Shader.SetMat4("Projection", Projection);
+                Mat.Shader.SetMat4("Model", Model);
 
-                Mat.Shader.SetVec3("camera.CamPos", Scene->GetComponent<Transform>(Scene->MainCam.Id).Position);
+                Mat.Shader.SetVec3("MainCam.CamPos", Scene->GetComponent<Transform>(Scene->MainCam.Id).Position);
 
                 int DiffuseIdx = 1;
                 int SpecularIdx = 1;
@@ -112,18 +141,18 @@ namespace engine::systems {
                 for (unsigned int i = 0; i < Textures.size(); i++) {
                     glActiveTexture(GL_TEXTURE0 + i);
 
-                    std::string number;
+                    std::string VarName;
                     std::string type = Textures[i].first;
 
                     if (type == "texture_diffuse") {
-                        number = std::to_string(DiffuseIdx++);
+                        VarName = "T_Diffuse" + std::to_string(DiffuseIdx++);
                     } else if (type == "texture_specular") {
-                        number = std::to_string(SpecularIdx++);
+                        VarName = "T_Specular" + std::to_string(SpecularIdx++);
                     } else if (type == "texture_normal") {
-                        number = std::to_string(NormalIdx++);
+                        VarName = "T_Normal" + std::to_string(NormalIdx++);
                     }
 
-                    Mat.Shader.SetInt(("material." + type + number).c_str(), i);
+                    Mat.Shader.SetInt(("MeshMat." + VarName).c_str(), i);
                     glBindTexture(GL_TEXTURE_2D, Textures[i].second.Handle);
                 }
                 glActiveTexture(GL_TEXTURE0);

@@ -10,7 +10,7 @@
 #include <vector>
 
 namespace engine {
-    Mesh::Mesh(std::vector<Vertex> Vertices, std::vector<unsigned int> Indicies, Material MeshMaterial) : Vertices(Vertices), Indicies(Indicies), MeshMaterial(MeshMaterial) {
+    Mesh::Mesh(std::vector<Vertex> Vertices, std::vector<unsigned int> Indices, Material MeshMaterial) : Vertices(Vertices), Indices(Indices), MeshMaterial(MeshMaterial) {
         SetupBuffers();
     }
 
@@ -24,7 +24,7 @@ namespace engine {
         glCreateBuffers(1, &EBO);
 
         glNamedBufferData(VBO, Vertices.size() * sizeof(Vertex), &Vertices[0], GL_STATIC_DRAW);
-        glNamedBufferData(EBO, Indicies.size() * sizeof(unsigned int), &Indicies[0], GL_STATIC_DRAW);
+        glNamedBufferData(EBO, Indices.size() * sizeof(unsigned int), &Indices[0], GL_STATIC_DRAW);
 
         glVertexArrayVertexBuffer(VAO, 0, VBO, 0, sizeof(Vertex));
         glVertexArrayElementBuffer(VAO, EBO);

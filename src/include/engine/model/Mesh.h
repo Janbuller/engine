@@ -10,10 +10,10 @@ namespace engine {
     class Mesh {
     public:
         std::vector<Vertex> Vertices;
-        std::vector<unsigned int> Indicies;
+        std::vector<unsigned int> Indices;
         Material MeshMaterial;
 
-        Mesh(std::vector<Vertex> Vertices, std::vector<unsigned int> Indicies, Material MeshMaterial);
+        Mesh(std::vector<Vertex> Vertices, std::vector<unsigned int> Indices, Material MeshMaterial);
         ~Mesh();
 
         void SetupBuffers();

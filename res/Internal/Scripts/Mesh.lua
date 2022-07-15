@@ -4,7 +4,7 @@ function Mesh:new()
    local mesh = {}
 
    mesh.Vertices = {};
-   mesh.Indicies = {};
+   mesh.Indices = {};
 
    setmetatable(mesh, self)
    self.__index = self

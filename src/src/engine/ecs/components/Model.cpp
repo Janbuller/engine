@@ -36,8 +36,8 @@ namespace engine::components {
                 L_Vert["TexCoords"]["y"] = Vert.TexCoords.y;
             }
 
-            for (int IndIdx = 0; IndIdx < Meshes[MeshIdx].Indicies.size(); IndIdx++) {
-                L_Model["Meshes"][MeshIdx + 1]["Indicies"][IndIdx + 1] = Meshes[MeshIdx].Indicies[IndIdx];
+            for (int IndIdx = 0; IndIdx < Meshes[MeshIdx].Indices.size(); IndIdx++) {
+                L_Model["Meshes"][MeshIdx + 1]["Indices"][IndIdx + 1] = Meshes[MeshIdx].Indices[IndIdx];
             }
         }
 
@@ -53,7 +53,7 @@ namespace engine::components {
             auto L_Mesh = L_Meshes[MeshIdx];
 
             std::vector<Vertex> Verts{};
-            std::vector<unsigned int> Indicies{};
+            std::vector<unsigned int> Indices{};
 
             for (int VertIdx = 1; VertIdx < L_Mesh["Vertices"].length() + 1; VertIdx++) {
                 auto L_Vert = L_Mesh["Vertices"][VertIdx];
@@ -69,16 +69,16 @@ namespace engine::components {
                                          L_Vert["TexCoords"]["y"],
                                  }});
             }
-            for (int IndIdx = 1; IndIdx < L_Mesh["Indicies"].length() + 1; IndIdx++) {
-                auto L_Ind = L_Mesh["Indicies"][IndIdx];
+            for (int IndIdx = 1; IndIdx < L_Mesh["Indices"].length() + 1; IndIdx++) {
+                auto L_Ind = L_Mesh["Indices"][IndIdx];
 
-                Indicies.push_back(L_Ind);
+                Indices.push_back(L_Ind);
             }
 
             if (MeshIdx - 1 < Meshes.size()) {
-                NewMeshes.push_back(Mesh{Verts, Indicies, Meshes[MeshIdx - 1].MeshMaterial});
+                NewMeshes.push_back(Mesh{Verts, Indices, Meshes[MeshIdx - 1].MeshMaterial});
             } else {
-                NewMeshes.push_back(Mesh{Verts, Indicies, Meshes[0].MeshMaterial});
+                NewMeshes.push_back(Mesh{Verts, Indices, Meshes[0].MeshMaterial});
             }
         }
 

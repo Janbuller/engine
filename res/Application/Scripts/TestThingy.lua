@@ -59,12 +59,12 @@ function Init()
 
    --       if(x < size) and (z < size) then
    --          local i = (x-1) + (z-1) * size;
-   --          table.insert(EntModel.Meshes[1].Indicies, i)
-   --          table.insert(EntModel.Meshes[1].Indicies, i+size)
-   --          table.insert(EntModel.Meshes[1].Indicies, i+1)
-   --          table.insert(EntModel.Meshes[1].Indicies, i+1)
-   --          table.insert(EntModel.Meshes[1].Indicies, i+size)
-   --          table.insert(EntModel.Meshes[1].Indicies, i+size+1)
+   --          table.insert(EntModel.Meshes[1].Indices, i)
+   --          table.insert(EntModel.Meshes[1].Indices, i+size)
+   --          table.insert(EntModel.Meshes[1].Indices, i+1)
+   --          table.insert(EntModel.Meshes[1].Indices, i+1)
+   --          table.insert(EntModel.Meshes[1].Indices, i+size)
+   --          table.insert(EntModel.Meshes[1].Indices, i+size+1)
    --       end
 
    --       table.insert(Verts, vertex)

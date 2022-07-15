@@ -65,7 +65,7 @@ namespace engine::systems {
             Mat.Shader.SetInt("Skybox", 0);
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_CUBE_MAP, SkyboxTex.Handle);
-            glDrawElements(GL_TRIANGLES, Skybox.Meshes[0].Indicies.size(), GL_UNSIGNED_INT, 0);
+            glDrawElements(GL_TRIANGLES, Skybox.Meshes[0].Indices.size(), GL_UNSIGNED_INT, 0);
             glBindVertexArray(0);
 
             glDepthMask(GL_TRUE);
@@ -134,31 +134,26 @@ namespace engine::systems {
 
                 Mat.Shader.SetVec3("MainCam.CamPos", Scene->GetComponent<Transform>(Scene->MainCam.Id).Position);
 
-                int DiffuseIdx = 1;
-                int SpecularIdx = 1;
-                int NormalIdx = 1;
+                std::array<int, (int)TextureType::NONE> TextureIndices{};
+                TextureIndices.fill(1);
 
                 for (unsigned int i = 0; i < Textures.size(); i++) {
                     glActiveTexture(GL_TEXTURE0 + i);
 
-                    std::string VarName;
-                    std::string type = Textures[i].first;
+                    TextureType Type = Textures[i].first;
 
-                    if (type == "texture_diffuse") {
-                        VarName = "T_Diffuse" + std::to_string(DiffuseIdx++);
-                    } else if (type == "texture_specular") {
-                        VarName = "T_Specular" + std::to_string(SpecularIdx++);
-                    } else if (type == "texture_normal") {
-                        VarName = "T_Normal" + std::to_string(NormalIdx++);
-                    }
+                    std::string TypeName = Material::TextureInfo[(int)Type].ShaderName;
+                    std::string TextureIdx = std::to_string(TextureIndices[(int)Type]++);
 
-                    Mat.Shader.SetInt(("MeshMat." + VarName).c_str(), i);
+                    std::string ShaderName = TypeName + TextureIdx;
+
+                    Mat.Shader.SetInt(("MeshMat." + ShaderName).c_str(), i);
                     glBindTexture(GL_TEXTURE_2D, Textures[i].second.Handle);
                 }
                 glActiveTexture(GL_TEXTURE0);
 
                 glBindVertexArray(Mesh.VAO);
-                glDrawElements(GL_TRIANGLES, Mesh.Indicies.size(), GL_UNSIGNED_INT, 0);
+                glDrawElements(GL_TRIANGLES, Mesh.Indices.size(), GL_UNSIGNED_INT, 0);
                 glBindVertexArray(0);
             }
         }

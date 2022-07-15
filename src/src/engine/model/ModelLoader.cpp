@@ -42,7 +42,7 @@ namespace engine {
 
     Mesh ModelLoader::ProcessMesh(aiMesh *ProcessedMesh, const aiScene *Scene, std::string BaseDir) {
         std::vector<Vertex> Vertices;
-        std::vector<unsigned int> Indicies;
+        std::vector<unsigned int> Indices;
         Material MeshMaterial;
 
         for (unsigned int i = 0; i < ProcessedMesh->mNumVertices; i++) {
@@ -72,7 +72,7 @@ namespace engine {
         for (unsigned int i = 0; i < ProcessedMesh->mNumFaces; i++) {
             aiFace Face = ProcessedMesh->mFaces[i];
             for (unsigned int j = 0; j < Face.mNumIndices; j++) {
-                Indicies.push_back(Face.mIndices[j]);
+                Indices.push_back(Face.mIndices[j]);
             }
         }
 
@@ -81,16 +81,16 @@ namespace engine {
             MeshMaterial = ProcessMaterial(Mat, BaseDir);
         }
 
-        return Mesh{Vertices, Indicies, MeshMaterial};
+        return Mesh{Vertices, Indices, MeshMaterial};
     }
 
     Material ModelLoader::ProcessMaterial(aiMaterial *Mat, std::string BaseDir) {
-        std::vector<std::pair<std::string, glcore::Texture>> Textures;
-        auto diffuseMaps = LoadMaterialTexture(Mat, aiTextureType_DIFFUSE, "texture_diffuse", BaseDir);
+        std::vector<std::pair<TextureType, glcore::Texture>> Textures;
+        auto diffuseMaps = LoadMaterialTexture(Mat, aiTextureType_DIFFUSE, TextureType::DIFFUSE, BaseDir);
         Textures.insert(Textures.end(), diffuseMaps.begin(), diffuseMaps.end());
-        auto specularMaps = LoadMaterialTexture(Mat, aiTextureType_SPECULAR, "texture_specular", BaseDir);
+        auto specularMaps = LoadMaterialTexture(Mat, aiTextureType_SPECULAR, TextureType::SPECULAR, BaseDir);
         Textures.insert(Textures.end(), specularMaps.begin(), specularMaps.end());
-        auto normalMaps = LoadMaterialTexture(Mat, aiTextureType_NORMALS, "texture_normal", BaseDir);
+        auto normalMaps = LoadMaterialTexture(Mat, aiTextureType_NORMALS, TextureType::NORMAL, BaseDir);
         Textures.insert(Textures.end(), normalMaps.begin(), normalMaps.end());
 
         /* LOG_ENGINE_TRACE("dMap = {0} : sMap = {1} : nMap = {2}", diffuseMaps.size(), specularMaps.size(), normalMaps.size()); */
@@ -98,8 +98,8 @@ namespace engine {
         return Material{DefaultShader, Textures};
     }
 
-    std::vector<std::pair<std::string, glcore::Texture2D>> ModelLoader::LoadMaterialTexture(aiMaterial *Mat, aiTextureType Type, std::string TypeName, std::string BaseDir) {
-        std::vector<std::pair<std::string, glcore::Texture2D>> Textures;
+    std::vector<std::pair<TextureType, glcore::Texture2D>> ModelLoader::LoadMaterialTexture(aiMaterial *Mat, aiTextureType Type, TextureType EngineType, std::string BaseDir) {
+        std::vector<std::pair<TextureType, glcore::Texture2D>> Textures;
 
         for (unsigned int i = 0; i < Mat->GetTextureCount(Type); i++) {
             aiString str;
@@ -110,7 +110,7 @@ namespace engine {
 
             const auto &Data = RessourceManager::Get<glcore::TextureData>(filename);
             glcore::Texture2D Texture = glcore::Texture2D::FromTextureData(Data);
-            Textures.push_back({TypeName, Texture});
+            Textures.push_back({EngineType, Texture});
         }
         return Textures;
     }

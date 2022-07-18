@@ -21,9 +21,9 @@ struct Light {
 };
 
 struct Material {
-    sampler2D T_Diffuse1;
-    sampler2D T_Specular1;
-    sampler2D T_Normal1;
+  sampler2D T_Diffuse1;
+  sampler2D T_Specular1;
+  sampler2D T_Normal1;
 };
 
 struct Camera {

@@ -74,21 +74,36 @@ namespace engine::systems {
 
         // LIGHTING
         // ========
-        // Generate vector of all light components in scene using SceneView.
+        // Generate vector of ShaderLights from all light components in scene
+        // using SceneView.
         std::vector<lighting::ShaderLight> Lights;
         
         auto LightsView = SceneView<Transform, Light>{Scene};
         for(const auto& L : LightsView) {
+            // Create new empty shaderlight, to be filled in by the current
+            // light entity.
             lighting::ShaderLight Light{};
+
+            // Get Transform- and Light-component from current entity.
             auto& LT = Scene->GetComponent<Transform>(L);
             auto& LL = Scene->GetComponent<engine::components::Light>(L);
+
+            // Generate the ShaderLight position variable. The shader uses the
+            // w-component of the position vector to determine the light-type.
+            // It also expects the xyz-components for a dirlight to be a
+            // vector, pointing the direction.
             if(LL.Type == Light::PointLight) {
+                // If it is a pointlight, just grab the position.
                 Light.Position = glm::vec4(LT.Position, 1.0f);
             } else if (LL.Type == Light::DirectionalLight) {
+                // If it is a dirlight, rotate a forward facing vector by the
+                // light quaternion.
                 glm::vec3 Forward = glm::rotate(glm::inverse(LT.Rotation), glm::vec3(0.0, 0.0, -1.0));
                 Light.Position = glm::vec4{Forward, 0.0f};
             }
 
+            // Grab the rest of the variables straight from the light
+            // component.
             Light.Color = LL.Color;
             Light.Intensity = LL.Intensity;
 
@@ -119,8 +134,10 @@ namespace engine::systems {
                 continue;
             }
 
+            // Grab the transformation (model) matrix.
             auto Model = ET.GetTransformMatrix();
 
+            // Loop through all the meshes in the current model.
             for (auto &Mesh : EM.Meshes) {
                 auto &Mat = Mesh.MeshMaterial;
                 auto &Textures = Mat.Textures;
@@ -134,24 +151,35 @@ namespace engine::systems {
 
                 Mat.Shader.SetVec3("MainCam.CamPos", Scene->GetComponent<Transform>(Scene->MainCam.Id).Position);
 
-                std::array<int, (int)TextureType::NONE> TextureIndices{};
-                TextureIndices.fill(1);
+                // Holds the amount of bound textures of each different type,
+                // starting from one. This is used for variable name in
+                // shaders.
+                std::array<int, (int)TextureType::NONE> TextureTypeCounter{};
+                TextureTypeCounter.fill(1);
 
+                // Loop through all mesh textures, generating names and binding
+                // them.
                 for (unsigned int i = 0; i < Textures.size(); i++) {
                     glActiveTexture(GL_TEXTURE0 + i);
 
                     TextureType Type = Textures[i].first;
 
+                    // Get the texture shadername from the TextureInfo array
+                    // using the type.
                     std::string TypeName = Material::TextureInfo[(int)Type].ShaderName;
-                    std::string TextureIdx = std::to_string(TextureIndices[(int)Type]++);
 
-                    std::string ShaderName = TypeName + TextureIdx;
+                    // Get the count of the current texturetype and add one to
+                    // it.
+                    std::string TextureTypeCount = std::to_string(TextureTypeCounter[(int)Type]++);
+
+                    std::string ShaderName = TypeName + TextureTypeCount;
 
                     Mat.Shader.SetInt(("MeshMat." + ShaderName).c_str(), i);
                     glBindTexture(GL_TEXTURE_2D, Textures[i].second.Handle);
                 }
                 glActiveTexture(GL_TEXTURE0);
 
+                // Bind the vao and draw.
                 glBindVertexArray(Mesh.VAO);
                 glDrawElements(GL_TRIANGLES, Mesh.Indices.size(), GL_UNSIGNED_INT, 0);
                 glBindVertexArray(0);

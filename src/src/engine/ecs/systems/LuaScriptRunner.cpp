@@ -1,5 +1,4 @@
 #include "engine/ecs/systems/LuaScriptRunner.h"
-#include "LuaBridge/detail/LuaRef.h"
 #include "engine/Base.h"
 #include "engine/core/Keys.h"
 #include "engine/ecs/components/Model.h"
@@ -7,13 +6,8 @@
 #include "engine/ecs/components/Transform.h"
 #include <fstream>
 #include <functional>
-
-// clang-format off
-#include <lua.hpp>
-#include <LuaBridge/LuaBridge.h>
-// clang-format on
-
 #include <re2/re2.h>
+#include <sol/types.hpp>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -23,11 +17,33 @@
 namespace engine::systems {
 
     LuaScriptRunner::LuaScriptRunner() {
-        L = luaL_newstate();
-        luaL_openlibs(L);
+        lua_State *Ls = luaL_newstate();
+        L.open_libraries(
+                sol::lib::base,
+                sol::lib::package,
+                sol::lib::coroutine,
+                sol::lib::string,
+                sol::lib::os,
+                sol::lib::math,
+                sol::lib::table,
+                sol::lib::debug,
+                sol::lib::bit32,
+                sol::lib::io,
+                sol::lib::ffi,
+                sol::lib::jit);
     }
 
     void LuaScriptRunner::InitializeScripting(sptr<Scene> Scene) {
+
+        std::function<void(sol::variadic_args)> PrintFn = [](sol::variadic_args ToPrint) {
+            std::string FinalString;
+            for(auto Print : ToPrint) {
+                FinalString += Print;
+                FinalString += "\t";
+            }
+            LOG_TRACE("{}", FinalString);
+        };
+        L["print"] = PrintFn;
 
         std::function<void(std::string)> TraceFn    = [](std::string ToPrint) { LOG_TRACE(ToPrint); };
         std::function<void(std::string)> InfoFn     = [](std::string ToPrint) { LOG_INFO(ToPrint); };
@@ -35,66 +51,43 @@ namespace engine::systems {
         std::function<void(std::string)> ErrorFn    = [](std::string ToPrint) { LOG_ERROR(ToPrint); };
         std::function<void(std::string)> CriticalFn = [](std::string ToPrint) { LOG_CRITICAL(ToPrint); };
 
-        luabridge::getGlobalNamespace(L)
-                .beginNamespace("Log")
-                .addFunction("Trace", TraceFn)
-                .addFunction("Info", InfoFn)
-                .addFunction("Warn", WarnFn)
-                .addFunction("Error", ErrorFn)
-                .addFunction("Critical", CriticalFn)
-                .endNamespace();
+        {
+            auto Log = L["Log"].get_or_create<sol::table>();
+            Log["Trace"]    = TraceFn;
+            Log["Info"]     = InfoFn;
+            Log["Warn"]     = WarnFn;
+            Log["Error"]    = ErrorFn;
+            Log["Critical"] = CriticalFn;
+        }
 
         SetupGettersAndSetters(Scene);
 
-        auto L_Entities = luabridge::newTable(L);
-        L_Entities["Globals"] = luabridge::newTable(L);
-
-        // auto L_NewEntity = luabridge::getGlobal(L, "NewEntity");
+        auto L_Entities = L.create_named_table("Entities");
+        L_Entities["Globals"] = L.create_table();
 
         auto EntityScript = LoadAndReplaceFile("res/Internal/Scripts/Entity.lua");
-        if (!CheckLua(L, luaL_dostring(L, EntityScript.c_str()))) {
-            LOG_ENGINE_ERROR("Failed to create the entity creator!");
-            throw std::runtime_error("Failed to create the entity creator!");
-        }
+        L.script(EntityScript);
 
-        lua_getglobal(L, "NewEntity");
-        auto L_NewEntity = luabridge::LuaRef::fromStack(L, -1);
-        lua_pop(L, -1);
+        auto L_NewEntity = L["NewEntity"];
 
         for (const auto &Entity : Entities) {
             auto &EScript = Scene->GetComponent<Script>(Entity);
 
-            try {
-                L_Entities[Entity.Id] = L_NewEntity(Entity.Id);
-            } catch (luabridge::LuaException e) {
-                LOG_ENGINE_ERROR("Lua Error: {}", e.what());
-            }
+            L_Entities[Entity.Id] = L_NewEntity(Entity.Id);
 
             for (int ScriptIdx = 0; ScriptIdx < EScript.ScriptPaths.size(); ScriptIdx++) {
-                L_Entities[Entity.Id][ScriptIdx] = luabridge::newTable(L);
+                L_Entities[Entity.Id][ScriptIdx] = L.create_table();
             }
         }
 
         auto Classes = LoadAndReplaceFile("res/Internal/Scripts/Classes.lua");
-        if (!CheckLua(L, luaL_dostring(L, Classes.c_str()))) {
-            LOG_ENGINE_ERROR("Failed to load lua classes!");
-            throw std::runtime_error("Failed to load lua classes!");
-        }
+        L.script(Classes);
 
-        luabridge::push(L, L_Entities);
-        lua_setglobal(L, "Entities");
-
-        luabridge::push(L, 0);
-        lua_setglobal(L, "EntityID");
-
-        luabridge::push(L, 0);
-        lua_setglobal(L, "ScriptID");
+        L["EntityID"] = 0;
+        L["ScriptID"] = 0;
 
         auto GlobalMetaTable = LoadAndReplaceFile("res/Internal/Scripts/GlobalMetaTable.lua");
-        if (!CheckLua(L, luaL_dostring(L, GlobalMetaTable.c_str()))) {
-            LOG_ENGINE_ERROR("Failed to set the global lua metatable!");
-            throw std::runtime_error("Failed to set the global lua metatable!");
-        }
+        L.script(GlobalMetaTable);
 
         // Run through all scripts and initialize the semi-global
         // variables and functions.
@@ -104,19 +97,11 @@ namespace engine::systems {
                 const auto &Path = EScript.ScriptPaths[ScriptIdx];
 
                 auto ScriptSrc = LoadAndReplaceFile(Path);
-                // std::cout << ScriptSrc << std::endl;
-                // throw std::runtime_error("lsdjf");
 
-                luabridge::push(L, Entity.Id);
-                lua_setglobal(L, "EntityID");
+                L["EntityID"] = Entity.Id;
+                L["ScriptID"] = ScriptIdx;
 
-                luabridge::push(L, ScriptIdx);
-                lua_setglobal(L, "ScriptID");
-
-                if (!CheckLua(L, luaL_dostring(L, ScriptSrc.c_str()))) {
-                    LOG_ENGINE_ERROR("Failed to execute the lua script (\"{0}\")", Path);
-                    throw std::runtime_error("Failed to execute lua script.");
-                }
+                L.script(ScriptSrc);
             }
         }
     }
@@ -131,8 +116,6 @@ namespace engine::systems {
 
     void LuaScriptRunner::Exit(sptr<Scene> Scene) {
         RunFunctionForAll(Scene, "Exit");
-
-        lua_close(L);
     }
 
     void LuaScriptRunner::OnKeyPressed(sptr<Scene> Scene, Keys Key, int Action) {
@@ -156,16 +139,20 @@ namespace engine::systems {
         auto contents = buffer.str();
 
         // Replaces compound assignments (+=, -=, *=, /=) with a
-        // lua-supported version.
-
+        // lua-supported version. Exempts whitespace, "=" and "~" before the
+        // equals sign.
+        //
         // Examples:
         // x += 5 --> x = x + 5
         // x *= y --> x = x * y
+        //
+        // x == y --> x == y    (stays same)
+        // x ~= y --> x ~= y    (stays same)
         RE2::GlobalReplace(&contents, "(\\S+)\\s*([^\\s=~])=\\s*(\\w+)", "\\1 = \\1 \\2 \\3");
 
         // Replaces the keyword global into "g_". This allows for using the
-        // word "global" to represent global variabls, while lua just sees
-        // it as a variable name prefixed with "g_".
+        // word "global" to represent global variabls, while the
+        // lua-interpreter just sees it as a variable name prefixed with "g_".
         RE2::GlobalReplace(&contents, "global (\\w+)", "g_\\1");
 
         // RE2::GlobalReplace(&contents, "(g_)(\\s*[\\n;])", "\\1 = nil\\2");
@@ -179,82 +166,68 @@ namespace engine::systems {
         const auto &ET = Scene->GetComponent<Transform>(E);
         const auto &EM = Scene->GetComponent<Model>(E);
         auto TransformTable = ET.GetTable(L);
-        auto ModelTable = EM.GetTable(L);
+        /* auto ModelTable = EM.GetTable(L); */
 
-        lua_getglobal(L, "Entities");
-        auto L_Entity = luabridge::LuaRef::fromStack(L, -1)[E.Id];
-        lua_pop(L, -1);
+        auto L_Entity = L["Entities"][E.Id];
 
         L_Entity[ET.GetName()] = TransformTable;
-        L_Entity[EM.GetName()] = ModelTable;
+        /* L_Entity[EM.GetName()] = ModelTable; */
     }
 
     void LuaScriptRunner::SetComponentsInEngine(sptr<Scene> Scene, const Entity &E) {
         auto &ET = Scene->GetComponent<Transform>(E);
-        auto &EM = Scene->GetComponent<Model>(E);
+        /* auto &EM = Scene->GetComponent<Model>(E); */
 
-        lua_getglobal(L, "Entities");
-        auto Entity = luabridge::LuaRef::fromStack(L, -1)[E.Id];
-        lua_pop(L, -1);
+        auto Entity = L["Entities"][E.Id];
 
         auto L_TransformTable = Entity[ET.GetName()];
-        auto L_ModelTable = Entity[EM.GetName()];
+        /* auto L_ModelTable = Entity[EM.GetName()]; */
 
-        // LOG_ENGINE_ERROR("{0}", tmp);
         ET.SetTable(L_TransformTable);
-        EM.SetTable(L_ModelTable);
+        /* EM.SetTable(L_ModelTable); */
     }
 
     void LuaScriptRunner::SetupGettersAndSetters(sptr<Scene> Scene) {
-        std::function<luabridge::LuaRef(int)> GetTransformFn = [Scene, this](int EID) {
+        std::function<sol::table(int)> GetTransformFn = [Scene, this](int EID) {
             return Scene->GetComponent<Transform>((EntityID) EID).GetTable(L);
         };
 
-        std::function<void(int, luabridge::LuaRef)> SetTransformFn = [Scene](int EID, luabridge::LuaRef Component) {
+        std::function<void(int, sol::table)> SetTransformFn = [Scene](int EID, sol::table Component) {
             Scene->GetComponent<Transform>((EntityID) EID).SetTable(Component);
         };
 
-        std::function<luabridge::LuaRef(int)> GetModelFn = [Scene, this](int EID) {
-            return Scene->GetComponent<Model>((EntityID) EID).GetTable(L);
-        };
+        /* std::function<sol::table(int)> GetModelFn = [Scene, this](int EID) { */
+        /*     return Scene->GetComponent<Model>((EntityID) EID).GetTable(L); */
+        /* }; */
 
-        std::function<void(int, luabridge::LuaRef)> SetModelFn = [Scene](int EID, luabridge::LuaRef Component) {
-            Scene->GetComponent<Model>((EntityID) EID).SetTable(Component);
-        };
+        /* std::function<void(int, sol::table)> SetModelFn = [Scene](int EID, sol::table Component) { */
+        /*     Scene->GetComonent<Model>((EntityID) EID).SetTable(Component); */
+        /* }; */
 
-        luabridge::getGlobalNamespace(L)
-                .beginNamespace("Components")
-                .addFunction("GetTransform", GetTransformFn)
-                .addFunction("SetTransform", SetTransformFn)
-                .addFunction("GetModel", GetModelFn)
-                .addFunction("SetModel", SetModelFn)
-                .endNamespace();
+        {
+            auto Components = L["Components"].get_or_create<sol::table>();
+            Components["GetTransform"] = GetTransformFn;
+            Components["SetTransform"] = SetTransformFn;
+            /* Components["GetModel"]     = GetModelFn; */
+            /* Components["SetModel"]     = SetModelFn; */
+        }
     }
 
 
     template<typename... Arguments>
-    void LuaScriptRunner::RunFunctionForAll(sptr<Scene> Scene, std::string Function, Arguments &&...Args) {
+    void LuaScriptRunner::RunFunctionForAll(sptr<Scene> Scene, std::string Function, Arguments ...Args) {
         for (const auto &Entity : Entities) {
             auto &EScript = Scene->GetComponent<Script>(Entity);
 
             for (int ScriptIdx = 0; ScriptIdx < EScript.ScriptPaths.size(); ScriptIdx++) {
-                lua_getglobal(L, "Entities");
-                auto L_EntityScript = luabridge::LuaRef::fromStack(L, -1)[Entity.Id][ScriptIdx];
-                lua_pop(L, -1);
+                auto L_EntityScript = L["Entities"][Entity.Id][ScriptIdx];
 
-                luabridge::push(L, Entity.Id);
-                lua_setglobal(L, "EntityID");
-                luabridge::push(L, ScriptIdx);
-                lua_setglobal(L, "ScriptID");
+                L["EntityID"] = Entity.Id;
+                L["ScriptID"] = ScriptIdx;
 
                 auto L_Func = L_EntityScript[Function];
-                if (!(L_Func == luabridge::Nil())) {
-                    try {
-                        L_Func(Args...);
-                    } catch (luabridge::LuaException e) {
-                        LOG_ENGINE_ERROR("Failed to run function on lua script \"{0}\"", EScript.ScriptPaths[ScriptIdx]);
-                        LOG_ENGINE_ERROR("Lua Error: {}", e.what());
-                    }
+                if (L_Func) {
+                    L_Func(Args...);
                 }
             }
         }

@@ -3,12 +3,6 @@
 #include "engine/model/Mesh.h"
 #include "engine/model/Vertex.h"
 #include "engine/Base.h"
-
-// clang-format off
-#include <lua.hpp>
-#include <LuaBridge/LuaBridge.h>
-// clang-format on
-
 #include <vector>
 
 namespace engine::components {
@@ -20,8 +14,10 @@ namespace engine::components {
             Visible = true;
         }
 
+        /*
         luabridge::LuaRef GetTable(lua_State *L) const;
         void SetTable(luabridge::LuaRef Component);
+        */
 
         std::string GetName() const { return "Model"; }
 

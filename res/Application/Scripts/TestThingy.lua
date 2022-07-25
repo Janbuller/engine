@@ -5,6 +5,8 @@ size = 8
 
 Quality = 1;
 
+print("hello, world!", 52)
+
 function Init()
    -- if not (EntityID == 0) then
    --    local model =  Entity.Model
@@ -12,27 +14,24 @@ function Init()
    --    Entity.Model = model
    -- end
 
-   time = math.random(1000)/10;
+   -- time = math.random(1000)/10;
 
-   for x = 1, size do
-      StartHeight[x] = {}
-      for z = 1, size do
-         StartHeight[x][z] = math.random(1000)/1000
-      end
-   end
+   -- for x = 1, size do
+   --    StartHeight[x] = {}
+   --    for z = 1, size do
+   --       StartHeight[x][z] = math.random(1000)/1000
+   --    end
+   -- end
 
    local ET = Entity.Transform;
-   -- ET.Position.z -= 5;
-   -- ET.Position.y -= 2.5;
-   -- ET.Position.x += 2.5;
 
    ET.Scale.x = 64;
    ET.Scale.y = 64;
    ET.Scale.z = 64;
 
-   ET.Rotation:Rotate(3.1415, Vector3:new(0, 0, 1));
-
    Entity.Transform = ET;
+
+
    -- time += dt;
 
    -- local EntModel = Model:new();
@@ -74,6 +73,9 @@ function Init()
    -- EntModel.Meshes[1].Vertices = Verts
 
    -- Entity.Model = EntModel
+end
+
+function Update(dt)
 end
 
 function OnKeyPressed(Key, Action)

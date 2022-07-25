@@ -28,13 +28,6 @@
 #include "glm/gtx/quaternion.hpp"
 #include "glm/gtx/string_cast.hpp"
 #include "siv/PerlinNoise.hpp"
-
-// clang-format off
-#include <lua.hpp>
-#include <LuaBridge/LuaBridge.h>
-#include <LuaBridge/Vector.h>
-// clang-format on
-
 #include <bitset>
 #include <functional>
 #include <glad/glad.h>
@@ -74,22 +67,8 @@ namespace ecstest {
         auto LuaScriptRunnerSignature = std::bitset<engine::MAX_COMPONENTS>();
         LuaScriptRunnerSignature.set(MainScene->GetComponentId<Script>(), true);
         MainScene->SetSystemSignature<LuaScriptRunner>(LuaScriptRunnerSignature);
-        {
-            /*
-            auto &E  = MainScene->AddEntity();
-            auto &ET = MainScene->AddComponent<Transform>(E);
-            auto &EM = MainScene->AddComponent<Model>(E);
-            auto &ES = MainScene->AddComponent<Script>(E);
 
-            ET.Position.x = 64;
-            ET.Position.y -= 2;
-            ET.Rotation = glm::rotate(ET.Rotation, 3.141592654f, {1, 0, 0});
 
-            EM = engine::RessourceManager::Get<Model>("res/Application/Models/wood_floor/floor.obj");
-
-            ES.ScriptPaths.push_back("res/Application/Scripts/TestThingy.lua");
-            */
-        }
         {
             auto &E  = MainScene->AddEntity();
             auto &ET = MainScene->AddComponent<Transform>(E);
@@ -97,7 +76,6 @@ namespace ecstest {
             auto &ES = MainScene->AddComponent<Script>(E);
 
             ET.Position.y -= 2;
-            ET.Rotation = glm::rotate(ET.Rotation, 3.141592654f, {1, 0, 0});
 
             EM = engine::RessourceManager::Get<Model>("res/Application/Models/pavement_floor/floor.fbx");
 

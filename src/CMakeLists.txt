@@ -91,31 +91,43 @@ if(NOT assimp_POPULATED)
   add_subdirectory(${assimp_SOURCE_DIR} ${assimp_BINARY_DIR})
 endif()
 
-# Include Lua #
-#=============#
-find_package(Lua REQUIRED)
-
-# Include LuaBridge #
-#===================#
+# Include Luajit #
+#================#
 FetchContent_Declare(
-        luabridge
-        GIT_REPOSITORY https://github.com/vinniefalco/LuaBridge.git
+        luajit
+        GIT_REPOSITORY https://github.com/janbuller/luajit-cmake.git
 )
 
-FetchContent_GetProperties(luabridge)
-if(NOT luabridge_POPULATED)
-    FetchContent_Populate(luabridge)
+FetchContent_GetProperties(luajit)
+if(NOT luajit_POPULATED)
+    FetchContent_Populate(luajit)
 
-    set(LUABRIDGE_CXX17 ON CACHE INTERNAL "Use C++17 standard if supported by compiler")
+    add_subdirectory(${luajit_SOURCE_DIR} ${luajit_BINARY_DIR})
+endif()
 
-    add_subdirectory(${luabridge_SOURCE_DIR} ${luabridge_BINARY_DIR})
+# Include SOL #
+#=============#
+FetchContent_Declare(
+        sol
+        GIT_REPOSITORY https://github.com/ThePhD/sol2.git
+        GIT_TAG main
+)
+
+FetchContent_GetProperties(sol)
+if(NOT sol_POPULATED)
+    FetchContent_Populate(sol)
+
+    set(SOL2_LUA_VERSION "luajit" CACHE INTERNAL "")
+    set(SOL2_ENABLE_INSTALL OFF CACHE INTERNAL "")
+
+    add_subdirectory(${sol_SOURCE_DIR} ${sol_BINARY_DIR})
 endif()
 
 # Include re2 #
 #=============#
 FetchContent_Declare(
-        re2
-        GIT_REPOSITORY https://github.com/google/re2.git
+    re2
+    GIT_REPOSITORY https://github.com/google/re2.git
 	GIT_TAG main
 )
 
@@ -152,6 +164,6 @@ set_target_properties(ecs-test PROPERTIES
   CXX_STANDARD_REQUIRED ON
   CXX_EXTENSIONS OFF)
 
-target_include_directories(ecs-test PRIVATE include ${LUA_INCLUDE_DIR})
+target_include_directories(ecs-test PRIVATE include)
 
-target_link_libraries(ecs-test glfw glm glad spdlog assimp ${LUA_LIBRARIES} LuaBridge re2::re2)
+target_link_libraries(ecs-test glfw glm glad spdlog assimp re2::re2 libluajit sol2)

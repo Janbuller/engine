@@ -39,7 +39,6 @@ function Update(dt)
    Pitch = math.min(math.max(-1.55, Pitch), 1.55)
 
    ET.Rotation = Quaternion:new(0, 0, 0, 1);
-
    ET.Rotation:Rotate(Yaw, Vector3:new(0, 1, 0));
    ET.Rotation:Rotate(Pitch, Vector3:new(0, 0, -1));
 

@@ -14,12 +14,11 @@ namespace engine::components {
 	return TransMat;
     }
 
-    luabridge::LuaRef Transform::GetTable(lua_State *L) const {
-        lua_getglobal(L, "Transform");
-        auto L_TransformClass = luabridge::LuaRef::fromStack(L, -1);
-        lua_pop(L, -1);
+    sol::table Transform::GetTable(sol::state& L) const {
+        auto L_TransformClass = L["Transform"];
 
-        auto L_Transform = L_TransformClass["new"](L_TransformClass);
+        sol::table L_Transform = L_TransformClass["new"](L_TransformClass);
+
         L_Transform["Position"]["x"] = Position.x;
         L_Transform["Position"]["y"] = Position.y;
         L_Transform["Position"]["z"] = Position.z;
@@ -36,7 +35,7 @@ namespace engine::components {
         return L_Transform;
     }
 
-    void Transform::SetTable(luabridge::LuaRef Component) {
+    void Transform::SetTable(sol::table Component) {
         Position.x = Component["Position"]["x"];
         Position.y = Component["Position"]["y"];
         Position.z = Component["Position"]["z"];

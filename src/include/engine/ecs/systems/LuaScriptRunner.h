@@ -3,18 +3,14 @@
 #include "engine/Base.h"
 #include "engine/core/Keys.h"
 #include "engine/ecs/Scene.h"
+#include <sol/sol.hpp>
 #include "engine/ecs/components/Script.h"
 #include "engine/ecs/systems/ISystem.h"
-
-// clang-format off
-#include <lua.hpp>
-#include <LuaBridge/LuaBridge.h>
-// clang-format on
 
 namespace engine::systems {
     class LuaScriptRunner : public ISystem {
     private:
-        lua_State *L;
+        sol::state L;
 
     public:
         LuaScriptRunner();
@@ -29,10 +25,8 @@ namespace engine::systems {
 
         template<class R, class... Args>
         void AddLuaFunction(std::function<R(Args...)> Func, std::string NS, std::string Name) {
-            luabridge::getGlobalNamespace(L)
-                    .beginNamespace(NS.c_str())
-                    .addFunction(Name.c_str(), Func)
-                    .endNamespace();
+            auto Components = L[NS].get_or_create<sol::table>();
+            Components[Name] = Func;
         }
 
     private:
@@ -45,6 +39,6 @@ namespace engine::systems {
         void SetupGettersAndSetters(sptr<Scene> Scene);
 
         template<typename... Arguments>
-        void RunFunctionForAll(sptr<Scene> Scene, std::string Function, Arguments &&...Args);
+        void RunFunctionForAll(sptr<Scene> Scene, std::string Function, Arguments ...Args);
     };
 }// namespace engine::systems

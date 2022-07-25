@@ -6,6 +6,7 @@ namespace engine::components {
         return *ModelLoader::LoadModel(Path);
     }
 
+    /*
     luabridge::LuaRef Model::GetTable(lua_State *L) const {
         auto L_ModelClass = luabridge::getGlobal(L, "Model");
         auto L_MeshClass = luabridge::getGlobal(L, "Mesh");
@@ -85,4 +86,5 @@ namespace engine::components {
         Meshes.clear();
         Meshes = NewMeshes;
     }
+*/
 }// namespace engine::components

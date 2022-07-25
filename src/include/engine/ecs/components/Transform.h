@@ -1,15 +1,10 @@
 #pragma once
 
 #include "engine/Base.h"
-
-// clang-format off
-#include <lua.hpp>
-#include <LuaBridge/LuaBridge.h>
-// clang-format on
-
 #include <glm/fwd.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
+#include <sol/sol.hpp>
 
 namespace engine::components {
     struct Transform {
@@ -21,8 +16,8 @@ namespace engine::components {
 
         glm::mat4 GetTransformMatrix() const;
 
-        luabridge::LuaRef GetTable(lua_State *L) const;
-        void SetTable(luabridge::LuaRef Component);
+        sol::table GetTable(sol::state& L) const;
+        void SetTable(sol::table Component);
 
         std::string GetName() const { return "Transform"; }
     };

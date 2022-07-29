@@ -71,7 +71,7 @@ void main()
 
 vec3 CalcLight(Light Light, vec3 Normal, vec3 ViewDir) {
   vec3 LightDir;
-  float Attenuationr = 1.0;
+  float Attenuation = 1.0;
 
   // Check the w-parameter of the position vector, to determine light type.
   if(Light.Position.w == 0) {
@@ -85,7 +85,7 @@ vec3 CalcLight(Light Light, vec3 Normal, vec3 ViewDir) {
     // Calc distance between position and fragment position. Use for
     // calculating attenuation.
     float Dist = length(Light.Position.xyz - FSIn.FragPos);
-    Attenuationr = 1.0 / (Light.Constant + Light.Linear * Dist + Light.Quadratic * (Dist * Dist));
+    Attenuation = 1.0 / (Light.Constant + Light.Linear * Dist + Light.Quadratic * (Dist * Dist));
   }
 
   vec3 HalfwayDir = normalize(LightDir + ViewDir);
@@ -100,8 +100,8 @@ vec3 CalcLight(Light Light, vec3 Normal, vec3 ViewDir) {
   vec3 Diffuse  = LightCol * Diff * vec3(pow(texture(MeshMat.T_Diffuse1, FSIn.TexCoords).xyz, vec3(Gamma)));
   vec3 Specular = LightCol * Spec * vec3(texture(MeshMat.T_Specular1, FSIn.TexCoords).rrr);
 
-  Diffuse *= Attenuationr;
-  Specular *= Attenuationr;
+  Diffuse *= Attenuation;
+  Specular *= Attenuation;
 
   return (Diffuse + Specular);
 }

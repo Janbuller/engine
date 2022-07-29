@@ -30,7 +30,6 @@ namespace engine::systems {
         }
 
     private:
-        bool CheckLua(lua_State *L, int r);
         std::string LoadAndReplaceFile(std::string filename);
 
         void SetComponentsInLua(sptr<Scene> Scene, const Entity &E);

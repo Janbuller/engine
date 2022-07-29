@@ -84,11 +84,11 @@ namespace ecstest {
 
         {
             auto &E  = MainScene->AddEntity();
-            auto& ET = MainScene->AddComponent<Transform>(E);
+            auto &ET = MainScene->AddComponent<Transform>(E);
             auto &EL = MainScene->AddComponent<Light>(E);
 
-            ET.Rotation = glm::rotate(ET.Rotation, 0.66f,  glm::vec3{1, 0, 0});
-            ET.Rotation = glm::rotate(ET.Rotation, 0.4f,  glm::vec3{0, 0, 1});
+            ET.Rotation = glm::rotate(ET.Rotation, 0.66f, glm::vec3{1, 0, 0});
+            ET.Rotation = glm::rotate(ET.Rotation, 0.4f, glm::vec3{0, 0, 1});
 
             EL.Color     = {0.9, 0.9, 1.0};
             EL.Intensity = 0.2;
@@ -101,10 +101,10 @@ namespace ecstest {
         }
         {
             auto &E  = MainScene->AddEntity();
-            auto& ET = MainScene->AddComponent<Transform>(E);
+            auto &ET = MainScene->AddComponent<Transform>(E);
             auto &EL = MainScene->AddComponent<Light>(E);
 
-            ET.Position  = {-1, 1, 0};
+            ET.Position = {-1, 1, 0};
 
             EL.Color     = {1, 0.97, 0.94};
             EL.Intensity = 5.0;
@@ -118,9 +118,9 @@ namespace ecstest {
 
         {
             auto &Cam = MainScene->AddEntity();
-            auto &CT = MainScene->AddComponent<Transform>(Cam);
-            auto &CC = MainScene->AddComponent<Camera>(Cam);
-            auto &CS = MainScene->AddComponent<Script>(Cam);
+            auto &CT  = MainScene->AddComponent<Transform>(Cam);
+            auto &CC  = MainScene->AddComponent<Camera>(Cam);
+            auto &CS  = MainScene->AddComponent<Script>(Cam);
 
             /* CC.Projection = engine::components::Camera::ProjectionType::ORTHOGRAPHIC; */
             CS.ScriptPaths.push_back("res/Application/Scripts/CameraController.lua");
@@ -135,7 +135,7 @@ namespace ecstest {
                                                                 RessourceManager::Get<TextureData>("res/Application/Skybox/Evening Meadow/2048/yn.jpg"),
                                                                 RessourceManager::Get<TextureData>("res/Application/Skybox/Evening Meadow/2048/zp.jpg"),
                                                                 RessourceManager::Get<TextureData>("res/Application/Skybox/Evening Meadow/2048/zn.jpg")});
-                CC.Skybox = CubeMap;
+                CC.Skybox    = CubeMap;
             }
             CC.BackgroundColor = glm::vec4{0.0, 0.3, 0.4, 1.0};
 
@@ -154,42 +154,6 @@ namespace ecstest {
             return MousePos[Axis - 1];
         };
         MainScene->GetSystem<LuaScriptRunner>()->AddLuaFunction(GetMousePosFn, "Input", "GetMousePos");
-
-        std::function<std::vector<float>(std::vector<float>, float, std::vector<float>)> RotateFn =
-                [](std::vector<float> IQuat, float IAngle, std::vector<float> IAxis) {
-                    glm::quat StartQuat{IQuat[0], IQuat[1], IQuat[2], IQuat[3]};
-                    const auto &Angle = IAngle;
-                    glm::vec3 Axis{IAxis[0], IAxis[1], IAxis[2]};
-
-                    auto EndQuat = glm::rotate(StartQuat, Angle, Axis);
-                    return std::vector<float>{EndQuat[0], EndQuat[1], EndQuat[2], EndQuat[3]};
-                };
-        MainScene->GetSystem<LuaScriptRunner>()->AddLuaFunction(RotateFn, "GMath", "Rotate");
-
-        std::function<std::vector<float>(std::vector<float>, std::vector<float>)> RotatePointFn =
-                [](std::vector<float> IPoint, std::vector<float> IQuat) {
-                    glm::quat Quat{IQuat[0], IQuat[1], IQuat[2], IQuat[3]};
-                    glm::vec3 Point{IPoint[0], IPoint[1], IPoint[2]};
-
-                    auto Rotated = glm::rotate(Quat, Point);
-                    return std::vector<float>{Rotated[0], Rotated[1], Rotated[2]};
-                };
-        MainScene->GetSystem<LuaScriptRunner>()->AddLuaFunction(RotatePointFn, "GMath", "RotatePoint");
-
-        std::function<std::vector<float>(std::vector<float>)> InverseQuatFn =
-                [](std::vector<float> IQuat) {
-                    glm::quat Quat{IQuat[3], IQuat[0], IQuat[1], IQuat[2]};
-
-                    auto Inverse = glm::inverse(Quat);
-                    return std::vector<float>{Inverse[0], Inverse[1], Inverse[2], Inverse[3]};
-                };
-        MainScene->GetSystem<LuaScriptRunner>()->AddLuaFunction(InverseQuatFn, "GMath", "InverseQuat");
-
-        /* std::function<int()> AddEntitiyFn = */
-        /*         [this]() { */
-        /*             return MainScene->AddEntity().Id; */
-        /*         }; */
-        /* MainScene->GetSystem<LuaScriptRunner>()->AddLuaFunction(AddEntitiyFn, "Scene", "AddEntity"); */
 
         MainScene->Init();
     }

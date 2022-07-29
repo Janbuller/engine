@@ -1,6 +1,7 @@
 #include "engine/ecs/systems/LuaScriptRunner.h"
 #include "engine/Base.h"
 #include "engine/core/Keys.h"
+#include "engine/lualib/LEngine.h"
 #include "engine/ecs/components/Model.h"
 #include "engine/ecs/components/Script.h"
 #include "engine/ecs/components/Transform.h"
@@ -59,6 +60,8 @@ namespace engine::systems {
             Log["Error"]    = ErrorFn;
             Log["Critical"] = CriticalFn;
         }
+
+        lualib::LoadEngineLib(L);
 
         SetupGettersAndSetters(Scene);
 
@@ -120,15 +123,6 @@ namespace engine::systems {
 
     void LuaScriptRunner::OnKeyPressed(sptr<Scene> Scene, Keys Key, int Action) {
         RunFunctionForAll(Scene, "OnKeyPressed", (int) Key, Action);
-    }
-
-    bool LuaScriptRunner::CheckLua(lua_State *L, int r) {
-        if (r != LUA_OK) {
-            std::string errormsg = lua_tostring(L, -1);
-            LOG_ENGINE_ERROR(errormsg);
-            return false;
-        }
-        return true;
     }
 
     std::string LuaScriptRunner::LoadAndReplaceFile(std::string filename) {

@@ -1,12 +1,12 @@
 local Quaternion = {}
 
-function Quaternion:new(x, y, z, w)
+function Quaternion:new(w, x, y, z)
    local quaternion = {}
 
+   quaternion.w = w;
    quaternion.x = x;
    quaternion.y = y;
    quaternion.z = z;
-   quaternion.w = w;
 
    setmetatable(quaternion, self)
    self.__index = self
@@ -14,59 +14,23 @@ function Quaternion:new(x, y, z, w)
 end
 
 function Quaternion:Rotate(Angle, Axis)
-   local RotTable = {
-      self.x,
-      self.y,
-      self.z,
-      self.w
-   }
-
-   local AxisTable = {
-      Axis.x,
-      Axis.y,
-      Axis.z
-   }
-
-   RotTable = GMath.Rotate(RotTable, Angle, AxisTable)
-
-   self.x = RotTable[1]
-   self.y = RotTable[2]
-   self.z = RotTable[3]
-   self.w = RotTable[4]
+   RetQuat = Engine.Math.Rotate(self, Angle, Axis)
+   self.w = RetQuat.w
+   self.x = RetQuat.x
+   self.y = RetQuat.y
+   self.z = RetQuat.z
 end
 
 function Quaternion.RotatePoint(Quat, Point)
-   local RotTable = {
-      Quat.x,
-      Quat.y,
-      Quat.z,
-      Quat.w
-   }
+   local Rotated = Engine.Math.RotatePoint(Point, Quat)
 
-   local PointTable = {
-      Point.x,
-      Point.y,
-      Point.z
-   }
-
-   local Rotated = GMath.RotatePoint(PointTable, RotTable)
-
-
-   Rotated = Vector3:new(Rotated[1], Rotated[2], Rotated[3]);
-   return Rotated
+   return Vector3:new(Rotated.x, Rotated.y, Rotated.z)
 end
 
 function Quaternion.Inverse(Quat)
-   local QuatTable = {
-      Quat.x,
-      Quat.y,
-      Quat.z,
-      Quat.w
-   }
+   Inversed = Engine.Math.InverseQuat(Quat);
 
-   QuatTable = GMath.InverseQuat(QuatTable);
-
-   return Quaternion:new(QuatTable[1], QuatTable[2], QuatTable[3], QuatTable[4]);
+   return Quaternion:new(Inversed.w, Inversed.x, Inversed.y, Inversed.z);
 end
 
 return Quaternion

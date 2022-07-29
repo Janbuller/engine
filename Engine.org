@@ -1,0 +1,19 @@
+* DONE Add normal-mapping                                 :Lighting:Renderer:
+* DONE Refactor shader code                                        :Renderer:
+Refactoring of shader code
+** DONE All variables should be capital
+** DONE out-/inputs should be in blocks
+** DONE Some more commenting
+* DONE Fix light component to use transform               :Lighting:Renderer:
+* DONE Switch texture type away from using strings                 :Renderer:
+* DONE Switch luabridge to sol                              :BuildSystem:Lua:
+* DONE Switch to luajit                                     :BuildSystem:Lua:
+* TODO Fix lua-variables only getting initialized on scene init     :BUG:Lua:
+* TODO Make lua api better                                              :Lua:
+** TODO References for components
+** TODO Custom lua library
+Instead of std::function and anonymous functions, make a complete
+lua-library in-tree, with all used functions.
+* TODO Make new renderer api                                       :Renderer:
+* TODO ECS-control from lua api                                         :Lua:
+* TODO Turn engine into cmake library                           :BuildSystem:

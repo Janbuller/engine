@@ -38,9 +38,9 @@ function Update(dt)
    Pitch -= MousePosRelative.y * dt * 0.1;
    Pitch = math.min(math.max(-1.55, Pitch), 1.55)
 
-   ET.Rotation = Quaternion:new(0, 0, 0, 1);
-   ET.Rotation:Rotate(Yaw, Vector3:new(0, 1, 0));
-   ET.Rotation:Rotate(Pitch, Vector3:new(0, 0, -1));
+   ET.Rotation = Quaternion:new(1, 0, 0, 0);
+   ET.Rotation:Rotate(Pitch, Vector3:new(1, 0, 0));
+   ET.Rotation:Rotate(Yaw, Vector3:new(0, -1, 0));
 
    local InvRot = ET.Rotation:Inverse();
    local Front = InvRot:RotatePoint(Vector3:new(0, 0, -1));

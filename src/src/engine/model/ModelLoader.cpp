@@ -4,9 +4,9 @@
 #include "engine/glcore/Shader.h"
 #include "engine/model/Material.h"
 #include "engine/ressources/RessourceManager.h"
+#include <glm/gtx/string_cast.hpp>
 #include <memory>
 #include <stdexcept>
-#include <glm/gtx/string_cast.hpp>
 
 namespace engine {
     glcore::Shader ModelLoader::DefaultShader{};
@@ -78,7 +78,7 @@ namespace engine {
 
         if (ProcessedMesh->mMaterialIndex >= 0) {
             aiMaterial *Mat = Scene->mMaterials[ProcessedMesh->mMaterialIndex];
-            MeshMaterial = ProcessMaterial(Mat, BaseDir);
+            MeshMaterial    = ProcessMaterial(Mat, BaseDir);
         }
 
         return Mesh{Vertices, Indices, MeshMaterial};
@@ -106,9 +106,9 @@ namespace engine {
             Mat->GetTexture(Type, i, &str);
 
             std::string filename = str.C_Str();
-            filename = BaseDir + '/' + filename;
+            filename             = BaseDir + '/' + filename;
 
-            const auto &Data = RessourceManager::Get<glcore::TextureData>(filename);
+            const auto &Data          = RessourceManager::Get<glcore::TextureData>(filename);
             glcore::Texture2D Texture = glcore::Texture2D::FromTextureData(Data);
             Textures.push_back({EngineType, Texture});
         }

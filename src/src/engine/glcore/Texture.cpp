@@ -5,4 +5,4 @@ namespace engine::glcore {
     Texture::Texture(GLuint Handle)
         : Handle{Handle} {
     }
-}
+}// namespace engine::glcore

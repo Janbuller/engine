@@ -12,4 +12,4 @@ namespace engine::lighting {
         GLfloat Linear;
         GLfloat Quadratic;
     };
-}
+}// namespace engine::lighting

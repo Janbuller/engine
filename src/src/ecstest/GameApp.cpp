@@ -129,13 +129,14 @@ namespace ecstest {
             {
                 using namespace engine;
                 using namespace engine::glcore;
-                auto CubeMap = TextureCubemap::FromTextureData({RessourceManager::Get<TextureData>("res/Application/Skybox/Evening Meadow/2048/xp.jpg"),
-                                                                RessourceManager::Get<TextureData>("res/Application/Skybox/Evening Meadow/2048/xn.jpg"),
-                                                                RessourceManager::Get<TextureData>("res/Application/Skybox/Evening Meadow/2048/yp.jpg"),
-                                                                RessourceManager::Get<TextureData>("res/Application/Skybox/Evening Meadow/2048/yn.jpg"),
-                                                                RessourceManager::Get<TextureData>("res/Application/Skybox/Evening Meadow/2048/zp.jpg"),
-                                                                RessourceManager::Get<TextureData>("res/Application/Skybox/Evening Meadow/2048/zn.jpg")});
-                CC.Skybox    = CubeMap;
+                auto CubeMap = TextureCubemap::FromTextureData(
+                        {RessourceManager::Get<TextureData>("res/Application/Skybox/Evening Meadow/2048/xp.jpg"),
+                         RessourceManager::Get<TextureData>("res/Application/Skybox/Evening Meadow/2048/xn.jpg"),
+                         RessourceManager::Get<TextureData>("res/Application/Skybox/Evening Meadow/2048/yp.jpg"),
+                         RessourceManager::Get<TextureData>("res/Application/Skybox/Evening Meadow/2048/yn.jpg"),
+                         RessourceManager::Get<TextureData>("res/Application/Skybox/Evening Meadow/2048/zp.jpg"),
+                         RessourceManager::Get<TextureData>("res/Application/Skybox/Evening Meadow/2048/zn.jpg")});
+                CC.Skybox = CubeMap;
             }
             CC.BackgroundColor = glm::vec4{0.0, 0.3, 0.4, 1.0};
 

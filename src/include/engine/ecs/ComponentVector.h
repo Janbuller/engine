@@ -35,7 +35,7 @@ namespace engine {
             return Components.back();
         }
 
-        T& AddComponent(Entity E, T Component) {
+        T &AddComponent(Entity E, T Component) {
             if (EntityToComponentIdx.find(E.Id) != EntityToComponentIdx.end()) {
                 LOG_ENGINE_ERROR("Failed to remove add an already existing \"{0}\" component to an entity with id \"{1}\".", typeid(T).name(), E.Id);
                 throw std::invalid_argument("Tried to add existing component to entity");
@@ -56,14 +56,14 @@ namespace engine {
             }
 
             auto RemoveIdx = EntityToComponentIdx[E.Id];
-            auto LastIdx = Components.size() - 1;
-            auto LastId = ComponentToEntityIdx[LastIdx];
+            auto LastIdx   = Components.size() - 1;
+            auto LastId    = ComponentToEntityIdx[LastIdx];
 
             // Move the last component to the removed component
             Components[RemoveIdx] = Components.back();
 
             // Update the conversion maps.
-            EntityToComponentIdx[LastId] = RemoveIdx;
+            EntityToComponentIdx[LastId]    = RemoveIdx;
             ComponentToEntityIdx[RemoveIdx] = LastId;
 
             EntityToComponentIdx.erase(E.Id);

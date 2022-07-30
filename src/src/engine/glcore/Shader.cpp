@@ -8,7 +8,7 @@ namespace engine::glcore {
     }
 
     void Shader::LoadShaderFromFiles(const unsigned int ID, const char *VertexPath, const char *FragmentPath) {
-        this->VertexPath = VertexPath;
+        this->VertexPath   = VertexPath;
         this->FragmentPath = FragmentPath;
 
         std::ifstream VertexShaderFile;
@@ -37,11 +37,11 @@ namespace engine::glcore {
             throw e;
         }
 
-        const auto VertexCode = VertexShaderStream.str();
+        const auto VertexCode   = VertexShaderStream.str();
         const auto FragmentCode = FragmentShaderStream.str();
 
-        const auto* VertexShaderCode = VertexCode.c_str();
-        const auto* FragmentShaderCode = FragmentCode.c_str();
+        const auto *VertexShaderCode   = VertexCode.c_str();
+        const auto *FragmentShaderCode = FragmentCode.c_str();
 
         unsigned int VertexID, FragmentID;
         int Success;

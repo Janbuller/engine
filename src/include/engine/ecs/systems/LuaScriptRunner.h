@@ -3,9 +3,9 @@
 #include "engine/Base.h"
 #include "engine/core/Keys.h"
 #include "engine/ecs/Scene.h"
-#include <sol/sol.hpp>
 #include "engine/ecs/components/Script.h"
 #include "engine/ecs/systems/ISystem.h"
+#include <sol/sol.hpp>
 
 namespace engine::systems {
     class LuaScriptRunner : public ISystem {
@@ -25,7 +25,7 @@ namespace engine::systems {
 
         template<class R, class... Args>
         void AddLuaFunction(std::function<R(Args...)> Func, std::string NS, std::string Name) {
-            auto Components = L[NS].get_or_create<sol::table>();
+            auto Components  = L[NS].get_or_create<sol::table>();
             Components[Name] = Func;
         }
 
@@ -38,6 +38,6 @@ namespace engine::systems {
         void SetupGettersAndSetters(sptr<Scene> Scene);
 
         template<typename... Arguments>
-        void RunFunctionForAll(sptr<Scene> Scene, std::string Function, Arguments ...Args);
+        void RunFunctionForAll(sptr<Scene> Scene, std::string Function, Arguments... Args);
     };
 }// namespace engine::systems

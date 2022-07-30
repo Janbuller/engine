@@ -51,8 +51,8 @@ namespace engine {
         }
 
         template<typename T>
-        T& AddComponent(Entity &E) {
-            auto& NewComponent = Components.AddComponent<T>(E);
+        T &AddComponent(Entity &E) {
+            auto &NewComponent = Components.AddComponent<T>(E);
 
             auto &Signature = E.ComponentSignature;
             Signature.set(GetComponentId<T>(), true);
@@ -62,8 +62,8 @@ namespace engine {
         }
 
         template<typename T>
-        T& AddComponent(Entity &E, T Component) {
-            auto& NewComponent = Components.AddComponent<T>(E, Component);
+        T &AddComponent(Entity &E, T Component) {
+            auto &NewComponent = Components.AddComponent<T>(E, Component);
 
             auto &Signature = E.ComponentSignature;
             Signature.set(GetComponentId<T>(), true);
@@ -94,7 +94,7 @@ namespace engine {
 
         template<typename T>
         bool HasComponent(Entity E) {
-            const auto &EntSig = E.ComponentSignature;
+            const auto &EntSig      = E.ComponentSignature;
             const auto &ComponentId = GetComponentId<T>();
 
             return EntSig[ComponentId];

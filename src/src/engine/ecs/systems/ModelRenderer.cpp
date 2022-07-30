@@ -1,10 +1,10 @@
 #include "engine/ecs/systems/ModelRenderer.h"
 #include "engine/ecs/SceneView.h"
 #include "engine/ecs/components/Camera.h"
-#include "engine/ecs/components/Model.h"
 #include "engine/ecs/components/Light.h"
-#include "engine/ressources/RessourceManager.h"
+#include "engine/ecs/components/Model.h"
 #include "engine/lighting/ShaderLight.h"
+#include "engine/ressources/RessourceManager.h"
 #include <glad/glad.h>
 
 namespace engine::systems {
@@ -21,7 +21,7 @@ namespace engine::systems {
 
         glGenBuffers(1, &LightSSBO);
 
-        Skybox = RessourceManager::Get<Model>("res/Internal/Models/Skybox.obj");
+        Skybox                               = RessourceManager::Get<Model>("res/Internal/Models/Skybox.obj");
         Skybox.Meshes[0].MeshMaterial.Shader = glcore::Shader{"res/Internal/Shaders/Skybox.vert", "res/Internal/Shaders/Skybox.frag"};
     }
 
@@ -34,20 +34,20 @@ namespace engine::systems {
         // Get the projection and view matrix, which will be used for skybox
         // rendering and later for rendering of all other entities.
         auto Projection = Camera::GetProjectionMatrix(Scene, Scene->MainCam.Id, Width, Height);
-        auto View = Camera::GetViewMatrix(Scene, Scene->MainCam.Id);
+        auto View       = Camera::GetViewMatrix(Scene, Scene->MainCam.Id);
 
         // Set and clear background color
-        if(CC.BackgroundColor) {
-            auto& BG = CC.BackgroundColor.value();
+        if (CC.BackgroundColor) {
+            auto &BG = CC.BackgroundColor.value();
             glClearColor(BG.r, BG.g, BG.b, BG.a);
         }
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // Draw skybox if existing
-        if(CC.Skybox) {
+        if (CC.Skybox) {
             // Get the texture and material
-            auto& SkyboxTex = CC.Skybox.value();
-            auto& Mat = Skybox.Meshes[0].MeshMaterial;
+            auto &SkyboxTex = CC.Skybox.value();
+            auto &Mat       = Skybox.Meshes[0].MeshMaterial;
 
             // Bind the matrices to the shader.
             // For the view matrix, the translation is removed by doing
@@ -77,38 +77,38 @@ namespace engine::systems {
         // Generate vector of ShaderLights from all light components in scene
         // using SceneView.
         std::vector<lighting::ShaderLight> Lights;
-        
+
         auto LightsView = SceneView<Transform, Light>{Scene};
-        for(const auto& L : LightsView) {
+        for (const auto &L : LightsView) {
             // Create new empty shaderlight, to be filled in by the current
             // light entity.
             lighting::ShaderLight Light{};
 
             // Get Transform- and Light-component from current entity.
-            auto& LT = Scene->GetComponent<Transform>(L);
-            auto& LL = Scene->GetComponent<engine::components::Light>(L);
+            auto &LT = Scene->GetComponent<Transform>(L);
+            auto &LL = Scene->GetComponent<engine::components::Light>(L);
 
             // Generate the ShaderLight position variable. The shader uses the
             // w-component of the position vector to determine the light-type.
             // It also expects the xyz-components for a dirlight to be a
             // vector, pointing the direction.
-            if(LL.Type == Light::PointLight) {
+            if (LL.Type == Light::PointLight) {
                 // If it is a pointlight, just grab the position.
                 Light.Position = glm::vec4(LT.Position, 1.0f);
             } else if (LL.Type == Light::DirectionalLight) {
                 // If it is a dirlight, rotate a forward facing vector by the
                 // light quaternion.
                 glm::vec3 Forward = glm::rotate(glm::inverse(LT.Rotation), glm::vec3(0.0, 0.0, -1.0));
-                Light.Position = glm::vec4{Forward, 0.0f};
+                Light.Position    = glm::vec4{Forward, 0.0f};
             }
 
             // Grab the rest of the variables straight from the light
             // component.
-            Light.Color = LL.Color;
+            Light.Color     = LL.Color;
             Light.Intensity = LL.Intensity;
 
-            Light.Constant = LL.Constant;
-            Light.Linear = LL.Linear;
+            Light.Constant  = LL.Constant;
+            Light.Linear    = LL.Linear;
             Light.Quadratic = LL.Quadratic;
 
             Lights.push_back(Light);
@@ -139,7 +139,7 @@ namespace engine::systems {
 
             // Loop through all the meshes in the current model.
             for (auto &Mesh : EM.Meshes) {
-                auto &Mat = Mesh.MeshMaterial;
+                auto &Mat      = Mesh.MeshMaterial;
                 auto &Textures = Mat.Textures;
 
                 // Set the MVP-matrices and the main camera position uniforms
@@ -154,7 +154,7 @@ namespace engine::systems {
                 // Holds the amount of bound textures of each different type,
                 // starting from one. This is used for variable name in
                 // shaders.
-                std::array<int, (int)TextureType::NONE> TextureTypeCounter{};
+                std::array<int, (int) TextureType::NONE> TextureTypeCounter{};
                 TextureTypeCounter.fill(1);
 
                 // Loop through all mesh textures, generating names and binding
@@ -166,11 +166,11 @@ namespace engine::systems {
 
                     // Get the texture shadername from the TextureInfo array
                     // using the type.
-                    std::string TypeName = Material::TextureInfo[(int)Type].ShaderName;
+                    std::string TypeName = Material::TextureInfo[(int) Type].ShaderName;
 
                     // Get the count of the current texturetype and add one to
                     // it.
-                    std::string TextureTypeCount = std::to_string(TextureTypeCounter[(int)Type]++);
+                    std::string TextureTypeCount = std::to_string(TextureTypeCounter[(int) Type]++);
 
                     std::string ShaderName = TypeName + TextureTypeCount;
 

@@ -11,7 +11,7 @@ namespace engine::components {
             return glm::perspective(glm::radians(EC.FOV), Aspect, EC.Near, EC.Far);
         else if (EC.Projection == ProjectionType::ORTHOGRAPHIC)
             return glm::ortho(-Aspect, Aspect, -1.0f, 1.0f, EC.Near, EC.Far);
-            /* return glm::ortho(0.0f, (float) Width * EC.FOV, 0.0f, (float) Height * EC.FOV, EC.Near, EC.Far); */
+        /* return glm::ortho(0.0f, (float) Width * EC.FOV, 0.0f, (float) Height * EC.FOV, EC.Near, EC.Far); */
 
         LOG_ENGINE_ERROR("Failed to get projection matrix from Entity \"{0}\" with ProjectionType \"{1}\".", E, (int) EC.Projection);
         throw std::runtime_error("Failed to get projection matrix.");
@@ -22,7 +22,7 @@ namespace engine::components {
         auto &EC = Scene->GetComponent<Camera>(E);
 
         glm::vec3 Front = glm::rotate(glm::inverse(ET.Rotation), glm::vec3(0.0, 0.0, -1.0));
-        glm::vec3 Up = glm::rotate(glm::inverse(ET.Rotation), glm::vec3(0.0, 1.0, 0.0));
+        glm::vec3 Up    = glm::rotate(glm::inverse(ET.Rotation), glm::vec3(0.0, 1.0, 0.0));
         return glm::lookAt(ET.Position, ET.Position + Front, Up);
     }
 }// namespace engine::components

@@ -28,7 +28,7 @@ namespace engine::glcore {
     TextureData TextureData::LoadTextureFromFile(const char *Path,
                                                  const std::string &Directory) {
         std::string Filename = std::string(Path);
-        Filename = Directory + '/' + Filename;
+        Filename             = Directory + '/' + Filename;
 
         return LoadTextureFromFile(Filename.c_str());
     }

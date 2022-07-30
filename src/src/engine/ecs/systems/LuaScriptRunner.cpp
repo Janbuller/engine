@@ -1,10 +1,10 @@
 #include "engine/ecs/systems/LuaScriptRunner.h"
 #include "engine/Base.h"
 #include "engine/core/Keys.h"
-#include "engine/lualib/LEngine.h"
 #include "engine/ecs/components/Model.h"
 #include "engine/ecs/components/Script.h"
 #include "engine/ecs/components/Transform.h"
+#include "engine/lualib/LEngine.h"
 #include <fstream>
 #include <functional>
 #include <re2/re2.h>
@@ -38,7 +38,7 @@ namespace engine::systems {
 
         std::function<void(sol::variadic_args)> PrintFn = [](sol::variadic_args ToPrint) {
             std::string FinalString;
-            for(auto Print : ToPrint) {
+            for (auto Print : ToPrint) {
                 FinalString += Print;
                 FinalString += "\t";
             }
@@ -65,7 +65,7 @@ namespace engine::systems {
 
         SetupGettersAndSetters(Scene);
 
-        auto L_Entities = L.create_named_table("Entities");
+        auto L_Entities       = L.create_named_table("Entities");
         L_Entities["Globals"] = L.create_table();
 
         auto EntityScript = LoadAndReplaceFile("res/Internal/Scripts/Entity.lua");
@@ -157,8 +157,8 @@ namespace engine::systems {
     }
 
     void LuaScriptRunner::SetComponentsInLua(sptr<Scene> Scene, const Entity &E) {
-        const auto &ET = Scene->GetComponent<Transform>(E);
-        const auto &EM = Scene->GetComponent<Model>(E);
+        const auto &ET      = Scene->GetComponent<Transform>(E);
+        const auto &EM      = Scene->GetComponent<Model>(E);
         auto TransformTable = ET.GetTable(L);
         /* auto ModelTable = EM.GetTable(L); */
 
@@ -199,7 +199,7 @@ namespace engine::systems {
         /* }; */
 
         {
-            auto Components = L["Components"].get_or_create<sol::table>();
+            auto Components            = L["Components"].get_or_create<sol::table>();
             Components["GetTransform"] = GetTransformFn;
             Components["SetTransform"] = SetTransformFn;
             /* Components["GetModel"]     = GetModelFn; */
@@ -209,7 +209,7 @@ namespace engine::systems {
 
 
     template<typename... Arguments>
-    void LuaScriptRunner::RunFunctionForAll(sptr<Scene> Scene, std::string Function, Arguments ...Args) {
+    void LuaScriptRunner::RunFunctionForAll(sptr<Scene> Scene, std::string Function, Arguments... Args) {
         for (const auto &Entity : Entities) {
             auto &EScript = Scene->GetComponent<Script>(Entity);
 

@@ -6,8 +6,8 @@
 
 namespace engine::lualib {
     void LoadMathLib(sol::table &L) {
-        auto Math = L["Math"].get_or_create<sol::table>();
-        Math["Rotate"] = Rotate;
+        auto Math           = L["Math"].get_or_create<sol::table>();
+        Math["Rotate"]      = Rotate;
         Math["RotatePoint"] = RotatePoint;
         Math["InverseQuat"] = InverseQuat;
     }

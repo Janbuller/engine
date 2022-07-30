@@ -1,9 +1,9 @@
 #pragma once
 
 #include "Entity.h"
-#include "engine/ecs/systems/ISystem.h"
 #include "Scene.h"
 #include "engine/Base.h"
+#include "engine/ecs/systems/ISystem.h"
 #include <bitset>
 #include <stdexcept>
 #include <unordered_map>
@@ -68,8 +68,8 @@ namespace engine {
 
         void EntitySignatureChanged(Entity entity, std::bitset<MAX_COMPONENTS> entitySignature) {
             for (const auto &pair : Systems) {
-                const auto &TypeName = pair.first;
-                const auto &System = pair.second;
+                const auto &TypeName        = pair.first;
+                const auto &System          = pair.second;
                 const auto &SystemSignature = Signatures[TypeName];
 
                 if ((entitySignature & SystemSignature) == SystemSignature) {

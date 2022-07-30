@@ -9,4 +9,4 @@ namespace engine {
         glm::vec2 TexCoords;
         glm::vec3 Tangent;
     };
-}
+}// namespace engine

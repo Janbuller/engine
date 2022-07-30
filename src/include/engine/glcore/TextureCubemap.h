@@ -9,8 +9,8 @@
 
 namespace engine::glcore {
     struct TextureCubemap : public Texture {
-        TextureCubemap () = default;
-        TextureCubemap (GLuint Handle);
+        TextureCubemap() = default;
+        TextureCubemap(GLuint Handle);
         static TextureCubemap FromTextureData(std::array<TextureData, 6> TD);
     };
 }// namespace engine::glcore

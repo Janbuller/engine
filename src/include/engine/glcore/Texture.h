@@ -9,4 +9,4 @@ namespace engine::glcore {
         Texture() = default;
         Texture(GLuint Handle);
     };
-}
+}// namespace engine::glcore

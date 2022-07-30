@@ -26,7 +26,7 @@ namespace engine {
         std::array<T, size> GetDelta(std::array<T, size> absolute) {
             std::array<T, size> delta;
             for (int i = 0; i < size; i++) {
-                delta[i] = absolute[i] - lastVars[i];
+                delta[i]    = absolute[i] - lastVars[i];
                 lastVars[i] = absolute[i];
             }
             return delta;

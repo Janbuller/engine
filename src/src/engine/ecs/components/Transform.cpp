@@ -11,10 +11,10 @@ namespace engine::components {
         TransMat = glm::scale(TransMat, Scale);
         TransMat *= glm::mat4_cast(Rotation);
 
-	return TransMat;
+        return TransMat;
     }
 
-    sol::table Transform::GetTable(sol::state& L) const {
+    sol::table Transform::GetTable(sol::state &L) const {
         auto L_TransformClass = L["Transform"];
 
         sol::table L_Transform = L_TransformClass["new"](L_TransformClass);
@@ -49,4 +49,4 @@ namespace engine::components {
         Scale.y = Component["Scale"]["y"];
         Scale.z = Component["Scale"]["z"];
     }
-}
+}// namespace engine::components

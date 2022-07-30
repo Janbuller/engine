@@ -1,9 +1,9 @@
 #include "engine/model/Mesh.h"
-#include "engine/model/Material.h"
-#include "engine/model/Vertex.h"
 #include "engine/Base.h"
 #include "engine/glcore/Shader.h"
 #include "engine/glcore/Texture2D.h"
+#include "engine/model/Material.h"
+#include "engine/model/Vertex.h"
 #include <fstream>
 #include <glad/glad.h>
 #include <sstream>
@@ -14,9 +14,9 @@ namespace engine {
         SetupBuffers();
     }
 
-  Mesh::~Mesh() {
-    DeleteBuffers();
-  }
+    Mesh::~Mesh() {
+        DeleteBuffers();
+    }
 
     void Mesh::SetupBuffers() {
         glCreateVertexArrays(1, &VAO);
@@ -45,9 +45,9 @@ namespace engine {
         glVertexArrayAttribBinding(VAO, 3, 0);
     }
 
-  void Mesh::DeleteBuffers() {
-    // glDeleteBuffers(1, &EBO);
-    // glDeleteBuffers(1, &VBO);
-    // glDeleteVertexArrays(1, &VAO);
-  }
+    void Mesh::DeleteBuffers() {
+        // glDeleteBuffers(1, &EBO);
+        // glDeleteBuffers(1, &VBO);
+        // glDeleteVertexArrays(1, &VAO);
+    }
 }// namespace engine

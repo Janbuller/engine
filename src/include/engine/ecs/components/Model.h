@@ -1,8 +1,8 @@
 #pragma once
 
+#include "engine/Base.h"
 #include "engine/model/Mesh.h"
 #include "engine/model/Vertex.h"
-#include "engine/Base.h"
 #include <vector>
 
 namespace engine::components {

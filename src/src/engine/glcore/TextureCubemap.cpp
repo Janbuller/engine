@@ -1,7 +1,7 @@
-#include "engine/core/Logger.h"
-#include "engine/glcore/Texture.h"
 #include "engine/glcore/TextureCubemap.h"
 #include "engine/Base.h"
+#include "engine/core/Logger.h"
+#include "engine/glcore/Texture.h"
 #include "stb/stb_image.h"
 #include <glad/glad.h>
 #include <iostream>
@@ -16,7 +16,7 @@ namespace engine::glcore {
         unsigned int TextureID;
         glGenTextures(1, &TextureID);
 
-        for(int i = 0; i < 6; i++) {
+        for (int i = 0; i < 6; i++) {
             GLenum Format;
             if (TD[i].ComponentAmount == 1)
                 Format = GL_RED;

@@ -4,11 +4,11 @@
 #include "engine/ecs/components/Transform.h"
 
 namespace engine::systems {
-  void MoveDown::Update(sptr<Scene> Scene, double DeltaTime) {
-    for(const auto& Entity : Entities) {
-      auto& ET = Scene->GetComponent<Transform>(Entity);
+    void MoveDown::Update(sptr<Scene> Scene, double DeltaTime) {
+        for (const auto &Entity : Entities) {
+            auto &ET = Scene->GetComponent<Transform>(Entity);
 
-      ET.Position.y -= DeltaTime;
+            ET.Position.y -= DeltaTime;
+        }
     }
-  }
-}
+}// namespace engine::systems

@@ -122,15 +122,14 @@ namespace engine {
             {"KEY_RIGHT_CONTROL", 345},
             {"KEY_RIGHT_ALT", 346},
             {"KEY_RIGHT_SUPER", 347},
-            {"KEY_MENU", 348}
-    };
+            {"KEY_MENU", 348}};
 
-  std::string KeyConverter::GetKeyName(int KeyNum) {
-    return KeysToString.get_key(KeyNum);
-  }
+    std::string KeyConverter::GetKeyName(int KeyNum) {
+        return KeysToString.get_key(KeyNum);
+    }
 
-  int KeyConverter::GetKeyNum(std::string KeyName) {
-    LOG_ENGINE_CRITICAL(KeysToString.get_value(KeyName));
-    return KeysToString.get_value(KeyName);
-  }
-}
+    int KeyConverter::GetKeyNum(std::string KeyName) {
+        LOG_ENGINE_CRITICAL(KeysToString.get_value(KeyName));
+        return KeysToString.get_value(KeyName);
+    }
+}// namespace engine

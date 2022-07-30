@@ -6,14 +6,14 @@
 #include <spdlog/spdlog.h>
 
 namespace engine {
-  class Logger {
-  public:
-    static void Init();
+    class Logger {
+    public:
+        static void Init();
 
-    static sptr<spdlog::logger> EngineLogger;
-    static sptr<spdlog::logger> GameLogger;
-  };
-}
+        static sptr<spdlog::logger> EngineLogger;
+        static sptr<spdlog::logger> GameLogger;
+    };
+}// namespace engine
 
 #define LOG_ENGINE_TRACE(...)    ::engine::Logger::EngineLogger->trace(__VA_ARGS__)
 #define LOG_ENGINE_INFO(...)     ::engine::Logger::EngineLogger->info(__VA_ARGS__)
@@ -21,8 +21,8 @@ namespace engine {
 #define LOG_ENGINE_ERROR(...)    ::engine::Logger::EngineLogger->error(__VA_ARGS__)
 #define LOG_ENGINE_CRITICAL(...) ::engine::Logger::EngineLogger->critical(__VA_ARGS__)
 
-#define LOG_TRACE(...)           ::engine::Logger::GameLogger->trace(__VA_ARGS__)
-#define LOG_INFO(...)            ::engine::Logger::GameLogger->info(__VA_ARGS__)
-#define LOG_WARN(...)            ::engine::Logger::GameLogger->warn(__VA_ARGS__)
-#define LOG_ERROR(...)           ::engine::Logger::GameLogger->error(__VA_ARGS__)
-#define LOG_CRITICAL(...)        ::engine::Logger::GameLogger->critical(__VA_ARGS__)
+#define LOG_TRACE(...)    ::engine::Logger::GameLogger->trace(__VA_ARGS__)
+#define LOG_INFO(...)     ::engine::Logger::GameLogger->info(__VA_ARGS__)
+#define LOG_WARN(...)     ::engine::Logger::GameLogger->warn(__VA_ARGS__)
+#define LOG_ERROR(...)    ::engine::Logger::GameLogger->error(__VA_ARGS__)
+#define LOG_CRITICAL(...) ::engine::Logger::GameLogger->critical(__VA_ARGS__)

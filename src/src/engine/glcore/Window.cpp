@@ -6,7 +6,7 @@
 
 namespace engine::glcore {
     void Window::onWindowResize(int width, int height) {
-        this->Width = width;
+        this->Width  = width;
         this->Height = height;
 
         glViewport(0, 0, width, height);

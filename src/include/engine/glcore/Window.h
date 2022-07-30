@@ -25,7 +25,7 @@ namespace engine::glcore {
         engine::DeltaVariable<double, 1> deltaTime;
 
     public:
-        int Width = 640;
+        int Width  = 640;
         int Height = 480;
 
         std::string Title;

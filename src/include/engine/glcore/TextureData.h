@@ -6,16 +6,16 @@
 namespace engine::glcore {
     class TextureData {
     public:
-        unsigned char* Data;
+        unsigned char *Data;
         int Width, Height;
         int ComponentAmount;
 
         TextureData() = default;
-        TextureData(unsigned char* Data, int Width, int Height, int ComponentAmount);
+        TextureData(unsigned char *Data, int Width, int Height, int ComponentAmount);
         void Free();
 
         static TextureData Load(std::string Path);
         static TextureData LoadTextureFromFile(const char *Path);
         static TextureData LoadTextureFromFile(const char *Path, const std::string &Directory);
     };
-}
+}// namespace engine::glcore

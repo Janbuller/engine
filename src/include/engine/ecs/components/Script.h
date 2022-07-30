@@ -7,7 +7,7 @@
 #include <vector>
 
 namespace engine::components {
-  struct Script {
-    std::vector<std::string> ScriptPaths;
-  };
-}
+    struct Script {
+        std::vector<std::string> ScriptPaths;
+    };
+}// namespace engine::components

@@ -1,4 +1,4 @@
-LastMousePos = Vector2:new(0, 0)
+LastMousePos = Vec2:new(0)
 
 Speed = 5;
 
@@ -18,7 +18,7 @@ function Init()
 end
 
 function Update(dt)
-   local MousePos = Vector2:new(0, 0)
+   local MousePos = Vec2:new(0)
    MousePos.x = Input.GetMousePos(1);
    MousePos.y = Input.GetMousePos(2);
 
@@ -38,13 +38,15 @@ function Update(dt)
    Pitch -= MousePosRelative.y * dt * 0.1;
    Pitch = math.min(math.max(-1.55, Pitch), 1.55)
 
-   ET.Rotation = Quaternion:new(1, 0, 0, 0);
-   ET.Rotation:Rotate(Pitch, Vector3:new(1, 0, 0));
-   ET.Rotation:Rotate(Yaw, Vector3:new(0, -1, 0));
+   ET.Rotation = Quat:new(1, 0, 0, 0);
+   ET.Rotation:Rotate(Pitch, Vec3.new(1, 0, 0));
+   ET.Rotation:Rotate(Yaw, Vec3.new(0, -1, 0));
 
    local InvRot = ET.Rotation:Inverse();
-   local Front = InvRot:RotatePoint(Vector3:new(0, 0, -1));
-   local Right = InvRot:RotatePoint(Vector3:new(1, 0, 0));
+   local Front = InvRot:RotatePoint(Vec3.new(0, 0, -1));
+   local Right = InvRot:RotatePoint(Vec3.new(1, 0, 0));
+
+   local Up = InvRot:RotatePoint(Vec3.new(0, 1, 0));
 
    if(Input.KeyDown.W) then
       ET.Position += Front * dt * Speed;
@@ -58,6 +60,13 @@ function Update(dt)
    if(Input.KeyDown.D) then
       ET.Position += Right * dt * Speed;
    end
+   if Input.KeyDown.E then
+      ET.Position += Up * dt * Speed;
+   end
+   if Input.KeyDown.Q then
+      ET.Position -= Up * dt * Speed;
+   end
+end
 
-   Entity.Transform = ET;
+function Exit()
 end

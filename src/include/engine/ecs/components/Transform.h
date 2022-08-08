@@ -1,6 +1,5 @@
 #pragma once
 
-#include "engine/Base.h"
 #include <glm/fwd.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
@@ -15,9 +14,6 @@ namespace engine::components {
         Transform() = default;
 
         glm::mat4 GetTransformMatrix() const;
-
-        sol::table GetTable(sol::state &L) const;
-        void SetTable(sol::table Component);
 
         std::string GetName() const { return "Transform"; }
     };

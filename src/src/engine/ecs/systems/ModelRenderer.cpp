@@ -92,10 +92,10 @@ namespace engine::systems {
             // w-component of the position vector to determine the light-type.
             // It also expects the xyz-components for a dirlight to be a
             // vector, pointing the direction.
-            if (LL.Type == Light::PointLight) {
+            if (LL.Type == Light::LightType::PointLight) {
                 // If it is a pointlight, just grab the position.
                 Light.Position = glm::vec4(LT.Position, 1.0f);
-            } else if (LL.Type == Light::DirectionalLight) {
+            } else if (LL.Type == Light::LightType::DirectionalLight) {
                 // If it is a dirlight, rotate a forward facing vector by the
                 // light quaternion.
                 glm::vec3 Forward = glm::rotate(glm::inverse(LT.Rotation), glm::vec3(0.0, 0.0, -1.0));
@@ -162,7 +162,7 @@ namespace engine::systems {
                 for (unsigned int i = 0; i < Textures.size(); i++) {
                     glActiveTexture(GL_TEXTURE0 + i);
 
-                    TextureType Type = Textures[i].first;
+                    TextureType Type = Textures[i].Type;
 
                     // Get the texture shadername from the TextureInfo array
                     // using the type.
@@ -175,7 +175,7 @@ namespace engine::systems {
                     std::string ShaderName = TypeName + TextureTypeCount;
 
                     Mat.Shader.SetInt(("MeshMat." + ShaderName).c_str(), i);
-                    glBindTexture(GL_TEXTURE_2D, Textures[i].second.Handle);
+                    glBindTexture(GL_TEXTURE_2D, Textures[i].Texture.Handle);
                 }
                 glActiveTexture(GL_TEXTURE0);
 

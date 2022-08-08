@@ -4,7 +4,7 @@
 #include "engine/ecs/components/Model.h"
 #include "engine/ecs/components/Script.h"
 #include "engine/ecs/components/Transform.h"
-#include "engine/lualib/LEngine.h"
+#include "engine/lua/lualib/LEngine.h"
 #include <fstream>
 #include <functional>
 #include <re2/re2.h>
@@ -15,10 +15,11 @@
 #include <type_traits>
 #include <typeinfo>
 
+#include "engine/lua/usertypes/LAllUsertypes.h"
+
 namespace engine::systems {
 
     LuaScriptRunner::LuaScriptRunner() {
-        lua_State *Ls = luaL_newstate();
         L.open_libraries(
                 sol::lib::base,
                 sol::lib::package,
@@ -35,33 +36,10 @@ namespace engine::systems {
     }
 
     void LuaScriptRunner::InitializeScripting(sptr<Scene> Scene) {
-
-        std::function<void(sol::variadic_args)> PrintFn = [](sol::variadic_args ToPrint) {
-            std::string FinalString;
-            for (auto Print : ToPrint) {
-                FinalString += Print;
-                FinalString += "\t";
-            }
-            LOG_TRACE("{}", FinalString);
-        };
-        L["print"] = PrintFn;
-
-        std::function<void(std::string)> TraceFn    = [](std::string ToPrint) { LOG_TRACE(ToPrint); };
-        std::function<void(std::string)> InfoFn     = [](std::string ToPrint) { LOG_INFO(ToPrint); };
-        std::function<void(std::string)> WarnFn     = [](std::string ToPrint) { LOG_WARN(ToPrint); };
-        std::function<void(std::string)> ErrorFn    = [](std::string ToPrint) { LOG_ERROR(ToPrint); };
-        std::function<void(std::string)> CriticalFn = [](std::string ToPrint) { LOG_CRITICAL(ToPrint); };
-
-        {
-            auto Log = L["Log"].get_or_create<sol::table>();
-            Log["Trace"]    = TraceFn;
-            Log["Info"]     = InfoFn;
-            Log["Warn"]     = WarnFn;
-            Log["Error"]    = ErrorFn;
-            Log["Critical"] = CriticalFn;
-        }
-
-        lualib::LoadEngineLib(L);
+        // Load the library of functions for the engine and initialize the
+        // usertypes for all the different used classes.
+        lua::lualib::LoadEngineLib(L);
+        lua::usertypes::InitializeAllUsertypes(L);
 
         SetupGettersAndSetters(Scene);
 
@@ -82,9 +60,6 @@ namespace engine::systems {
                 L_Entities[Entity.Id][ScriptIdx] = L.create_table();
             }
         }
-
-        auto Classes = LoadAndReplaceFile("res/Internal/Scripts/Classes.lua");
-        L.script(Classes);
 
         L["EntityID"] = 0;
         L["ScriptID"] = 0;
@@ -149,61 +124,22 @@ namespace engine::systems {
         // lua-interpreter just sees it as a variable name prefixed with "g_".
         RE2::GlobalReplace(&contents, "global (\\w+)", "g_\\1");
 
-        // RE2::GlobalReplace(&contents, "(g_)(\\s*[\\n;])", "\\1 = nil\\2");
-        // RE2::GlobalReplace(&contents, "global (\\w+)", "GameObject[\"Globals\"][\"\\1\"]");
-        // RE2::GlobalReplace(&contents, "(GameObject\\[\"Globals\"\\]\\[.+\\])(\\s*[\\n;])", "\\1 = nil\\2");
-
         return contents;
     }
 
-    void LuaScriptRunner::SetComponentsInLua(sptr<Scene> Scene, const Entity &E) {
-        const auto &ET      = Scene->GetComponent<Transform>(E);
-        const auto &EM      = Scene->GetComponent<Model>(E);
-        auto TransformTable = ET.GetTable(L);
-        /* auto ModelTable = EM.GetTable(L); */
-
-        auto L_Entity = L["Entities"][E.Id];
-
-        L_Entity[ET.GetName()] = TransformTable;
-        /* L_Entity[EM.GetName()] = ModelTable; */
-    }
-
-    void LuaScriptRunner::SetComponentsInEngine(sptr<Scene> Scene, const Entity &E) {
-        auto &ET = Scene->GetComponent<Transform>(E);
-        /* auto &EM = Scene->GetComponent<Model>(E); */
-
-        auto Entity = L["Entities"][E.Id];
-
-        auto L_TransformTable = Entity[ET.GetName()];
-        /* auto L_ModelTable = Entity[EM.GetName()]; */
-
-        ET.SetTable(L_TransformTable);
-        /* EM.SetTable(L_ModelTable); */
-    }
-
     void LuaScriptRunner::SetupGettersAndSetters(sptr<Scene> Scene) {
-        std::function<sol::table(int)> GetTransformFn = [Scene, this](int EID) {
-            return Scene->GetComponent<Transform>((EntityID) EID).GetTable(L);
+        std::function<Transform&(int)> GetTransformFn = [Scene, this](int EID) -> Transform& {
+            return Scene->GetComponent<Transform>((EntityID) EID);
         };
 
-        std::function<void(int, sol::table)> SetTransformFn = [Scene](int EID, sol::table Component) {
-            Scene->GetComponent<Transform>((EntityID) EID).SetTable(Component);
+        std::function<Model&(int)> GetModelFn = [Scene, this](int EID) -> Model& {
+            return Scene->GetComponent<Model>((EntityID) EID);
         };
-
-        /* std::function<sol::table(int)> GetModelFn = [Scene, this](int EID) { */
-        /*     return Scene->GetComponent<Model>((EntityID) EID).GetTable(L); */
-        /* }; */
-
-        /* std::function<void(int, sol::table)> SetModelFn = [Scene](int EID, sol::table Component) { */
-        /*     Scene->GetComonent<Model>((EntityID) EID).SetTable(Component); */
-        /* }; */
 
         {
             auto Components            = L["Components"].get_or_create<sol::table>();
             Components["GetTransform"] = GetTransformFn;
-            Components["SetTransform"] = SetTransformFn;
-            /* Components["GetModel"]     = GetModelFn; */
-            /* Components["SetModel"]     = SetModelFn; */
+            Components["GetModel"]     = GetModelFn;
         }
     }
 

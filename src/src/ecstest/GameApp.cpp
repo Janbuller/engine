@@ -2,9 +2,7 @@
 #include "GLFW/glfw3.h"
 #include "engine/core/Application.h"
 #include "engine/core/Keys.h"
-#include "engine/core/Logger.h"
 #include "engine/ecs/Entity.h"
-#include "engine/ecs/SceneView.h"
 #include "engine/ecs/components/Camera.h"
 #include "engine/ecs/components/Light.h"
 #include "engine/ecs/components/Model.h"
@@ -12,22 +10,12 @@
 #include "engine/ecs/components/Transform.h"
 #include "engine/ecs/systems/LuaScriptRunner.h"
 #include "engine/ecs/systems/ModelRenderer.h"
-#include "engine/ecs/systems/MoveDown.h"
 #include "engine/glcore/Shader.h"
-#include "engine/glcore/Texture2D.h"
 #include "engine/glcore/TextureCubemap.h"
 #include "engine/glcore/Window.h"
-#include "engine/model/Mesh.h"
 #include "engine/model/ModelLoader.h"
-#include "engine/model/Vertex.h"
 #include "engine/ressources/RessourceManager.h"
-#include "engine/ressources/SpecificRessourceManager.h"
-#include "glm/ext/matrix_transform.hpp"
 #include "glm/ext/quaternion_transform.hpp"
-#include "glm/gtc/quaternion.hpp"
-#include "glm/gtx/quaternion.hpp"
-#include "glm/gtx/string_cast.hpp"
-#include "siv/PerlinNoise.hpp"
 #include <bitset>
 #include <functional>
 #include <glad/glad.h>
@@ -46,11 +34,6 @@ namespace ecstest {
 
         engine::ModelLoader::DefaultShader = MainShader;
 
-        std::default_random_engine Gen;
-        std::uniform_real_distribution<float> PosDist{-10, 100};
-        std::uniform_real_distribution<float> RotDist{0, 6.283};
-        std::uniform_real_distribution<double> ScaleDist{1.0, 1.0};
-
         MainScene->RegisterComponentType<Transform>();
         MainScene->RegisterComponentType<Model>();
         MainScene->RegisterComponentType<Script>();
@@ -68,7 +51,7 @@ namespace ecstest {
         LuaScriptRunnerSignature.set(MainScene->GetComponentId<Script>(), true);
         MainScene->SetSystemSignature<LuaScriptRunner>(LuaScriptRunnerSignature);
 
-
+        // Create floor entity
         {
             auto &E  = MainScene->AddEntity();
             auto &ET = MainScene->AddComponent<Transform>(E);
@@ -82,6 +65,7 @@ namespace ecstest {
             ES.ScriptPaths.push_back("res/Application/Scripts/TestThingy.lua");
         }
 
+        // Create sun light entity
         {
             auto &E  = MainScene->AddEntity();
             auto &ET = MainScene->AddComponent<Transform>(E);
@@ -97,8 +81,29 @@ namespace ecstest {
             EL.Linear    = 0.35;
             EL.Quadratic = 0.44;
 
-            EL.Type = Light::DirectionalLight;
+            EL.Type = Light::LightType::DirectionalLight;
         }
+
+        // Create sun light entity
+        {
+            auto &E  = MainScene->AddEntity();
+            auto &ET = MainScene->AddComponent<Transform>(E);
+            auto &EL = MainScene->AddComponent<Light>(E);
+
+            ET.Rotation = glm::rotate(ET.Rotation, -0.66f, glm::vec3{1, 0, 0});
+            ET.Rotation = glm::rotate(ET.Rotation, 0.4f, glm::vec3{0, 0, 1});
+
+            EL.Color     = {0.9, 0.9, 1.0};
+            EL.Intensity = 0.2;
+
+            EL.Constant  = 1.0;
+            EL.Linear    = 0.35;
+            EL.Quadratic = 0.44;
+
+            EL.Type = Light::LightType::DirectionalLight;
+        }
+
+        // Create point light entity
         {
             auto &E  = MainScene->AddEntity();
             auto &ET = MainScene->AddComponent<Transform>(E);
@@ -113,9 +118,10 @@ namespace ecstest {
             EL.Linear    = 0.14;
             EL.Quadratic = 0.07;
 
-            EL.Type = Light::PointLight;
+            EL.Type = Light::LightType::PointLight;
         }
 
+        // Create camera entity
         {
             auto &Cam = MainScene->AddEntity();
             auto &CT  = MainScene->AddComponent<Transform>(Cam);
@@ -179,6 +185,11 @@ namespace ecstest {
             MainShader.Reload();
         if (key == KEY_ESCAPE && action == GLFW_PRESS)
             AppWindow.CaptureMouse(!AppWindow.IsMouseCaptured());
+
+        if(key == KEY_F1 && action == GLFW_PRESS)
+            glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
+        if(key == KEY_F2 && action == GLFW_PRESS)
+            glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 
         MainScene->GetSystem<LuaScriptRunner>()->OnKeyPressed(MainScene, Keys(key), action);
     }

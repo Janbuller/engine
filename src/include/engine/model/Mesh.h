@@ -1,8 +1,6 @@
 #pragma once
 
 #include "Vertex.h"
-#include "engine/glcore/Shader.h"
-#include "engine/glcore/Texture2D.h"
 #include "engine/model/Material.h"
 #include <vector>
 
@@ -13,6 +11,7 @@ namespace engine {
         std::vector<unsigned int> Indices;
         Material MeshMaterial;
 
+        Mesh() = default;
         Mesh(std::vector<Vertex> Vertices, std::vector<unsigned int> Indices, Material MeshMaterial);
         ~Mesh();
 

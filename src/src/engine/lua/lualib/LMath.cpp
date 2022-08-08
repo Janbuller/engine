@@ -1,18 +1,22 @@
-#include "engine/lualib/LMath.h"
+#include "engine/lua/lualib/LMath.h"
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
 #include <sol/sol.hpp>
 
-namespace engine::lualib {
+namespace engine::lua::lualib {
     void LoadMathLib(sol::table &L) {
         auto Math           = L["Math"].get_or_create<sol::table>();
-        Math["Rotate"]      = Rotate;
-        Math["RotatePoint"] = RotatePoint;
-        Math["InverseQuat"] = InverseQuat;
+        Math["Rotate"]      = sol::overload(Rotate_UD, Rotate_TABLE);
+        Math["RotatePoint"] = sol::overload(RotatePoint_UD, RotatePoint_TABLE);
+        Math["InverseQuat"] = sol::overload(InverseQuat_UD, InverseQuat_TABLE);
     }
 
-    sol::table Rotate(sol::this_state State, sol::table IQuat, float IAngle, sol::table IAxis) {
+    glm::quat Rotate_UD(glm::quat &Quat, float Angle, glm::vec3 &Axis) {
+        return glm::rotate(Quat, Angle, Axis);
+    }
+
+    sol::table Rotate_TABLE(sol::this_state State, sol::table IQuat, float IAngle, sol::table IAxis) {
         sol::state_view StateView = State;
 
         glm::quat StartQuat{IQuat["w"], IQuat["x"], IQuat["y"], IQuat["z"]};
@@ -30,7 +34,11 @@ namespace engine::lualib {
         return ReturnQuat;
     }
 
-    sol::table RotatePoint(sol::this_state State, sol::table IPoint, sol::table IQuat) {
+    glm::vec3 RotatePoint_UD(glm::vec3 Point, glm::quat Quat) {
+        return glm::rotate(Quat, Point);
+    }
+
+    sol::table RotatePoint_TABLE(sol::this_state State, sol::table IPoint, sol::table IQuat) {
         sol::state_view StateView = State;
 
         glm::quat Quat{IQuat["w"], IQuat["x"], IQuat["y"], IQuat["z"]};
@@ -46,7 +54,11 @@ namespace engine::lualib {
         return ReturnPoint;
     }
 
-    sol::table InverseQuat(sol::this_state State, sol::table IQuat) {
+    glm::quat InverseQuat_UD(glm::quat Quat) {
+        return glm::inverse(Quat);
+    }
+
+    sol::table InverseQuat_TABLE(sol::this_state State, sol::table IQuat) {
         sol::state_view StateView = State;
 
         glm::quat Quat{IQuat["w"], IQuat["x"], IQuat["y"], IQuat["z"]};

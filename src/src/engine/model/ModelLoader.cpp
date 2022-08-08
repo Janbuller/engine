@@ -85,7 +85,7 @@ namespace engine {
     }
 
     Material ModelLoader::ProcessMaterial(aiMaterial *Mat, std::string BaseDir) {
-        std::vector<std::pair<TextureType, glcore::Texture>> Textures;
+        std::vector<TypedTexture> Textures;
         auto diffuseMaps = LoadMaterialTexture(Mat, aiTextureType_DIFFUSE, TextureType::DIFFUSE, BaseDir);
         Textures.insert(Textures.end(), diffuseMaps.begin(), diffuseMaps.end());
         auto specularMaps = LoadMaterialTexture(Mat, aiTextureType_SPECULAR, TextureType::SPECULAR, BaseDir);
@@ -98,8 +98,8 @@ namespace engine {
         return Material{DefaultShader, Textures};
     }
 
-    std::vector<std::pair<TextureType, glcore::Texture2D>> ModelLoader::LoadMaterialTexture(aiMaterial *Mat, aiTextureType Type, TextureType EngineType, std::string BaseDir) {
-        std::vector<std::pair<TextureType, glcore::Texture2D>> Textures;
+    std::vector<TypedTexture> ModelLoader::LoadMaterialTexture(aiMaterial *Mat, aiTextureType Type, TextureType EngineType, std::string BaseDir) {
+        std::vector<TypedTexture> Textures;
 
         for (unsigned int i = 0; i < Mat->GetTextureCount(Type); i++) {
             aiString str;

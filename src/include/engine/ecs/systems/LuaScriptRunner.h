@@ -32,9 +32,6 @@ namespace engine::systems {
     private:
         std::string LoadAndReplaceFile(std::string filename);
 
-        void SetComponentsInLua(sptr<Scene> Scene, const Entity &E);
-        void SetComponentsInEngine(sptr<Scene> Scene, const Entity &E);
-
         void SetupGettersAndSetters(sptr<Scene> Scene);
 
         template<typename... Arguments>

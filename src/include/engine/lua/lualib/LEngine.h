@@ -1,5 +1,5 @@
 #include <sol/sol.hpp>
 
-namespace engine::lualib {
+namespace engine::lua::lualib {
     void LoadEngineLib(sol::state &L);
 }

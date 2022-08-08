@@ -27,6 +27,15 @@ namespace engine::components {
 
         static glm::mat4 GetProjectionMatrix(sptr<Scene> Scene, EntityID E, int Width, int Height);
         static glm::mat4 GetViewMatrix(sptr<Scene> Scene, EntityID E);
+
+        Camera() = default;
+        Camera(float FOV,
+               float Near,
+               float Far,
+               ProjectionType Projection) : FOV{FOV},
+                                            Near{Near},
+                                            Far{Far},
+                                            Projection{Projection} {}
     };
 
 }// namespace engine::components

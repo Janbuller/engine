@@ -15,7 +15,7 @@ namespace engine {
         EngineLogger->set_level(spdlog::level::trace);
         GameLogger->set_level(spdlog::level::trace);
 
-        EngineLogger->set_pattern("[%H:%M:%S] [%n] [%^%l%$] %v");
-        GameLogger->set_pattern("[%H:%M:%S] [%n]   [%^%l%$] %v");
+        EngineLogger->set_pattern("[%H:%M:%S] [%n] [%^%l%$]\t %v");
+        GameLogger->set_pattern("[%H:%M:%S] [%n]   [%^%l%$]\t %v");
     }
 }// namespace engine

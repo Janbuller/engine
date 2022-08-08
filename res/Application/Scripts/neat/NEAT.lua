@@ -46,13 +46,13 @@ function Pool:new(Inputs, Outputs, Population, outputAsBool, Time, newInstance, 
 
     setmetatable(pool, self)
     self.__index = self
-    
+
     -- add genomes, think they are like all instances of brains... but probly not...
 	for i=1,Population do
 		local basic = Genome:new(pool)
 		pool:addToSpecies(basic)
 	end
-    
+
     return pool
 end
 

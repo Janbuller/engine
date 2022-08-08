@@ -6,15 +6,6 @@ local MT = {
          end
       end
       return rawget(self, key)
-   end,
-   __newindex = function(self, key, v)
-      for funcName, func in pairs(Components) do
-         if "Set" .. key == funcName then
-            func(self.Id, v)
-            return;
-         end
-      end
-      rawset(self, key, v)
    end
 }
 

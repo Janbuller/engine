@@ -24,10 +24,10 @@ namespace engine::lua::usertypes {
 
         L.new_enum(
                 // Name
-                "Camera.ProjectionType",
+                "ProjectionType",
 
                 // Values
-                "PointLight", components::Camera::ProjectionType::PERSPECTIVE,
-                "PointLight", components::Camera::ProjectionType::ORTHOGRAPHIC);
+                "PERSPECTIVE", components::Camera::ProjectionType::PERSPECTIVE,
+                "ORTHOGRAPHIC", components::Camera::ProjectionType::ORTHOGRAPHIC);
     }
 }// namespace engine::lua::usertypes

@@ -23,7 +23,7 @@ namespace engine::lua::usertypes {
 
         L.new_enum(
                 // Name
-                "Light.LightType",
+                "LightType",
 
                 // Values
                 "PointLight", components::Light::LightType::PointLight,

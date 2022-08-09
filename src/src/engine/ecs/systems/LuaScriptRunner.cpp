@@ -1,6 +1,8 @@
 #include "engine/ecs/systems/LuaScriptRunner.h"
 #include "engine/Base.h"
 #include "engine/core/Keys.h"
+#include "engine/ecs/components/Camera.h"
+#include "engine/ecs/components/Light.h"
 #include "engine/ecs/components/Model.h"
 #include "engine/ecs/components/Script.h"
 #include "engine/ecs/components/Transform.h"
@@ -136,10 +138,20 @@ namespace engine::systems {
             return Scene->GetComponent<Model>((EntityID) EID);
         };
 
+        std::function<Light&(int)> GetLightFn = [Scene, this](int EID) -> Light& {
+            return Scene->GetComponent<Light>((EntityID) EID);
+        };
+
+        std::function<Camera&(int)> GetCameraFn = [Scene, this](int EID) -> Camera& {
+            return Scene->GetComponent<Camera>((EntityID) EID);
+        };
+
         {
             auto Components            = L["Components"].get_or_create<sol::table>();
             Components["GetTransform"] = GetTransformFn;
             Components["GetModel"]     = GetModelFn;
+            Components["GetLight"]     = GetLightFn;
+            Components["GetCamera"]    = GetCameraFn;
         }
     }
 

@@ -12,21 +12,21 @@ namespace engine::lua::usertypes {
                 sol::constructors<components::Light(glm::vec3, float, float, float, float, components::Light::LightType)>(),
 
                 // Member variables
-                "Color", &components::Light::Color,
+                "Color",     &components::Light::Color,
                 "Intensity", &components::Light::Intensity,
 
-                "Constant", &components::Light::Constant,
-                "Linear", &components::Light::Linear,
+                "Constant",  &components::Light::Constant,
+                "Linear",    &components::Light::Linear,
                 "Quadratic", &components::Light::Quadratic,
 
-                "Type", &components::Light::Type);
+                "Type",      &components::Light::Type);
 
         L.new_enum(
                 // Name
                 "LightType",
 
                 // Values
-                "PointLight", components::Light::LightType::PointLight,
+                "PointLight",       components::Light::LightType::PointLight,
                 "DirectionalLight", components::Light::LightType::DirectionalLight);
 
     }

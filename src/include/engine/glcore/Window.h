@@ -54,8 +54,8 @@ namespace engine::glcore {
 
             NONE
         };
-        KeyState GetKeyState(int key);
-        std::array<double, 2> GetCursorPos();
+        KeyState GetKeyState(int key) const;
+        std::array<double, 2> GetCursorPos() const;
 
         void SetKeyPressedCallback(std::function<void(int key, int scandcode, int action, int mods)> Callback);
         void SetMouseButtonPressedCallback(std::function<void(int button, int action, int mods)> Callback);

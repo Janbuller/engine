@@ -6,8 +6,7 @@ Yaw = 0;
 Pitch = 0;
 
 function Init()
-   LastMousePos.x = Input.GetMousePos(1);
-   LastMousePos.y = Input.GetMousePos(2);
+   LastMousePos = Engine.Input.GetMousePos();
 
    local ET = Entity.Transform;
 
@@ -19,8 +18,7 @@ end
 
 function Update(dt)
    local MousePos = Vec2:new(0)
-   MousePos.x = Input.GetMousePos(1);
-   MousePos.y = Input.GetMousePos(2);
+   MousePos = Engine.Input.GetMousePos();
 
    local MousePosRelative = LastMousePos - MousePos;
 
@@ -65,6 +63,17 @@ function Update(dt)
    end
    if Input.KeyDown.Q then
       ET.Position -= Up * dt * Speed;
+   end
+end
+
+function OnKeyPressed(Key, Action)
+   local EC = Entity.Camera;
+
+   if(Key == Input.Keys.KEY_F3 and Action == 1) then
+      EC.Projection = ProjectionType.ORTHOGRAPHIC;
+   end
+   if(Key == Input.Keys.KEY_F4 and Action == 1) then
+      EC.Projection = ProjectionType.PERSPECTIVE;
    end
 end
 

@@ -114,7 +114,7 @@ namespace engine::glcore {
         glfwSetWindowTitle(WindowHandle, title.c_str());
     }
 
-    Window::KeyState Window::GetKeyState(int key) {
+    Window::KeyState Window::GetKeyState(int key) const {
         int state = glfwGetKey(WindowHandle, key);
 
         if (state == GLFW_PRESS)
@@ -125,7 +125,7 @@ namespace engine::glcore {
         return Window::KeyState::NONE;
     }
 
-    std::array<double, 2> Window::GetCursorPos() {
+    std::array<double, 2> Window::GetCursorPos() const {
         double x, y;
         glfwGetCursorPos(WindowHandle, &x, &y);
 

@@ -17,9 +17,15 @@ Refactoring of shader code
 *** DONE Light Component
 *** TODO Change to new way of initializing references
 *** DONE Better way of initializing usertypes
-** TODO Custom lua library
+** DONE Custom lua library
 Instead of std::function and anonymous functions, make a complete
 lua-library in-tree, with all used functions.
+* TODO Seperate out header-only libraries into cmake libraries  :BuildSystem:
+** TODO stb
+** TODO siv
+* TODO Make a way to load images and models through lua                 :Lua:
+** TODO Images
+** TODO Models
 * TODO Make new renderer api                                       :Renderer:
 * TODO ECS-control from lua api                                         :Lua:
 * TODO Turn engine into cmake library                           :BuildSystem:

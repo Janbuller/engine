@@ -1,12 +1,14 @@
 #include "engine/ecs/systems/LuaScriptRunner.h"
 #include "engine/Base.h"
 #include "engine/core/Keys.h"
+#include "engine/ecs/SceneView.h"
 #include "engine/ecs/components/Camera.h"
 #include "engine/ecs/components/Light.h"
 #include "engine/ecs/components/Model.h"
 #include "engine/ecs/components/Script.h"
 #include "engine/ecs/components/Transform.h"
 #include "engine/lua/lualib/LEngine.h"
+#include "engine/lua/lualib/LInput.h"
 #include <fstream>
 #include <functional>
 #include <re2/re2.h>
@@ -51,23 +53,31 @@ namespace engine::systems {
         auto EntityScript = LoadAndReplaceFile("res/Internal/Scripts/Entity.lua");
         L.script(EntityScript);
 
+        // Get the lua function for making a new entity
         auto L_NewEntity = L["NewEntity"];
 
-        for (const auto &Entity : Entities) {
-            auto &EScript = Scene->GetComponent<Script>(Entity);
-
+        auto AllEnt = SceneView<>(Scene);
+        // Create entityobjects for all entities in the scene and make a table
+        // for each script.
+        for (const auto &Entity : AllEnt) {
             L_Entities[Entity.Id] = L_NewEntity(Entity.Id);
 
-            for (int ScriptIdx = 0; ScriptIdx < EScript.ScriptPaths.size(); ScriptIdx++) {
-                L_Entities[Entity.Id][ScriptIdx] = L.create_table();
+            // If the entity has a script component, create a table for all
+            // scripts.
+            if (Scene->HasComponent<Script>(Entity)) {
+                auto &EScript = Scene->GetComponent<Script>(Entity);
+
+                for (int ScriptIdx = 0; ScriptIdx < EScript.ScriptPaths.size(); ScriptIdx++) {
+                    L_Entities[Entity.Id][ScriptIdx] = L.create_table();
+                }
             }
         }
 
         L["EntityID"] = 0;
         L["ScriptID"] = 0;
 
-        auto GlobalMetaTable = LoadAndReplaceFile("res/Internal/Scripts/GlobalMetaTable.lua");
-        L.script(GlobalMetaTable);
+        auto GlobalMetaTableScript = LoadAndReplaceFile("res/Internal/Scripts/GlobalMetaTable.lua");
+        L.script(GlobalMetaTableScript);
 
         // Run through all scripts and initialize the semi-global
         // variables and functions.
@@ -86,6 +96,11 @@ namespace engine::systems {
         }
     }
 
+    void LuaScriptRunner::InitializeInput(glcore::Window* InputWindow) {
+        sol::table Engine = L["Engine"].get_or_create<sol::table>();
+        lua::lualib::LoadInputLib(Engine, InputWindow);
+    }
+
     void LuaScriptRunner::Init(sptr<Scene> Scene) {
         RunFunctionForAll(Scene, "Init");
     }
@@ -99,7 +114,7 @@ namespace engine::systems {
     }
 
     void LuaScriptRunner::OnKeyPressed(sptr<Scene> Scene, Keys Key, int Action) {
-        RunFunctionForAll(Scene, "OnKeyPressed", (int) Key, Action);
+        RunFunctionForAll(Scene, "OnKeyPressed", Key, Action);
     }
 
     std::string LuaScriptRunner::LoadAndReplaceFile(std::string filename) {
@@ -130,20 +145,20 @@ namespace engine::systems {
     }
 
     void LuaScriptRunner::SetupGettersAndSetters(sptr<Scene> Scene) {
-        std::function<Transform&(int)> GetTransformFn = [Scene, this](int EID) -> Transform& {
-            return Scene->GetComponent<Transform>((EntityID) EID);
+        std::function<Transform &(int)> GetTransformFn = [Scene](EntityID EID) -> Transform & {
+            return Scene->GetComponent<Transform>(EID);
         };
 
-        std::function<Model&(int)> GetModelFn = [Scene, this](int EID) -> Model& {
-            return Scene->GetComponent<Model>((EntityID) EID);
+        std::function<Model &(int)> GetModelFn = [Scene](EntityID EID) -> Model & {
+            return Scene->GetComponent<Model>(EID);
         };
 
-        std::function<Light&(int)> GetLightFn = [Scene, this](int EID) -> Light& {
-            return Scene->GetComponent<Light>((EntityID) EID);
+        std::function<Light &(int)> GetLightFn = [Scene](EntityID EID) -> Light & {
+            return Scene->GetComponent<Light>(EID);
         };
 
-        std::function<Camera&(int)> GetCameraFn = [Scene, this](int EID) -> Camera& {
-            return Scene->GetComponent<Camera>((EntityID) EID);
+        std::function<Camera &(int)> GetCameraFn = [Scene](EntityID EID) -> Camera & {
+            return Scene->GetComponent<Camera>(EID);
         };
 
         {

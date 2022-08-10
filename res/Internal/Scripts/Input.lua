@@ -123,23 +123,18 @@ Input.Keys = {
             ["KEY_MENU"] = 34
 }
 
-setmetatable(Input.KeyDown, {
+setmetatable(Input, {
 		__index = function(self, v)
-		   if Input.Keys["KEY_"..v] then
-		      return Input.IsKeyDown(Input.Keys["KEY_"..v]);
+		   if v == "Mouse" then
+		      return Engine.Input.GetMousePos();
 		   end
 		end
 })
 
-Mouse = {}
-setmetatable(Mouse, {
-		__index = function(selv, v)
-		   if v == "x" or v == "X" then
-		      return Input.GetMousePos(1);
-		   end
-
-		   if v == "y" or v == "Y" then
-		      return Input.GetMousePos(2);
+setmetatable(Input.KeyDown, {
+		__index = function(self, v)
+		   if Input.Keys["KEY_"..v] then
+		      return Engine.Input.IsKeyDown(Input.Keys["KEY_"..v]);
 		   end
 		end
 })

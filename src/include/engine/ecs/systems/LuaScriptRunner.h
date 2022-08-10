@@ -5,6 +5,7 @@
 #include "engine/ecs/Scene.h"
 #include "engine/ecs/components/Script.h"
 #include "engine/ecs/systems/ISystem.h"
+#include "engine/glcore/Window.h"
 #include <sol/sol.hpp>
 
 namespace engine::systems {
@@ -16,6 +17,7 @@ namespace engine::systems {
         LuaScriptRunner();
 
         void InitializeScripting(sptr<Scene> Scene);
+        void InitializeInput(glcore::Window* InputWindow);
 
         void Init(sptr<Scene> Scene) override;
         void Update(sptr<Scene> Scene, double DeltaTime) override;

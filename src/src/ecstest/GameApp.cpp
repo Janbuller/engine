@@ -84,30 +84,12 @@ namespace ecstest {
             EL.Type = Light::LightType::DirectionalLight;
         }
 
-        // Create sun light entity
-        {
-            auto &E  = MainScene->AddEntity();
-            auto &ET = MainScene->AddComponent<Transform>(E);
-            auto &EL = MainScene->AddComponent<Light>(E);
-
-            ET.Rotation = glm::rotate(ET.Rotation, -0.66f, glm::vec3{1, 0, 0});
-            ET.Rotation = glm::rotate(ET.Rotation, 0.4f, glm::vec3{0, 0, 1});
-
-            EL.Color     = {0.9, 0.9, 1.0};
-            EL.Intensity = 0.2;
-
-            EL.Constant  = 1.0;
-            EL.Linear    = 0.35;
-            EL.Quadratic = 0.44;
-
-            EL.Type = Light::LightType::DirectionalLight;
-        }
-
         // Create point light entity
         {
             auto &E  = MainScene->AddEntity();
             auto &ET = MainScene->AddComponent<Transform>(E);
             auto &EL = MainScene->AddComponent<Light>(E);
+            auto &ES = MainScene->AddComponent<Script>(E);
 
             ET.Position = {-1, 1, 0};
 
@@ -119,6 +101,8 @@ namespace ecstest {
             EL.Quadratic = 0.07;
 
             EL.Type = Light::LightType::PointLight;
+
+            ES.ScriptPaths.push_back("res/Application/Scripts/Light.lua");
         }
 
         // Create camera entity
@@ -149,18 +133,9 @@ namespace ecstest {
             MainScene->MainCam = Cam;
         }
 
-        MainScene->GetSystem<LuaScriptRunner>()->InitializeScripting(MainScene);
-
-        std::function<bool(int)> IsKeyDownFn = [this](int KeyNum) {
-            return AppWindow.GetKeyState(KeyNum) == engine::glcore::Window::KeyState::KEY_PRESS;
-        };
-        MainScene->GetSystem<LuaScriptRunner>()->AddLuaFunction(IsKeyDownFn, "Input", "IsKeyDown");
-
-        std::function<double(int)> GetMousePosFn = [this](int Axis) {
-            auto MousePos = AppWindow.GetCursorPos();
-            return MousePos[Axis - 1];
-        };
-        MainScene->GetSystem<LuaScriptRunner>()->AddLuaFunction(GetMousePosFn, "Input", "GetMousePos");
+        auto LSR = MainScene->GetSystem<LuaScriptRunner>();
+        LSR->InitializeScripting(MainScene);
+        LSR->InitializeInput(&AppWindow);
 
         MainScene->Init();
     }

@@ -1,9 +1,7 @@
 local MT = {
    __index = function(self, key)
       for funcName, func in pairs(Components) do
-         if "Get" .. key == funcName then
-            return func(self.Id)
-         end
+         return Components[key][self.Id]
       end
       return rawget(self, key)
    end

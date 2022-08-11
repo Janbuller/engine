@@ -17,7 +17,7 @@ namespace engine::systems {
         LuaScriptRunner();
 
         void InitializeScripting(sptr<Scene> Scene);
-        void InitializeInput(glcore::Window* InputWindow);
+        void InitializeInput(glcore::Window *InputWindow);
 
         void Init(sptr<Scene> Scene) override;
         void Update(sptr<Scene> Scene, double DeltaTime) override;
@@ -32,9 +32,20 @@ namespace engine::systems {
         }
 
     private:
-        std::string LoadAndReplaceFile(std::string filename);
+        std::string PreprocessFile(std::string filename);
 
-        void SetupGettersAndSetters(sptr<Scene> Scene);
+        void SetupComponents(sptr<Scene> Scene);
+
+        template<typename T>
+        void SetupComponent(sptr<Scene> Scene, std::string Name) {
+            auto Components = L["Components"].get_or_create<sol::table>();
+            Components[Name].get_or_create<sol::table>();
+
+            auto ComponentVec = Scene->GetComponentVector<T>();
+            for (const auto [EID, CID] : ComponentVec->EntityToComponentIdx) {
+                Components[Name][EID] = &Scene->GetComponent<T>(EID);
+            }
+        }
 
         template<typename... Arguments>
         void RunFunctionForAll(sptr<Scene> Scene, std::string Function, Arguments... Args);

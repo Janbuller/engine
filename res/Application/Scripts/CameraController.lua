@@ -5,10 +5,10 @@ Speed = 5;
 Yaw = 0;
 Pitch = 0;
 
+ET = Entity.Transform;
+
 function Init()
    LastMousePos = Engine.Input.GetMousePos();
-
-   local ET = Entity.Transform;
 
    ET.Position.x = -5;
    ET.Position.z = 5;
@@ -29,8 +29,6 @@ function Update(dt)
    else
       Speed = 5;
    end
-
-   local ET = Entity.Transform;
 
    Yaw += MousePosRelative.x * dt * 0.1;
    Pitch -= MousePosRelative.y * dt * 0.1;
@@ -66,7 +64,7 @@ function Update(dt)
    end
 end
 
-function OnKeyPressed(Key, Action)
+function OnKeyPressed2(Key, Action)
    local EC = Entity.Camera;
 
    if(Key == Input.Keys.KEY_F3 and Action == 1) then

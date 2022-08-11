@@ -106,6 +106,11 @@ namespace engine {
         }
 
         template<typename T>
+        sptr<ComponentVector<T>> GetComponentVector() {
+            return Components.GetComponentVector<T>();
+        }
+
+        template<typename T>
         sptr<T> RegisterSystem() {
             return Systems.RegisterSystem<T>();
         }

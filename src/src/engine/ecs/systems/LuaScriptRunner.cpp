@@ -45,20 +45,28 @@ namespace engine::systems {
         lua::lualib::LoadEngineLib(L);
         lua::usertypes::InitializeAllUsertypes(L);
 
-        SetupGettersAndSetters(Scene);
+        SetupComponents(Scene);
 
         auto L_Entities       = L.create_named_table("Entities");
         L_Entities["Globals"] = L.create_table();
 
-        auto EntityScript = LoadAndReplaceFile("res/Internal/Scripts/Entity.lua");
+        auto EntityScript = PreprocessFile("res/Internal/Scripts/Entity.lua");
         L.script(EntityScript);
+
+        // Creates temporary variables for the GlobalMetaTable Script
+        L["EntityID"] = 0;
+        L["ScriptID"] = 0;
+
+        // Run the GlobalMetaTable Script
+        auto GlobalMetaTableScript = PreprocessFile("res/Internal/Scripts/GlobalMetaTable.lua");
+        L.script(GlobalMetaTableScript);
 
         // Get the lua function for making a new entity
         auto L_NewEntity = L["NewEntity"];
 
-        auto AllEnt = SceneView<>(Scene);
         // Create entityobjects for all entities in the scene and make a table
         // for each script.
+        auto AllEnt = SceneView<>(Scene);
         for (const auto &Entity : AllEnt) {
             L_Entities[Entity.Id] = L_NewEntity(Entity.Id);
 
@@ -69,34 +77,21 @@ namespace engine::systems {
 
                 for (int ScriptIdx = 0; ScriptIdx < EScript.ScriptPaths.size(); ScriptIdx++) {
                     L_Entities[Entity.Id][ScriptIdx] = L.create_table();
+
+                    const auto &Path = EScript.ScriptPaths[ScriptIdx];
+
+                    auto ScriptSrc = PreprocessFile(Path);
+
+                    L["EntityID"] = Entity.Id;
+                    L["ScriptID"] = ScriptIdx;
+
+                    L.script(ScriptSrc);
                 }
-            }
-        }
-
-        L["EntityID"] = 0;
-        L["ScriptID"] = 0;
-
-        auto GlobalMetaTableScript = LoadAndReplaceFile("res/Internal/Scripts/GlobalMetaTable.lua");
-        L.script(GlobalMetaTableScript);
-
-        // Run through all scripts and initialize the semi-global
-        // variables and functions.
-        for (const auto &Entity : Entities) {
-            auto &EScript = Scene->GetComponent<Script>(Entity);
-            for (int ScriptIdx = 0; ScriptIdx < EScript.ScriptPaths.size(); ScriptIdx++) {
-                const auto &Path = EScript.ScriptPaths[ScriptIdx];
-
-                auto ScriptSrc = LoadAndReplaceFile(Path);
-
-                L["EntityID"] = Entity.Id;
-                L["ScriptID"] = ScriptIdx;
-
-                L.script(ScriptSrc);
             }
         }
     }
 
-    void LuaScriptRunner::InitializeInput(glcore::Window* InputWindow) {
+    void LuaScriptRunner::InitializeInput(glcore::Window *InputWindow) {
         sol::table Engine = L["Engine"].get_or_create<sol::table>();
         lua::lualib::LoadInputLib(Engine, InputWindow);
     }
@@ -117,7 +112,7 @@ namespace engine::systems {
         RunFunctionForAll(Scene, "OnKeyPressed", Key, Action);
     }
 
-    std::string LuaScriptRunner::LoadAndReplaceFile(std::string filename) {
+    std::string LuaScriptRunner::PreprocessFile(std::string filename) {
         std::ifstream file{filename};
         std::stringstream buffer;
         buffer << file.rdbuf();
@@ -144,30 +139,11 @@ namespace engine::systems {
         return contents;
     }
 
-    void LuaScriptRunner::SetupGettersAndSetters(sptr<Scene> Scene) {
-        std::function<Transform &(int)> GetTransformFn = [Scene](EntityID EID) -> Transform & {
-            return Scene->GetComponent<Transform>(EID);
-        };
-
-        std::function<Model &(int)> GetModelFn = [Scene](EntityID EID) -> Model & {
-            return Scene->GetComponent<Model>(EID);
-        };
-
-        std::function<Light &(int)> GetLightFn = [Scene](EntityID EID) -> Light & {
-            return Scene->GetComponent<Light>(EID);
-        };
-
-        std::function<Camera &(int)> GetCameraFn = [Scene](EntityID EID) -> Camera & {
-            return Scene->GetComponent<Camera>(EID);
-        };
-
-        {
-            auto Components            = L["Components"].get_or_create<sol::table>();
-            Components["GetTransform"] = GetTransformFn;
-            Components["GetModel"]     = GetModelFn;
-            Components["GetLight"]     = GetLightFn;
-            Components["GetCamera"]    = GetCameraFn;
-        }
+    void LuaScriptRunner::SetupComponents(sptr<Scene> Scene) {
+        SetupComponent<Transform>(Scene, "Transform");
+        SetupComponent<Model>(Scene, "Model");
+        SetupComponent<Light>(Scene, "Light");
+        SetupComponent<Camera>(Scene, "Camera");
     }
 
 

@@ -9,13 +9,13 @@ Refactoring of shader code
 * DONE Switch luabridge to sol                              :BuildSystem:Lua:
 * DONE Switch to luajit                                     :BuildSystem:Lua:
 * TODO Fix lua-variables only getting initialized on scene init     :BUG:Lua:
-* TODO Make lua api better                                              :Lua:
-** TODO References for components
+* DONE Make lua api better                                              :Lua:
+** DONE References for components
 *** DONE Transform Component
 *** DONE Model Component
 *** DONE Camera Component
 *** DONE Light Component
-*** TODO Change to new way of initializing references
+*** DONE Change to new way of initializing references
 *** DONE Better way of initializing usertypes
 ** DONE Custom lua library
 Instead of std::function and anonymous functions, make a complete

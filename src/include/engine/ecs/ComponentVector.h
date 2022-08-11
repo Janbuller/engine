@@ -14,13 +14,12 @@ namespace engine {
 
     template<typename T>
     class ComponentVector : public IComponentVector {
-    private:
+    public:
         std::unordered_map<EntityID, int> EntityToComponentIdx;
         std::unordered_map<int, EntityID> ComponentToEntityIdx;
 
         std::vector<T> Components;
 
-    public:
         T &AddComponent(Entity E) {
             if (EntityToComponentIdx.find(E.Id) != EntityToComponentIdx.end()) {
                 LOG_ENGINE_ERROR("Failed to remove add an already existing \"{0}\" component to an entity with id \"{1}\".", typeid(T).name(), E.Id);

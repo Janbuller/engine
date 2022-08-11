@@ -78,13 +78,6 @@ function Update(dt)
             Insert(EntModel.Meshes[1].Indices, i+size+1)
             Insert(EntModel.Meshes[1].Indices, i+size)
             Insert(EntModel.Meshes[1].Indices, i+1)
-
-            -- table.insert(EntModel.Meshes[1].Indices, i)
-            -- table.insert(EntModel.Meshes[1].Indices, i+size)
-            -- table.insert(EntModel.Meshes[1].Indices, i+1)
-            -- table.insert(EntModel.Meshes[1].Indices, i+1)
-            -- table.insert(EntModel.Meshes[1].Indices, i+size)
-            -- table.insert(EntModel.Meshes[1].Indices, i+size+1)
          end
 
          table.insert(Verts, vertex)
@@ -94,10 +87,6 @@ function Update(dt)
    EntModel.Meshes[1].Vertices = Verts
    EntModel.Meshes[1].Material = Mat;
    EntModel.Meshes[1]:SetupBuffers()
-
-   -- EntModel.Meshes[1].SetupBuffers();
-
-   -- Entity.Model = EntModel
 end
 
 function OnKeyPressed(Key, Action)

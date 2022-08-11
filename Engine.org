@@ -26,6 +26,8 @@ lua-library in-tree, with all used functions.
 * TODO Make a way to load images and models through lua                 :Lua:
 ** TODO Images
 ** TODO Models
+* TODO Add semiglobal variables                                         :Lua:
+Global for the entity, not script or global.
 * TODO Make new renderer api                                       :Renderer:
 * TODO ECS-control from lua api                                         :Lua:
 * TODO Turn engine into cmake library                           :BuildSystem:

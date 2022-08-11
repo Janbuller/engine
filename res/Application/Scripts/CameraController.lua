@@ -64,7 +64,7 @@ function Update(dt)
    end
 end
 
-function OnKeyPressed2(Key, Action)
+function OnKeyPressed(Key, Action)
    local EC = Entity.Camera;
 
    if(Key == Input.Keys.KEY_F3 and Action == 1) then

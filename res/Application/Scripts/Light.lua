@@ -2,7 +2,6 @@ Time = 0;
 Speed = 5;
 
 function Init()
-
 end
 
 function Update(dt)

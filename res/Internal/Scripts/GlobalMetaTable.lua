@@ -5,6 +5,9 @@ setmetatable(_G, {
 		   if key:sub(1, 2) == "g_" then
 		      rawset(Entities["Globals"], key, val)
 		   end
+		   if key:sub(1, 3) == "eg_" then
+		      rawset(Entities[EntityID]["EntGlobals"], key, val)
+		   end
 		   if key == "Entity" then
 		      rawset(Entities[EntityID], key, val)
 		   end
@@ -14,6 +17,10 @@ setmetatable(_G, {
 		__index = function (_G, key)
 		   if key:sub(1, 2) == "g_" then
 		      return rawget(Entities["Globals"], key)
+		   end
+
+		   if key:sub(1, 3) == "eg_" then
+		      return rawget(Entities[EntityID]["EntGlobals"], key)
 		   end
 
 		   if key == "Entity" then

@@ -69,6 +69,7 @@ namespace engine::systems {
         auto AllEnt = SceneView<>(Scene);
         for (const auto &Entity : AllEnt) {
             L_Entities[Entity.Id] = L_NewEntity(Entity.Id);
+            L_Entities[Entity.Id]["EntGlobals"] = L.create_table();
 
             // If the entity has a script component, create a table for all
             // scripts.

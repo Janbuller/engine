@@ -7,6 +7,8 @@ Quality = 8;
 
 Depth = 2
 
+eg_test = "tesgt"
+
 function Init()
    -- if not (EntityID == 0) then
    --    local model =  Entity.Model

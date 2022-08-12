@@ -16,6 +16,7 @@ namespace engine::systems {
         void Update(sptr<Scene> Scene, double DeltaTime) override{};
         void Exit(sptr<Scene> Scene) override {}
 
+        void EntityUpdated(sptr<Scene> Scene, Entity Ent) override{}
     public:
         void Render(sptr<Scene> Scene, int Width, int Height);
     };

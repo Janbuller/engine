@@ -1,5 +1,6 @@
 #pragma once
 
+#include "engine/Base.h"
 #include "engine/ecs/Entity.h"
 #include "engine/ecs/Scene.h"
 #include <set>
@@ -14,6 +15,8 @@ namespace engine {
             virtual void Init(sptr<Scene> Scene)                     = 0;
             virtual void Update(sptr<Scene> Scene, double DeltaTime) = 0;
             virtual void Exit(sptr<Scene> Scene)                     = 0;
+
+            virtual void EntityUpdated(sptr<Scene> Scene, Entity Ent) = 0;
         };
     }// namespace systems
 }// namespace engine

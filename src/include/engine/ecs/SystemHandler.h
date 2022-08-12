@@ -66,16 +66,22 @@ namespace engine {
             }
         }
 
-        void EntitySignatureChanged(Entity entity, std::bitset<MAX_COMPONENTS> entitySignature) {
+        void EntitySignatureChanged(sptr<Scene> Scene, Entity entity, std::bitset<MAX_COMPONENTS> entitySignature) {
             for (const auto &pair : Systems) {
                 const auto &TypeName        = pair.first;
                 const auto &System          = pair.second;
                 const auto &SystemSignature = Signatures[TypeName];
 
                 if ((entitySignature & SystemSignature) == SystemSignature) {
-                    System->Entities.insert(entity);
+                    if(!System->Entities.count(entity)) {
+                        System->Entities.insert(entity);
+                        System->EntityUpdated(Scene, entity);
+                    }
                 } else {
-                    System->Entities.erase(entity);
+                    if(System->Entities.count(entity)) {
+                        System->Entities.erase(entity);
+                        System->EntityUpdated(Scene, entity);
+                    }
                 }
             }
         }

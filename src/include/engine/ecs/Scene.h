@@ -34,6 +34,8 @@ namespace engine {
             auto NewId = EGen.GetNextId();
             Entities.push_back(Entity{NewId, std::bitset<MAX_COMPONENTS>()});
 
+            Systems.EntitySignatureChanged(shared_from_this(), Entities[NewId], Entities[NewId].ComponentSignature);
+
             return Entities.back();
         }
 
@@ -57,7 +59,7 @@ namespace engine {
             auto &Signature = E.ComponentSignature;
             Signature.set(GetComponentId<T>(), true);
 
-            Systems.EntitySignatureChanged(E, Signature);
+            Systems.EntitySignatureChanged(shared_from_this(), E, Signature);
             return NewComponent;
         }
 
@@ -68,7 +70,7 @@ namespace engine {
             auto &Signature = E.ComponentSignature;
             Signature.set(GetComponentId<T>(), true);
 
-            Systems.EntitySignatureChanged(E, Signature);
+            Systems.EntitySignatureChanged(shared_from_this(), E, Signature);
             return NewComponent;
         }
 
@@ -79,7 +81,7 @@ namespace engine {
             auto &Signature = E.ComponentSignature;
             Signature.set(GetComponentId<T>(), false);
 
-            Systems.EntitySignatureChanged(E, Signature);
+            Systems.EntitySignatureChanged(shared_from_this(), E, Signature);
         }
 
         template<typename T>

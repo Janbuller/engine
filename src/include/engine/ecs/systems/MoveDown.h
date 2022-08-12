@@ -10,5 +10,7 @@ namespace engine::systems {
         void Init(sptr<Scene> Scene) override{};
         void Update(sptr<Scene> Scene, double DeltaTime) override;
         void Exit(sptr<Scene> Scene) override{};
+
+        void EntityUpdated(sptr<Scene> Scene, Entity Ent) override{}
     };
 }// namespace engine::systems

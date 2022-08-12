@@ -25,10 +25,14 @@ namespace engine::systems {
 
         void OnKeyPressed(sptr<Scene> Scene, Keys Key, int Action);
 
+        void EntityUpdated(sptr<Scene> Scene, Entity Ent) override;
+
+        void SetupComponents(sptr<Scene> Scene);
+
     private:
         std::string PreprocessFile(std::string filename);
 
-        void SetupComponents(sptr<Scene> Scene);
+        void InitializeEntity(sptr<Scene> Scene, Entity Entity);
 
         template<typename T>
         void SetupComponent(sptr<Scene> Scene, std::string Name) {

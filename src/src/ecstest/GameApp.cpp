@@ -134,6 +134,7 @@ namespace ecstest {
         }
 
         auto LSR = MainScene->GetSystem<LuaScriptRunner>();
+        LSR->SetupComponents(MainScene);
         LSR->InitializeScripting(MainScene);
         LSR->InitializeInput(&AppWindow);
 

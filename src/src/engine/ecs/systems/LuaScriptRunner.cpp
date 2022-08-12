@@ -45,8 +45,6 @@ namespace engine::systems {
         lua::lualib::LoadEngineLib(L);
         lua::usertypes::InitializeAllUsertypes(L);
 
-        SetupComponents(Scene);
-
         auto L_Entities       = L.create_named_table("Entities");
         L_Entities["Globals"] = L.create_table();
 
@@ -61,34 +59,11 @@ namespace engine::systems {
         auto GlobalMetaTableScript = PreprocessFile("res/Internal/Scripts/GlobalMetaTable.lua");
         L.script(GlobalMetaTableScript);
 
-        // Get the lua function for making a new entity
-        auto L_NewEntity = L["NewEntity"];
-
         // Create entityobjects for all entities in the scene and make a table
         // for each script.
         auto AllEnt = SceneView<>(Scene);
         for (const auto &Entity : AllEnt) {
-            L_Entities[Entity.Id] = L_NewEntity(Entity.Id);
-            L_Entities[Entity.Id]["EntGlobals"] = L.create_table();
-
-            // If the entity has a script component, create a table for all
-            // scripts.
-            if (Scene->HasComponent<Script>(Entity)) {
-                auto &EScript = Scene->GetComponent<Script>(Entity);
-
-                for (int ScriptIdx = 0; ScriptIdx < EScript.ScriptPaths.size(); ScriptIdx++) {
-                    L_Entities[Entity.Id][ScriptIdx] = L.create_table();
-
-                    const auto &Path = EScript.ScriptPaths[ScriptIdx];
-
-                    auto ScriptSrc = PreprocessFile(Path);
-
-                    L["EntityID"] = Entity.Id;
-                    L["ScriptID"] = ScriptIdx;
-
-                    L.script(ScriptSrc);
-                }
-            }
+            InitializeEntity(Scene, Entity);
         }
     }
 
@@ -111,6 +86,10 @@ namespace engine::systems {
 
     void LuaScriptRunner::OnKeyPressed(sptr<Scene> Scene, Keys Key, int Action) {
         RunFunctionForAll(Scene, "OnKeyPressed", Key, Action);
+    }
+
+    void LuaScriptRunner::EntityUpdated(sptr<Scene> Scene, Entity Ent) {
+        /* InitializeEntity(Scene, Ent); */
     }
 
     std::string LuaScriptRunner::PreprocessFile(std::string filename) {
@@ -138,6 +117,35 @@ namespace engine::systems {
         RE2::GlobalReplace(&contents, "global (\\w+)", "g_\\1");
 
         return contents;
+    }
+
+    void LuaScriptRunner::InitializeEntity(sptr<Scene> Scene, Entity Entity) {
+        // Get the lua function for making a new entity
+        auto L_NewEntity = L["NewEntity"];
+
+        // Create entityobjects for all entities in the scene and make a table
+        // for each script.
+        L["Entities"][Entity.Id]               = L_NewEntity(Entity.Id);
+        L["Entities"][Entity.Id]["EntGlobals"] = L.create_table();
+
+        // If the entity has a script component, create a table for all
+        // scripts.
+        if (Scene->HasComponent<Script>(Entity)) {
+            auto &EScript = Scene->GetComponent<Script>(Entity);
+
+            for (int ScriptIdx = 0; ScriptIdx < EScript.ScriptPaths.size(); ScriptIdx++) {
+                L["Entities"][Entity.Id][ScriptIdx] = L.create_table();
+
+                const auto &Path = EScript.ScriptPaths[ScriptIdx];
+
+                auto ScriptSrc = PreprocessFile(Path);
+
+                L["EntityID"] = Entity.Id;
+                L["ScriptID"] = ScriptIdx;
+
+                L.script(ScriptSrc);
+            }
+        }
     }
 
     void LuaScriptRunner::SetupComponents(sptr<Scene> Scene) {

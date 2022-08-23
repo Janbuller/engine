@@ -2,6 +2,7 @@
 #include "glm/gtx/string_cast.hpp"
 #include <glm/detail/type_vec3.hpp>
 #include <glm/glm.hpp>
+#include <fmt/format.h>
 
 namespace engine::lua::usertypes {
     void InitializeVec3(sol::state &L) {
@@ -57,7 +58,7 @@ namespace engine::lua::usertypes {
                 "B", &glm::vec3::z,
 
                 // Meta Functions
-                sol::meta_function::to_string, [](glm::vec3 &v) { return glm::to_string(v); },
+                sol::meta_function::to_string, [](glm::vec3 &v) { return fmt::format("Vec3.new({0}, {1}, {2})", v.x, v.y, v.z); },
                 sol::meta_function::equal_to, [](glm::vec3 &v1, glm::vec3 &v2) { return v1 == v2; },
                 sol::meta_function::addition, add_overloads,
                 sol::meta_function::subtraction, sub_overloads,

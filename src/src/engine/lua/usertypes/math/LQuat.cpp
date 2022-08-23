@@ -1,5 +1,6 @@
 #include "engine/lua/usertypes/math/LQuat.h"
 #include "glm/gtx/string_cast.hpp"
+#include <fmt/format.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtx/quaternion.hpp>
@@ -36,7 +37,7 @@ namespace engine::lua::usertypes {
                 "Z", &glm::quat::z,
 
                 // Meta Functions
-                sol::meta_function::to_string, [](glm::quat &v) { return glm::to_string(v); },
+                sol::meta_function::to_string, [](glm::quat &v) { return fmt::format("Quat.new({0}, {1}, {2}, {3})", v.w, v.x, v.y, v.z); },
                 sol::meta_function::equal_to, [](glm::quat &v1, glm::quat &v2) { return v1 == v2; },
                 /* sol::meta_function::multiplication, mul_overloads, */
                 sol::meta_function::unary_minus, [](glm::quat &v) { return -v; },

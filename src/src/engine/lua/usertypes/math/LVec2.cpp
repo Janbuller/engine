@@ -1,5 +1,6 @@
 #include "engine/lua/usertypes/math/LVec2.h"
 #include "glm/gtx/string_cast.hpp"
+#include <fmt/format.h>
 #include <glm/detail/type_vec3.hpp>
 #include <glm/glm.hpp>
 
@@ -45,7 +46,7 @@ namespace engine::lua::usertypes {
                 "Y", &glm::vec2::y,
 
                 // Meta Functions
-                sol::meta_function::to_string, [](glm::vec2 &v) { return glm::to_string(v); },
+                sol::meta_function::to_string, [](glm::vec2 &v) { return fmt::format("Vec2.new({0}, {1})", v.x, v.y); },
                 sol::meta_function::equal_to, [](glm::vec2 &v1, glm::vec2 &v2) { return v1 == v2; },
                 sol::meta_function::addition, add_overloads,
                 sol::meta_function::subtraction, sub_overloads,

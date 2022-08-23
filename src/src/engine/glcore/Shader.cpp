@@ -45,7 +45,7 @@ namespace engine::glcore {
 
         unsigned int VertexID, FragmentID;
         int Success;
-        unsigned int InfoLogLen = 1024;
+        const unsigned int InfoLogLen = 1024;
         char InfoLog[InfoLogLen];
 
         VertexID = glCreateShader(GL_VERTEX_SHADER);

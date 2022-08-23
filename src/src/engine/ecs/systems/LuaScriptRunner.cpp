@@ -167,7 +167,7 @@ namespace engine::systems {
                 L["EntityID"] = Entity.Id;
                 L["ScriptID"] = ScriptIdx;
 
-                auto L_Func = L_EntityScript[Function];
+                sol::function L_Func = L_EntityScript[Function];
                 if (L_Func) {
                     L_Func(Args...);
                 }

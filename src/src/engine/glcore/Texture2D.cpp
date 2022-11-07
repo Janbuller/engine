@@ -16,7 +16,7 @@ namespace engine::glcore {
         unsigned int TextureID;
         glGenTextures(1, &TextureID);
 
-        GLenum Format;
+        GLenum Format = GL_RG;
         if (TD.ComponentAmount == 1)
             Format = GL_RED;
         else if (TD.ComponentAmount == 3)

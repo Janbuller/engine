@@ -31,7 +31,7 @@ namespace ecstest {
 
         engine::RessourceManager::RegisterRessourceType<Model>();
         engine::RessourceManager::RegisterRessourceType<engine::glcore::TextureData>();
-
+        
         engine::ModelLoader::DefaultShader = MainShader;
 
         MainScene->RegisterComponentType<Transform>();
@@ -51,6 +51,11 @@ namespace ecstest {
         LuaScriptRunnerSignature.set(MainScene->GetComponentId<Script>(), true);
         MainScene->SetSystemSignature<LuaScriptRunner>(LuaScriptRunnerSignature);
 
+
+        auto LSR = MainScene->GetSystem<LuaScriptRunner>();
+        LSR->SetupComponents(MainScene);
+        LSR->InitializeScripting(MainScene);
+        LSR->InitializeInput(&AppWindow);
         // Create floor entity
         {
             auto &E  = MainScene->AddEntity();
@@ -62,7 +67,8 @@ namespace ecstest {
 
             EM = engine::RessourceManager::Get<Model>("res/Application/Models/pavement_floor/floor.fbx");
 
-            ES.ScriptPaths.push_back("res/Application/Scripts/TestThingy.lua");
+            ES.AddScript("res/Application/Scripts/TestThingy.lua");
+            LSR->AnyEntityUpdated(MainScene, E);
         }
 
         // Create sun light entity
@@ -70,6 +76,7 @@ namespace ecstest {
             auto &E  = MainScene->AddEntity();
             auto &ET = MainScene->AddComponent<Transform>(E);
             auto &EL = MainScene->AddComponent<Light>(E);
+            /* auto &ES = MainScene->AddComponent<Script>(E); */
 
             ET.Rotation = glm::rotate(ET.Rotation, 0.66f, glm::vec3{1, 0, 0});
             ET.Rotation = glm::rotate(ET.Rotation, 0.4f, glm::vec3{0, 0, 1});
@@ -84,27 +91,6 @@ namespace ecstest {
             EL.Type = Light::LightType::DirectionalLight;
         }
 
-        // Create point light entity
-        {
-            auto &E  = MainScene->AddEntity();
-            auto &ET = MainScene->AddComponent<Transform>(E);
-            auto &EL = MainScene->AddComponent<Light>(E);
-            auto &ES = MainScene->AddComponent<Script>(E);
-
-            ET.Position = {-1, 1, 0};
-
-            EL.Color     = {1, 0.97, 0.94};
-            EL.Intensity = 5.0;
-
-            EL.Constant  = 1.0;
-            EL.Linear    = 0.14;
-            EL.Quadratic = 0.07;
-
-            EL.Type = Light::LightType::PointLight;
-
-            ES.ScriptPaths.push_back("res/Application/Scripts/Light.lua");
-        }
-
         // Create camera entity
         {
             auto &Cam = MainScene->AddEntity();
@@ -113,7 +99,8 @@ namespace ecstest {
             auto &CS  = MainScene->AddComponent<Script>(Cam);
 
             /* CC.Projection = engine::components::Camera::ProjectionType::ORTHOGRAPHIC; */
-            CS.ScriptPaths.push_back("res/Application/Scripts/CameraController.lua");
+            CS.AddScript("res/Application/Scripts/CameraController.lua");
+            LSR->AnyEntityUpdated(MainScene, Cam);
 
             // Cubemap loading
             {
@@ -133,10 +120,28 @@ namespace ecstest {
             MainScene->MainCam = Cam;
         }
 
-        auto LSR = MainScene->GetSystem<LuaScriptRunner>();
-        LSR->SetupComponents(MainScene);
-        LSR->InitializeScripting(MainScene);
-        LSR->InitializeInput(&AppWindow);
+        // Create point light entity
+        {
+            auto &E  = MainScene->AddEntity();
+            PointLight = E;
+            auto &ET = MainScene->AddComponent<Transform>(E);
+            auto &EL = MainScene->AddComponent<Light>(E);
+            auto &ES = MainScene->AddComponent<Script>(E);
+
+            ET.Position = {-1, 1, 0};
+
+            EL.Color     = {1, 0.97, 0.94};
+            EL.Intensity = 5.0;
+
+            EL.Constant  = 1.0;
+            EL.Linear    = 0.14;
+            EL.Quadratic = 0.07;
+
+            EL.Type = Light::LightType::PointLight;
+
+            ES.AddScript("res/Application/Scripts/Light.lua");
+            LSR->AnyEntityUpdated(MainScene, E);
+        }
 
         MainScene->Init();
     }
@@ -157,6 +162,11 @@ namespace ecstest {
 
     void GameApp::onKeyPressed(int key, int scancode, int action, int mods) {
         using namespace engine;
+
+        if(MainScene->HasEntity(PointLight)) {
+            /* MainScene->RemoveEntity(PointLight); */
+        }
+
         if (key == KEY_R && action == GLFW_PRESS)
             MainShader.Reload();
         if (key == KEY_ESCAPE && action == GLFW_PRESS)
@@ -167,6 +177,27 @@ namespace ecstest {
         if(key == KEY_F2 && action == GLFW_PRESS)
             glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 
+        auto LSR = MainScene->GetSystem<LuaScriptRunner>();
+        if(key == KEY_F6 && action == GLFW_PRESS) {
+            LSR->AnyEntityUpdated(MainScene, PointLight);
+        }
+
+        // Create floor entity
+        if(key == KEY_F5 && action == GLFW_PRESS)
+        {
+            auto &E  = MainScene->AddEntity();
+            auto &ET = MainScene->AddComponent<Transform>(E);
+            auto &EM = MainScene->AddComponent<Model>(E);
+            /* auto &ES = MainScene->AddComponent<Script>(E); */
+
+            ET.Position.y += 5;
+            ET.Scale.x = 100;
+            ET.Scale.z = 100;
+
+            EM = engine::RessourceManager::Get<Model>("res/Application/Models/wood_floor/floor.obj");
+
+            /* ES.ScriptPaths.push_back("res/Application/Scripts/TestThingy.lua"); */
+        }
         MainScene->GetSystem<LuaScriptRunner>()->OnKeyPressed(MainScene, Keys(key), action);
     }
 

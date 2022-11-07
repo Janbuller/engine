@@ -26,6 +26,8 @@ namespace engine {
         auto CreatedModel = std::make_shared<components::Model>();
         ProcessNode(Scene->mRootNode, Scene, CreatedModel, BaseDir);
 
+        CreatedModel->LastLoadPath = Path;
+
         return CreatedModel;
     }
 

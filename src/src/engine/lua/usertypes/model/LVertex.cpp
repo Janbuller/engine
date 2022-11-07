@@ -1,5 +1,6 @@
 #include "engine/lua/usertypes/model/LVertex.h"
 #include "engine/model/Vertex.h"
+#include <fmt/format.h>
 
 namespace engine::lua::usertypes {
     void InitializeVertex(sol::state &L) {

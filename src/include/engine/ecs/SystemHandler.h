@@ -72,6 +72,7 @@ namespace engine {
                 const auto &System          = pair.second;
                 const auto &SystemSignature = Signatures[TypeName];
 
+                System->AnyEntityUpdated(Scene, entity);
                 if ((entitySignature & SystemSignature) == SystemSignature) {
                     if(!System->Entities.count(entity)) {
                         System->Entities.insert(entity);

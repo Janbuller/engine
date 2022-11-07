@@ -12,5 +12,8 @@ namespace engine::components {
 
         Script() = default;
         Script(std::vector<std::string> ScriptPaths) : ScriptPaths{ScriptPaths} {}
+
+        void AddScript(std::string Filename);
+        void RemoveScript(std::string Filename);
     };
 }// namespace engine::components

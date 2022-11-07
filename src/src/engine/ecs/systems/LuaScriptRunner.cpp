@@ -48,23 +48,25 @@ namespace engine::systems {
         auto L_Entities       = L.create_named_table("Entities");
         L_Entities["Globals"] = L.create_table();
 
-        auto EntityScript = PreprocessFile("res/Internal/Scripts/Entity.lua");
-        L.script(EntityScript);
-
-        // Creates temporary variables for the GlobalMetaTable Script
+        // Creates temporary variables for the GlobalMetaTable Script and
+        // EntityCreator Script.
         L["EntityID"] = 0;
         L["ScriptID"] = 0;
 
-        // Run the GlobalMetaTable Script
-        auto GlobalMetaTableScript = PreprocessFile("res/Internal/Scripts/GlobalMetaTable.lua");
-        L.script(GlobalMetaTableScript);
+        L["Entities"][0]    = L.create_table();
+        L["Entities"][0][0] = L.create_table();
 
-        // Create entityobjects for all entities in the scene and make a table
-        // for each script.
-        auto AllEnt = SceneView<>(Scene);
-        for (const auto &Entity : AllEnt) {
-            InitializeEntity(Scene, Entity);
-        }
+        RunScript("res/Internal/Scripts/Entity.lua");
+
+        // Run the GlobalMetaTable Script
+        RunScript("res/Internal/Scripts/GlobalMetaTable.lua");
+
+        /* // Create entityobjects for all entities in the scene and make a table */
+        /* // for each script. */
+        /* auto AllEnt = SceneView<>(Scene); */
+        /* for (const auto &Entity : AllEnt) { */
+        /*     InitializeEntity(Scene, Entity); */
+        /* } */
     }
 
     void LuaScriptRunner::InitializeInput(glcore::Window *InputWindow) {
@@ -73,6 +75,12 @@ namespace engine::systems {
     }
 
     void LuaScriptRunner::Init(sptr<Scene> Scene) {
+        // Create entityobjects for all entities in the scene and make a table
+        // for each script.
+        auto AllEnt = SceneView<>(Scene);
+        for (const auto &Entity : AllEnt) {
+            /* InitializeEntity(Scene, Entity); */
+        }
         RunFunctionForAll(Scene, "Init");
     }
 
@@ -88,8 +96,15 @@ namespace engine::systems {
         RunFunctionForAll(Scene, "OnKeyPressed", Key, Action);
     }
 
-    void LuaScriptRunner::EntityUpdated(sptr<Scene> Scene, Entity Ent) {
-        /* InitializeEntity(Scene, Ent); */
+    void LuaScriptRunner::AnyEntityUpdated(sptr<Scene> Scene, Entity Ent) {
+        SetupComponents(Scene);
+        if (Entities.count(Ent)) {
+            // Entity was added.
+            InitializeEntity(Scene, Ent);
+        } else {
+            //Entity was removed.
+            L["Entities"][Ent.Id] = sol::nil;
+        }
     }
 
     std::string LuaScriptRunner::PreprocessFile(std::string filename) {
@@ -119,6 +134,11 @@ namespace engine::systems {
         return contents;
     }
 
+    void LuaScriptRunner::RunScript(std::string Filename) {
+        auto GlobalMetaTableScript = PreprocessFile(Filename);
+        L.script(GlobalMetaTableScript, Filename);
+    }
+
     void LuaScriptRunner::InitializeEntity(sptr<Scene> Scene, Entity Entity) {
         // Get the lua function for making a new entity
         auto L_NewEntity = L["NewEntity"];
@@ -132,23 +152,21 @@ namespace engine::systems {
         // scripts.
         if (Scene->HasComponent<Script>(Entity)) {
             auto &EScript = Scene->GetComponent<Script>(Entity);
-
             for (int ScriptIdx = 0; ScriptIdx < EScript.ScriptPaths.size(); ScriptIdx++) {
                 L["Entities"][Entity.Id][ScriptIdx] = L.create_table();
 
                 const auto &Path = EScript.ScriptPaths[ScriptIdx];
 
-                auto ScriptSrc = PreprocessFile(Path);
-
                 L["EntityID"] = Entity.Id;
                 L["ScriptID"] = ScriptIdx;
 
-                L.script(ScriptSrc);
+                RunScript(Path);
             }
         }
     }
 
     void LuaScriptRunner::SetupComponents(sptr<Scene> Scene) {
+        auto Components = L.create_named_table("Components");
         SetupComponent<Transform>(Scene, "Transform");
         SetupComponent<Model>(Scene, "Model");
         SetupComponent<Light>(Scene, "Light");
@@ -168,7 +186,7 @@ namespace engine::systems {
                 L["ScriptID"] = ScriptIdx;
 
                 sol::function L_Func = L_EntityScript[Function];
-                if (L_Func) {
+                if (L_Func.valid()) {
                     L_Func(Args...);
                 }
             }

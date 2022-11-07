@@ -17,7 +17,7 @@ namespace engine::glcore {
         glGenTextures(1, &TextureID);
 
         for (int i = 0; i < 6; i++) {
-            GLenum Format;
+            GLenum Format = GL_RG;
             if (TD[i].ComponentAmount == 1)
                 Format = GL_RED;
             else if (TD[i].ComponentAmount == 3)

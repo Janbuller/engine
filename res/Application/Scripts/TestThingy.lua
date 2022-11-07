@@ -7,8 +7,6 @@ Quality = 8;
 
 Depth = 2
 
-eg_test = "tesgt"
-
 function Init()
    -- if not (EntityID == 0) then
    --    local model =  Entity.Model
@@ -77,6 +75,17 @@ function Update(dt)
             Insert(EntModel.Meshes[1].Indices, i+1)
             Insert(EntModel.Meshes[1].Indices, i+size)
             Insert(EntModel.Meshes[1].Indices, i)
+
+            -- Norm = Vec3.new()
+            -- Norm = Vec3.Cross(
+            --    EntModel.Meshes[1].Vertices[i+size].Position - EntModel.Meshes[1].Vertices[i+1].Position,
+            --    EntModel.Meshes[1].Vertices[i].Position      - EntModel.Meshes[1].Vertices[i+1].Position
+            --    );
+
+            -- EntModel.Meshes[1].Vertices[i].Normal = Norm;
+            -- EntModel.Meshes[1].Vertices[i+1].Normal = Norm;
+            -- EntModel.Meshes[1].Vertices[i+size].Normal = Norm;
+
             Insert(EntModel.Meshes[1].Indices, i+size+1)
             Insert(EntModel.Meshes[1].Indices, i+size)
             Insert(EntModel.Meshes[1].Indices, i+1)

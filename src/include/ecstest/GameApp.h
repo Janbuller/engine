@@ -23,6 +23,8 @@ namespace ecstest {
 
         engine::sptr<engine::Scene> MainScene = std::make_shared<engine::Scene>();
 
+        engine::Entity PointLight;
+
     private:
         void onCreate() override;
         bool onUpdate() override;

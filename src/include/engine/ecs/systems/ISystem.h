@@ -17,6 +17,7 @@ namespace engine {
             virtual void Exit(sptr<Scene> Scene)                     = 0;
 
             virtual void EntityUpdated(sptr<Scene> Scene, Entity Ent) = 0;
+            virtual void AnyEntityUpdated(sptr<Scene> Scene, Entity Ent) = 0;
         };
     }// namespace systems
 }// namespace engine

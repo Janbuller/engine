@@ -21,6 +21,7 @@ namespace engine::components {
         auto &ET = Scene->GetComponent<Transform>(E);
         auto &EC = Scene->GetComponent<Camera>(E);
 
+        /* LOG_ENGINE_CRITICAL(glm::to_string(ET.Position)); */
         glm::vec3 Front = glm::rotate(glm::inverse(ET.Rotation), glm::vec3(0.0, 0.0, -1.0));
         glm::vec3 Up    = glm::rotate(glm::inverse(ET.Rotation), glm::vec3(0.0, 1.0, 0.0));
         return glm::lookAt(ET.Position, ET.Position + Front, Up);

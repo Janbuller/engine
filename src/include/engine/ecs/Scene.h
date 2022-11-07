@@ -6,6 +6,7 @@
 #include "EntityGenerator.h"
 #include "SystemHandler.h"
 #include "engine/ecs/components/Transform.h"
+/* #include "engine/ecs/systems/LuaScriptRunner.h" */
 #include <algorithm>
 #include <bitset>
 #include <memory>
@@ -40,11 +41,18 @@ namespace engine {
         }
 
         void RemoveEntity(Entity E) {
+            Systems.EntitySignatureChanged(shared_from_this(), Entities[E.Id], 0);
+
             Entities.erase(std::find(Entities.begin(), Entities.end(), E));
             EGen.RemoveEntityId(E.Id);
 
+            
             Components.RemoveEntity(E);
             Systems.RemoveEntity(E);
+        }
+
+        bool HasEntity(Entity E) {
+            return std::find(Entities.begin(), Entities.end(), E) != Entities.end();
         }
 
         template<typename T>

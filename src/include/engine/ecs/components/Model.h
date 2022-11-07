@@ -7,6 +7,8 @@
 
 namespace engine::components {
     struct Model {
+        std::string LastLoadPath;
+
         bool Visible = true;
         std::vector<Mesh> Meshes;
 

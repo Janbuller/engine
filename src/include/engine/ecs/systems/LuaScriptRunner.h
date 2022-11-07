@@ -11,9 +11,9 @@
 namespace engine::systems {
     class LuaScriptRunner : public ISystem {
     private:
-        sol::state L;
 
     public:
+        sol::state L;
         LuaScriptRunner();
 
         void InitializeScripting(sptr<Scene> Scene);
@@ -25,12 +25,14 @@ namespace engine::systems {
 
         void OnKeyPressed(sptr<Scene> Scene, Keys Key, int Action);
 
-        void EntityUpdated(sptr<Scene> Scene, Entity Ent) override;
+        void EntityUpdated(sptr<Scene> Scene, Entity Ent) override{}
+        void AnyEntityUpdated(sptr<Scene> Scene, Entity Ent) override;
 
         void SetupComponents(sptr<Scene> Scene);
 
     private:
         std::string PreprocessFile(std::string filename);
+        void RunScript(std::string Filename);
 
         void InitializeEntity(sptr<Scene> Scene, Entity Entity);
 

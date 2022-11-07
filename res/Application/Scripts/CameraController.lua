@@ -17,6 +17,11 @@ function Init()
 end
 
 function Update(dt)
+   -- for i,v in pairs(Entities) do
+   --    print(i, v);
+   -- end
+   -- print();
+
    local MousePos = Vec2:new(0)
    MousePos = Engine.Input.GetMousePos();
 

@@ -1,4 +1,6 @@
 #include "engine/ecs/components/Transform.h"
+#include "engine/Base.h"
+#include "glm/gtx/string_cast.hpp"
 
 namespace engine::components {
     glm::mat4 Transform::GetTransformMatrix() const {

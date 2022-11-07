@@ -27,8 +27,7 @@ setmetatable(_G, {
 		      return rawget(Entities, EntityID)
 		   end
 
-		   -- print(Entities, EntityID, ScriptID, key);
-		   -- print( Entities[EntityID] );
+		   -- return rawget(rawget(rawget(Entities, EntityID), ScriptID), key);
 		   return rawget(Entities[EntityID][ScriptID], key)
 		end,
 })

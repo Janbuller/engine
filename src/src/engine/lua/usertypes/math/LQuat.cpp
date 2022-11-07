@@ -7,15 +7,6 @@
 
 namespace engine::lua::usertypes {
     void InitializeQuat(sol::state &L) {
-
-        // Create overloads for the multiplication operator
-        auto mul_overloads = sol::overload(
-                [](const glm::quat &v1, const glm::quat &v2) -> glm::quat { return v1 * v2; },
-                [](const glm::quat &v1, const glm::vec3 &v2) -> glm::vec3 { return v1 * v2; },
-                [](const glm::vec3 &v1, const glm::quat &v2) -> glm::vec3 { return v1 * v2; },
-                [](const glm::quat &v1, const float &v) -> glm::quat { return v * v1; },
-                [](const float v, const glm::quat &v1) -> glm::quat { return v * v1; });
-
         // Register the new usertype
         L.new_usertype<glm::quat>(
                 // Name

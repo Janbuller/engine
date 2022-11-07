@@ -12,6 +12,7 @@ namespace engine::lua::usertypes {
                 sol::constructors<components::Model()>(),
 
                 // Member variables
+                "LastLoadPath", &components::Model::LastLoadPath,
                 "Visible", &components::Model::Visible,
                 "Meshes",    &components::Model::Meshes);
     }

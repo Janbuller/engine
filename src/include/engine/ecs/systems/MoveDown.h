@@ -12,5 +12,6 @@ namespace engine::systems {
         void Exit(sptr<Scene> Scene) override{};
 
         void EntityUpdated(sptr<Scene> Scene, Entity Ent) override{}
+        void AnyEntityUpdated(sptr<Scene> Scene, Entity Ent) override{}
     };
 }// namespace engine::systems

@@ -17,6 +17,7 @@ namespace engine::systems {
         void Exit(sptr<Scene> Scene) override {}
 
         void EntityUpdated(sptr<Scene> Scene, Entity Ent) override{}
+        void AnyEntityUpdated(sptr<Scene> Scene, Entity Ent) override{}
     public:
         void Render(sptr<Scene> Scene, int Width, int Height);
     };

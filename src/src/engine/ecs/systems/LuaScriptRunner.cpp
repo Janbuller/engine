@@ -98,9 +98,15 @@ namespace engine::systems {
 
     void LuaScriptRunner::AnyEntityUpdated(sptr<Scene> Scene, Entity Ent) {
         SetupComponents(Scene);
+
+        auto CompVec          = Scene->GetComponentVector<Transform>();
+        Transform *CompVecVec = &CompVec->Components[0];
+
         if (Entities.count(Ent)) {
             // Entity was added.
             InitializeEntity(Scene, Ent);
+            RunFunctionForEntity(Scene, Ent, "Init");
+
         } else {
             //Entity was removed.
             L["Entities"][Ent.Id] = sol::nil;
@@ -135,7 +141,9 @@ namespace engine::systems {
     }
 
     void LuaScriptRunner::RunScript(std::string Filename) {
+        LOG_ENGINE_TRACE("Preprocessing script \"{}\"", Filename);
         auto GlobalMetaTableScript = PreprocessFile(Filename);
+        LOG_ENGINE_TRACE("Running script \"{}\"", Filename);
         L.script(GlobalMetaTableScript, Filename);
     }
 
@@ -177,18 +185,24 @@ namespace engine::systems {
     template<typename... Arguments>
     void LuaScriptRunner::RunFunctionForAll(sptr<Scene> Scene, std::string Function, Arguments... Args) {
         for (const auto &Entity : Entities) {
-            auto &EScript = Scene->GetComponent<Script>(Entity);
+            RunFunctionForEntity(Scene, Entity, Function, Args...);
+        }
+    }
 
-            for (int ScriptIdx = 0; ScriptIdx < EScript.ScriptPaths.size(); ScriptIdx++) {
-                auto L_EntityScript = L["Entities"][Entity.Id][ScriptIdx];
+    template<typename... Arguments>
+    void LuaScriptRunner::RunFunctionForEntity(sptr<Scene> Scene, const Entity &Entity, std::string Function, Arguments... Args) {
 
-                L["EntityID"] = Entity.Id;
-                L["ScriptID"] = ScriptIdx;
+        auto &EScript = Scene->GetComponent<Script>(Entity);
 
-                sol::function L_Func = L_EntityScript[Function];
-                if (L_Func.valid()) {
-                    L_Func(Args...);
-                }
+        for (int ScriptIdx = 0; ScriptIdx < EScript.ScriptPaths.size(); ScriptIdx++) {
+            auto L_EntityScript = L["Entities"][Entity.Id][ScriptIdx];
+
+            L["EntityID"] = Entity.Id;
+            L["ScriptID"] = ScriptIdx;
+
+            sol::function L_Func = L_EntityScript[Function];
+            if (L_Func.valid()) {
+                L_Func(Args...);
             }
         }
     }

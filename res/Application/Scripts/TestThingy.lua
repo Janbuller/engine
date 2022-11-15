@@ -105,6 +105,7 @@ function OnKeyPressed(Key, Action)
    -- if Key == Input.Keys["KEY_F"] then
    --    Log.Trace(Key .. " : " .. Action);
    -- end
+   --
 end
 
 function Exit()

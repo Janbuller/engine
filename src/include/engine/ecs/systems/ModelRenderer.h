@@ -11,6 +11,13 @@ namespace engine::systems {
         unsigned int LightSSBO;
         Model Skybox;
 
+        GLuint GFBO;
+        GLuint GPos, GNorm, GCol;
+        GLuint DepthRBO;
+
+        glcore::Shader GPassShader{"res/Internal/Shaders/GPass.vert", "res/Internal/Shaders/GPass.frag"};
+        glcore::Shader DefaultLightingShader{"res/Internal/Shaders/DefaultLightingShader.vert", "res/Internal/Shaders/DefaultLightingShader.frag"};
+
     public:
         void Init(sptr<Scene> Scene) override;
         void Update(sptr<Scene> Scene, double DeltaTime) override{};
@@ -20,5 +27,6 @@ namespace engine::systems {
         void AnyEntityUpdated(sptr<Scene> Scene, Entity Ent) override{}
     public:
         void Render(sptr<Scene> Scene, int Width, int Height);
+        void Resize(int Width, int Height);
     };
 }// namespace engine::systems

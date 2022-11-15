@@ -13,13 +13,19 @@ namespace engine {
             onKeyPressed(key, scancode, action, mods);
         };
         AppWindow.SetKeyPressedCallback(keyCallback);
-
+        LOG_ENGINE_TRACE("KeypressedCallback created.");
 
         auto mouseButtonCallback = [this](int button, int action, int mods) {
             onMouseButtonPressed(button, action, mods);
         };
         AppWindow.SetMouseButtonPressedCallback(mouseButtonCallback);
-        LOG_ENGINE_TRACE("Key- and MouseButton-Callbacks created.");
+        LOG_ENGINE_TRACE("MouseButtonCallback created.");
+
+        auto resizeCallback = [this](int width, int height) {
+            onWindowResize(width, height);
+        };
+        AppWindow.SetResizeCallback(resizeCallback);
+        LOG_ENGINE_TRACE("WindowResizeCallback created.");
     }
 
     void Application::Run() {
@@ -61,5 +67,8 @@ namespace engine {
     }
 
     void Application::onMouseButtonPressed(int button, int action, int mods) {
+    }
+
+    void Application::onWindowResize(int width, int height) {
     }
 }// namespace engine

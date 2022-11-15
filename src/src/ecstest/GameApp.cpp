@@ -31,7 +31,7 @@ namespace ecstest {
 
         engine::RessourceManager::RegisterRessourceType<Model>();
         engine::RessourceManager::RegisterRessourceType<engine::glcore::TextureData>();
-        
+
         engine::ModelLoader::DefaultShader = MainShader;
 
         MainScene->RegisterComponentType<Transform>();
@@ -76,7 +76,6 @@ namespace ecstest {
             auto &E  = MainScene->AddEntity();
             auto &ET = MainScene->AddComponent<Transform>(E);
             auto &EL = MainScene->AddComponent<Light>(E);
-            /* auto &ES = MainScene->AddComponent<Script>(E); */
 
             ET.Rotation = glm::rotate(ET.Rotation, 0.66f, glm::vec3{1, 0, 0});
             ET.Rotation = glm::rotate(ET.Rotation, 0.4f, glm::vec3{0, 0, 1});
@@ -89,6 +88,7 @@ namespace ecstest {
             EL.Quadratic = 0.44;
 
             EL.Type = Light::LightType::DirectionalLight;
+            LSR->AnyEntityUpdated(MainScene, E);
         }
 
         // Create camera entity
@@ -100,7 +100,6 @@ namespace ecstest {
 
             /* CC.Projection = engine::components::Camera::ProjectionType::ORTHOGRAPHIC; */
             CS.AddScript("res/Application/Scripts/CameraController.lua");
-            LSR->AnyEntityUpdated(MainScene, Cam);
 
             // Cubemap loading
             {
@@ -118,15 +117,40 @@ namespace ecstest {
             CC.BackgroundColor = glm::vec4{0.0, 0.3, 0.4, 1.0};
 
             MainScene->MainCam = Cam;
+
+            LSR->AnyEntityUpdated(MainScene, Cam);
         }
 
         // Create point light entity
         {
-            auto &E  = MainScene->AddEntity();
+            auto &E    = MainScene->AddEntity();
             PointLight = E;
-            auto &ET = MainScene->AddComponent<Transform>(E);
-            auto &EL = MainScene->AddComponent<Light>(E);
-            auto &ES = MainScene->AddComponent<Script>(E);
+            auto &ET   = MainScene->AddComponent<Transform>(E);
+            auto &EL   = MainScene->AddComponent<Light>(E);
+            auto &ES   = MainScene->AddComponent<Script>(E);
+
+            ET.Position = {-1, 4, 0};
+
+            EL.Color     = {1, 0.97, 0.94};
+            EL.Color     = {1, 0.2, 0.1};
+            EL.Intensity = 5.0;
+
+            EL.Constant  = 1.0;
+            EL.Linear    = 0.14;
+            EL.Quadratic = 0.07;
+
+            EL.Type = Light::LightType::PointLight;
+
+            ES.AddScript("res/Application/Scripts/Light.lua");
+            LSR->AnyEntityUpdated(MainScene, E);
+        }
+
+        for(int i = 0; i < 50; i++)
+        {
+            auto &E    = MainScene->AddEntity();
+            auto &ET   = MainScene->AddComponent<Transform>(E);
+            auto &EL   = MainScene->AddComponent<Light>(E);
+            auto &ES   = MainScene->AddComponent<Script>(E);
 
             ET.Position = {-1, 1, 0};
 
@@ -138,8 +162,7 @@ namespace ecstest {
             EL.Quadratic = 0.07;
 
             EL.Type = Light::LightType::PointLight;
-
-            ES.AddScript("res/Application/Scripts/Light.lua");
+            ES.AddScript("res/Application/Scripts/RandomLight.lua");
             LSR->AnyEntityUpdated(MainScene, E);
         }
 
@@ -163,7 +186,7 @@ namespace ecstest {
     void GameApp::onKeyPressed(int key, int scancode, int action, int mods) {
         using namespace engine;
 
-        if(MainScene->HasEntity(PointLight)) {
+        if (MainScene->HasEntity(PointLight)) {
             /* MainScene->RemoveEntity(PointLight); */
         }
 
@@ -172,19 +195,18 @@ namespace ecstest {
         if (key == KEY_ESCAPE && action == GLFW_PRESS)
             AppWindow.CaptureMouse(!AppWindow.IsMouseCaptured());
 
-        if(key == KEY_F1 && action == GLFW_PRESS)
-            glPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
-        if(key == KEY_F2 && action == GLFW_PRESS)
-            glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
+        if (key == KEY_F1 && action == GLFW_PRESS)
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        if (key == KEY_F2 && action == GLFW_PRESS)
+            glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
         auto LSR = MainScene->GetSystem<LuaScriptRunner>();
-        if(key == KEY_F6 && action == GLFW_PRESS) {
+        if (key == KEY_F6 && action == GLFW_PRESS) {
             LSR->AnyEntityUpdated(MainScene, PointLight);
         }
 
         // Create floor entity
-        if(key == KEY_F5 && action == GLFW_PRESS)
-        {
+        if (key == KEY_F5 && action == GLFW_PRESS) {
             auto &E  = MainScene->AddEntity();
             auto &ET = MainScene->AddComponent<Transform>(E);
             auto &EM = MainScene->AddComponent<Model>(E);
@@ -202,6 +224,11 @@ namespace ecstest {
     }
 
     void GameApp::onMouseButtonPressed(int button, int action, int mods) {
+    }
+
+    void GameApp::onWindowResize(int width, int height) {
+
+        MainScene->GetSystem<ModelRenderer>()->Resize(width, height);
     }
 
     void GameApp::DoMouseInput() {

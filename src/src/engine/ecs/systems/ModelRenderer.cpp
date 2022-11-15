@@ -23,6 +23,39 @@ namespace engine::systems {
 
         Skybox                               = RessourceManager::Get<Model>("res/Internal/Models/Skybox.obj");
         Skybox.Meshes[0].MeshMaterial.Shader = glcore::Shader{"res/Internal/Shaders/Skybox.vert", "res/Internal/Shaders/Skybox.frag"};
+
+        glCreateFramebuffers(1, &GFBO);
+
+        glCreateTextures(GL_TEXTURE_2D, 1, &GPos);
+        glBindTexture(GL_TEXTURE_2D, GPos);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, 800, 600, 0, GL_RGBA, GL_FLOAT, NULL);
+        glTextureParameteri(GPos, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTextureParameteri(GPos, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glNamedFramebufferTexture(GFBO, GL_COLOR_ATTACHMENT0, GPos, 0);
+
+        glCreateTextures(GL_TEXTURE_2D, 1, &GNorm);
+        glBindTexture(GL_TEXTURE_2D, GNorm);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, 800, 600, 0, GL_RGBA, GL_FLOAT, NULL);
+        glTextureParameteri(GNorm, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTextureParameteri(GNorm, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glNamedFramebufferTexture(GFBO, GL_COLOR_ATTACHMENT1, GNorm, 0);
+
+        glCreateTextures(GL_TEXTURE_2D, 1, &GCol);
+        glBindTexture(GL_TEXTURE_2D, GCol);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 800, 600, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+        glTextureParameteri(GCol, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTextureParameteri(GCol, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glNamedFramebufferTexture(GFBO, GL_COLOR_ATTACHMENT2, GCol, 0);
+
+        unsigned int attachments[3] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2};
+        glNamedFramebufferDrawBuffers(GFBO, 3, attachments);
+
+        glCreateRenderbuffers(1, &DepthRBO);
+        glNamedRenderbufferStorage(DepthRBO, GL_DEPTH_COMPONENT, 800, 600);
+        glNamedFramebufferRenderbuffer(GFBO, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, DepthRBO);
+
+        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+            LOG_ENGINE_ERROR("Incomplete Framebuffer!");
     }
 
     void ModelRenderer::Render(sptr<Scene> Scene, int Width, int Height) {
@@ -41,6 +74,9 @@ namespace engine::systems {
             auto &BG = CC.BackgroundColor.value();
             glClearColor(BG.r, BG.g, BG.b, BG.a);
         }
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        glBindFramebuffer(GL_FRAMEBUFFER, GFBO);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // Draw skybox if existing
@@ -71,6 +107,73 @@ namespace engine::systems {
             glDepthMask(GL_TRUE);
             glEnable(GL_CULL_FACE);
         }
+
+
+        // ENTITY RENDERING
+        // ================
+        // Loop through all the entities affected by the ModelRenderer system.
+        for (const auto &Entity : Entities) {
+            // Grab the transform and model components.
+            const auto &ET = Scene->GetComponent<Transform>(Entity);
+            const auto &EM = Scene->GetComponent<Model>(Entity);
+
+            // Ignore object if invisible.
+            if (!EM.Visible) {
+                continue;
+            }
+
+            // Grab the transformation (model) matrix.
+            auto Model = ET.GetTransformMatrix();
+
+            // Loop through all the meshes in the current model.
+            for (auto &Mesh : EM.Meshes) {
+                auto &Mat      = Mesh.MeshMaterial;
+                auto &Textures = Mat.Textures;
+
+                // Set the MVP-matrices and the main camera position uniforms
+                // in the shader.
+                GPassShader.Bind();
+                GPassShader.SetMat4("View", View);
+                GPassShader.SetMat4("Projection", Projection);
+                GPassShader.SetMat4("Model", Model);
+
+                // Holds the amount of bound textures of each different type,
+                // starting from one. This is used for variable name in
+                // shaders.
+                std::array<int, (int) TextureType::NONE> TextureTypeCounter{};
+                TextureTypeCounter.fill(1);
+
+                // Loop through all mesh textures, generating names and binding
+                // them.
+                for (unsigned int i = 0; i < Textures.size(); i++) {
+                    glActiveTexture(GL_TEXTURE0 + i);
+
+                    TextureType Type = Textures[i].Type;
+
+                    // Get the texture shadername from the TextureInfo array
+                    // using the type.
+                    std::string TypeName = Material::TextureInfo[(int) Type].ShaderName;
+
+                    // Get the count of the current texturetype and add one to
+                    // it.
+                    std::string TextureTypeCount = std::to_string(TextureTypeCounter[(int) Type]++);
+
+                    std::string ShaderName = TypeName + TextureTypeCount;
+
+                    GPassShader.SetInt(("MeshMat." + ShaderName).c_str(), i);
+                    glBindTexture(GL_TEXTURE_2D, Textures[i].Texture.Handle);
+                }
+                glActiveTexture(GL_TEXTURE0);
+
+                // Bind the vao and draw.
+                glBindVertexArray(Mesh.VAO);
+                glDrawElements(GL_TRIANGLES, Mesh.Indices.size(), GL_UNSIGNED_INT, 0);
+                glBindVertexArray(0);
+            }
+        }
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
 
         // LIGHTING
         // ========
@@ -114,6 +217,22 @@ namespace engine::systems {
             Lights.push_back(Light);
         }
 
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        DefaultLightingShader.Bind();
+
+        glActiveTexture(GL_TEXTURE0);
+        DefaultLightingShader.SetInt("GPos", 0);
+        glBindTexture(GL_TEXTURE_2D, GPos);
+        glActiveTexture(GL_TEXTURE1);
+        DefaultLightingShader.SetInt("GNorm", 1);
+        glBindTexture(GL_TEXTURE_2D, GNorm);
+        glActiveTexture(GL_TEXTURE2);
+        DefaultLightingShader.SetInt("GCol", 2);
+        glBindTexture(GL_TEXTURE_2D, GCol);
+
+        DefaultLightingShader.SetVec3("MainCam.CamPos", Scene->GetComponent<Transform>(Scene->MainCam.Id).Position);
+
         // Generate the light SSBO, which holds all the lights in the scene.
         // SSBO is used for the variable array size feature.
         glNamedBufferData(LightSSBO, sizeof(lighting::ShaderLight) * Lights.size(), Lights.data(), GL_DYNAMIC_DRAW);
@@ -121,69 +240,41 @@ namespace engine::systems {
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 10, LightSSBO);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
-        // ENTITY RENDERING
-        // ================
-        // Loop through all the entities affected by the ModelRenderer system.
-        for (const auto &Entity : Entities) {
-            // Grab the transform and model components.
-            const auto &ET = Scene->GetComponent<Transform>(Entity);
-            const auto &EM = Scene->GetComponent<Model>(Entity);
-
-            // Ignore object if invisible.
-            if (!EM.Visible) {
-                continue;
-            }
-
-            // Grab the transformation (model) matrix.
-            auto Model = ET.GetTransformMatrix();
-
-            // Loop through all the meshes in the current model.
-            for (auto &Mesh : EM.Meshes) {
-                auto &Mat      = Mesh.MeshMaterial;
-                auto &Textures = Mat.Textures;
-
-                // Set the MVP-matrices and the main camera position uniforms
-                // in the shader.
-                Mat.Shader.Bind();
-                Mat.Shader.SetMat4("View", View);
-                Mat.Shader.SetMat4("Projection", Projection);
-                Mat.Shader.SetMat4("Model", Model);
-
-                Mat.Shader.SetVec3("MainCam.CamPos", Scene->GetComponent<Transform>(Scene->MainCam.Id).Position);
-
-                // Holds the amount of bound textures of each different type,
-                // starting from one. This is used for variable name in
-                // shaders.
-                std::array<int, (int) TextureType::NONE> TextureTypeCounter{};
-                TextureTypeCounter.fill(1);
-
-                // Loop through all mesh textures, generating names and binding
-                // them.
-                for (unsigned int i = 0; i < Textures.size(); i++) {
-                    glActiveTexture(GL_TEXTURE0 + i);
-
-                    TextureType Type = Textures[i].Type;
-
-                    // Get the texture shadername from the TextureInfo array
-                    // using the type.
-                    std::string TypeName = Material::TextureInfo[(int) Type].ShaderName;
-
-                    // Get the count of the current texturetype and add one to
-                    // it.
-                    std::string TextureTypeCount = std::to_string(TextureTypeCounter[(int) Type]++);
-
-                    std::string ShaderName = TypeName + TextureTypeCount;
-
-                    Mat.Shader.SetInt(("MeshMat." + ShaderName).c_str(), i);
-                    glBindTexture(GL_TEXTURE_2D, Textures[i].Texture.Handle);
-                }
-                glActiveTexture(GL_TEXTURE0);
-
-                // Bind the vao and draw.
-                glBindVertexArray(Mesh.VAO);
-                glDrawElements(GL_TRIANGLES, Mesh.Indices.size(), GL_UNSIGNED_INT, 0);
-                glBindVertexArray(0);
-            }
+        unsigned int quadVAO = 0;
+        unsigned int quadVBO;
+        if (quadVAO == 0)
+        {
+            float quadVertices[] = {
+                // positions        // texture Coords
+                -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+                -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+                 1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+                 1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+            };
+            // setup plane VAO
+            glGenVertexArrays(1, &quadVAO);
+            glGenBuffers(1, &quadVBO);
+            glBindVertexArray(quadVAO);
+            glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
+            glEnableVertexAttribArray(0);
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+            glEnableVertexAttribArray(1);
+            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
         }
+        glBindVertexArray(quadVAO);
+        glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+        glBindVertexArray(0);
+    }
+
+    void ModelRenderer::Resize(int Width, int Height) {
+        glBindTexture(GL_TEXTURE_2D, GPos);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, Width, Height, 0, GL_RGBA, GL_FLOAT, NULL);
+        glBindTexture(GL_TEXTURE_2D, GNorm);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, Width, Height, 0, GL_RGBA, GL_FLOAT, NULL);
+        glBindTexture(GL_TEXTURE_2D, GCol);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Width, Height, 0, GL_RGBA, GL_FLOAT, NULL);
+
+        glNamedRenderbufferStorage(DepthRBO, GL_DEPTH_COMPONENT, Width, Height);
     }
 }// namespace engine::systems

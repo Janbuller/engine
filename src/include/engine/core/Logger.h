@@ -15,6 +15,8 @@ namespace engine {
     };
 }// namespace engine
 
+#ifndef RELEASE
+
 #define LOG_ENGINE_TRACE(...)    ::engine::Logger::EngineLogger->trace(__VA_ARGS__)
 #define LOG_ENGINE_INFO(...)     ::engine::Logger::EngineLogger->info(__VA_ARGS__)
 #define LOG_ENGINE_WARN(...)     ::engine::Logger::EngineLogger->warn(__VA_ARGS__)
@@ -26,3 +28,22 @@ namespace engine {
 #define LOG_WARN(...)     ::engine::Logger::GameLogger->warn(__VA_ARGS__)
 #define LOG_ERROR(...)    ::engine::Logger::GameLogger->error(__VA_ARGS__)
 #define LOG_CRITICAL(...) ::engine::Logger::GameLogger->critical(__VA_ARGS__)
+
+#else
+
+#define LOG_ENGINE_TRACE(...)    
+#define LOG_ENGINE_INFO(...)     
+#define LOG_ENGINE_WARN(...)     
+#define LOG_ENGINE_ERROR(...)    
+#define LOG_ENGINE_CRITICAL(...) 
+
+#define LOG_TRACE(...)    
+#define LOG_INFO(...)     
+#define LOG_WARN(...)     
+#define LOG_ERROR(...)    
+#define LOG_CRITICAL(...) 
+
+#endif
+
+
+

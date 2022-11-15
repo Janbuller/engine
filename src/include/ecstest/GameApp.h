@@ -36,6 +36,7 @@ namespace ecstest {
 
         void onKeyPressed(int key, int scancode, int action, int mods) override;
         void onMouseButtonPressed(int button, int action, int mods) override;
+        void onWindowResize(int width, int height) override;
 
         void DoMouseInput();
     };

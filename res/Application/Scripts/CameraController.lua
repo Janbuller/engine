@@ -12,11 +12,11 @@ function Init()
 
    ET.Position.x = -5;
    ET.Position.z = 5;
-
-   Entity.Transform = ET;
 end
 
 function Update(dt)
+
+   ET = Entity.Transform;
    -- for i,v in pairs(Entities) do
    --    print(i, v);
    -- end

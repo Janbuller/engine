@@ -10,6 +10,10 @@ namespace engine::glcore {
         this->Height = height;
 
         glViewport(0, 0, width, height);
+
+        if(ResizeCallback != nullptr) {
+            ResizeCallback(width, height);
+        }
     }
 
     void Window::onKeyPressed(int key, int scancode, int action, int mods) {
@@ -139,5 +143,9 @@ namespace engine::glcore {
 
     void Window::SetMouseButtonPressedCallback(std::function<void(int button, int action, int mods)> Callback) {
         MouseButtonPressedCallback = Callback;
+    }
+
+    void Window::SetResizeCallback(std::function<void(int width, int height)> Callback) {
+        ResizeCallback = Callback;
     }
 }// namespace engine::glcore

@@ -49,5 +49,8 @@ namespace engine::systems {
 
         template<typename... Arguments>
         void RunFunctionForAll(sptr<Scene> Scene, std::string Function, Arguments... Args);
+
+        template<typename... Arguments>
+        void RunFunctionForEntity(sptr<Scene> Scene, const Entity &Entity, std::string Function, Arguments... Args);
     };
 }// namespace engine::systems

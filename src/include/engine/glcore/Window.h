@@ -21,6 +21,7 @@ namespace engine::glcore {
 
         std::function<void(int key, int scandcode, int action, int mods)> KeyPressedCallback;
         std::function<void(int button, int action, int mods)> MouseButtonPressedCallback;
+        std::function<void(int width, int height)> ResizeCallback;
 
         engine::DeltaVariable<double, 1> deltaTime;
 
@@ -59,5 +60,6 @@ namespace engine::glcore {
 
         void SetKeyPressedCallback(std::function<void(int key, int scandcode, int action, int mods)> Callback);
         void SetMouseButtonPressedCallback(std::function<void(int button, int action, int mods)> Callback);
+        void SetResizeCallback(std::function<void(int width, int height)> Callback);
     };
 }// namespace engine::glcore

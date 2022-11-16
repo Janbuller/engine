@@ -14,6 +14,7 @@ namespace engine::systems {
         GLuint GFBO;
         GLuint GPos, GNorm, GCol;
         GLuint DepthRBO;
+        GLuint QuadVAO, QuadVBO;
 
         glcore::Shader GPassShader{"res/Internal/Shaders/GPass.vert", "res/Internal/Shaders/GPass.frag"};
         glcore::Shader DefaultLightingShader{"res/Internal/Shaders/DefaultLightingShader.vert", "res/Internal/Shaders/DefaultLightingShader.frag"};
@@ -25,8 +26,13 @@ namespace engine::systems {
 
         void EntityUpdated(sptr<Scene> Scene, Entity Ent) override{}
         void AnyEntityUpdated(sptr<Scene> Scene, Entity Ent) override{}
+
     public:
         void Render(sptr<Scene> Scene, int Width, int Height);
         void Resize(int Width, int Height);
+
+    private:
+        void CreateFramebuffer();
+        void CreateScreenQuad();
     };
 }// namespace engine::systems

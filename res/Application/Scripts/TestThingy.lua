@@ -1,11 +1,11 @@
-time = 0;
+local Time = 0;
 
-StartHeight = {}
-size = 32
+local StartHeight = {}
+local Size = 32
 
-Quality = 8;
+local Quality = 8;
 
-Depth = 2
+local Depth = 2
 
 function Init()
    -- if not (EntityID == 0) then
@@ -14,11 +14,11 @@ function Init()
    --    Entity.Model = model
    -- end
 
-   time = math.random(1000)/10;
+   Time = math.random(1000)/10;
 
-   for x = 1, size do
+   for x = 1, Size do
       StartHeight[x] = {}
-      for z = 1, size do
+      for z = 1, Size do
          StartHeight[x][z] = math.random(1000)/1000
       end
    end
@@ -34,7 +34,7 @@ function Init()
 end
 
 function Update(dt)
-   time += dt;
+   Time += dt;
 
    local EntModel = Entity.Model;
 
@@ -48,13 +48,13 @@ function Update(dt)
       Table[#(Table)+1] = ToInsert;
    end
 
-   for x = 1, size do
-      for z = 1, size do
+   for x = 1, Size do
+      for z = 1, Size do
          local vertex = Vertex.new()
          local pos = vertex.Position
 
          pos.x = (x-1) / Quality;
-         pos.y = StartHeight[x][z] * math.cos(time*StartHeight[x][z]) / Quality
+         pos.y = StartHeight[x][z] * math.cos(Time*StartHeight[x][z]) / Quality
          -- pos.y = (math.min(0, math.sin(x+time)) * Depth) / Quality;
          pos.z = (z-1) / Quality;
 
@@ -62,18 +62,18 @@ function Update(dt)
          vertex.Normal.y = 1;
          vertex.Normal.z = 0;
 
-         vertex.TexCoords.x = (x-1)/(size-1);
-         vertex.TexCoords.y = (z-1)/(size-1);
+         vertex.TexCoords.x = (x-1)/(Size-1);
+         vertex.TexCoords.y = (z-1)/(Size-1);
 
          vertex.Tangent.x = 1
          vertex.Tangent.y = 0
          vertex.Tangent.z = 0
 
-         if(x < size) and (z < size) then
-            local i = (x-1) + (z-1) * size;
+         if(x < Size) and (z < Size) then
+            local i = (x-1) + (z-1) * Size;
 
             Insert(EntModel.Meshes[1].Indices, i+1)
-            Insert(EntModel.Meshes[1].Indices, i+size)
+            Insert(EntModel.Meshes[1].Indices, i+Size)
             Insert(EntModel.Meshes[1].Indices, i)
 
             -- Norm = Vec3.new()
@@ -86,8 +86,8 @@ function Update(dt)
             -- EntModel.Meshes[1].Vertices[i+1].Normal = Norm;
             -- EntModel.Meshes[1].Vertices[i+size].Normal = Norm;
 
-            Insert(EntModel.Meshes[1].Indices, i+size+1)
-            Insert(EntModel.Meshes[1].Indices, i+size)
+            Insert(EntModel.Meshes[1].Indices, i+Size+1)
+            Insert(EntModel.Meshes[1].Indices, i+Size)
             Insert(EntModel.Meshes[1].Indices, i+1)
          end
 

@@ -99,9 +99,6 @@ namespace engine::systems {
     void LuaScriptRunner::AnyEntityUpdated(sptr<Scene> Scene, Entity Ent) {
         SetupComponents(Scene);
 
-        auto CompVec          = Scene->GetComponentVector<Transform>();
-        Transform *CompVecVec = &CompVec->Components[0];
-
         if (Entities.count(Ent)) {
             // Entity was added.
             InitializeEntity(Scene, Ent);

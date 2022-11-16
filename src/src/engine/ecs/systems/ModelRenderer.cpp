@@ -24,38 +24,9 @@ namespace engine::systems {
         Skybox                               = RessourceManager::Get<Model>("res/Internal/Models/Skybox.obj");
         Skybox.Meshes[0].MeshMaterial.Shader = glcore::Shader{"res/Internal/Shaders/Skybox.vert", "res/Internal/Shaders/Skybox.frag"};
 
-        glCreateFramebuffers(1, &GFBO);
+        CreateFramebuffer();
 
-        glCreateTextures(GL_TEXTURE_2D, 1, &GPos);
-        glBindTexture(GL_TEXTURE_2D, GPos);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, 800, 600, 0, GL_RGBA, GL_FLOAT, NULL);
-        glTextureParameteri(GPos, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTextureParameteri(GPos, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glNamedFramebufferTexture(GFBO, GL_COLOR_ATTACHMENT0, GPos, 0);
-
-        glCreateTextures(GL_TEXTURE_2D, 1, &GNorm);
-        glBindTexture(GL_TEXTURE_2D, GNorm);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, 800, 600, 0, GL_RGBA, GL_FLOAT, NULL);
-        glTextureParameteri(GNorm, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTextureParameteri(GNorm, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glNamedFramebufferTexture(GFBO, GL_COLOR_ATTACHMENT1, GNorm, 0);
-
-        glCreateTextures(GL_TEXTURE_2D, 1, &GCol);
-        glBindTexture(GL_TEXTURE_2D, GCol);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 800, 600, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-        glTextureParameteri(GCol, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTextureParameteri(GCol, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glNamedFramebufferTexture(GFBO, GL_COLOR_ATTACHMENT2, GCol, 0);
-
-        unsigned int attachments[3] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2};
-        glNamedFramebufferDrawBuffers(GFBO, 3, attachments);
-
-        glCreateRenderbuffers(1, &DepthRBO);
-        glNamedRenderbufferStorage(DepthRBO, GL_DEPTH_COMPONENT, 800, 600);
-        glNamedFramebufferRenderbuffer(GFBO, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, DepthRBO);
-
-        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-            LOG_ENGINE_ERROR("Incomplete Framebuffer!");
+        CreateScreenQuad();
     }
 
     void ModelRenderer::Render(sptr<Scene> Scene, int Width, int Height) {
@@ -76,6 +47,9 @@ namespace engine::systems {
         }
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        // GEOMETRY PASS
+        // =============
+        // Bind the GeometryPass framebuffer to draw to.
         glBindFramebuffer(GL_FRAMEBUFFER, GFBO);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -110,7 +84,7 @@ namespace engine::systems {
 
 
         // ENTITY RENDERING
-        // ================
+        // ----------------
         // Loop through all the entities affected by the ModelRenderer system.
         for (const auto &Entity : Entities) {
             // Grab the transform and model components.
@@ -172,11 +146,12 @@ namespace engine::systems {
             }
         }
 
+        // Unbind GPass framebuffer.
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
+        // LIGHTING PASS
+        // =============
 
-        // LIGHTING
-        // ========
         // Generate vector of ShaderLights from all light components in scene
         // using SceneView.
         std::vector<lighting::ShaderLight> Lights;
@@ -217,19 +192,16 @@ namespace engine::systems {
             Lights.push_back(Light);
         }
 
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+        // Bind the shader for the lighting pass
         DefaultLightingShader.Bind();
 
-        glActiveTexture(GL_TEXTURE0);
+        // Bind the textures of the GPass framebuffer.
         DefaultLightingShader.SetInt("GPos", 0);
-        glBindTexture(GL_TEXTURE_2D, GPos);
-        glActiveTexture(GL_TEXTURE1);
+        glBindTextureUnit(0, GPos);
         DefaultLightingShader.SetInt("GNorm", 1);
-        glBindTexture(GL_TEXTURE_2D, GNorm);
-        glActiveTexture(GL_TEXTURE2);
+        glBindTextureUnit(1, GNorm);
         DefaultLightingShader.SetInt("GCol", 2);
-        glBindTexture(GL_TEXTURE_2D, GCol);
+        glBindTextureUnit(2, GCol);
 
         DefaultLightingShader.SetVec3("MainCam.CamPos", Scene->GetComponent<Transform>(Scene->MainCam.Id).Position);
 
@@ -240,34 +212,14 @@ namespace engine::systems {
         glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 10, LightSSBO);
         glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
 
-        unsigned int quadVAO = 0;
-        unsigned int quadVBO;
-        if (quadVAO == 0)
-        {
-            float quadVertices[] = {
-                // positions        // texture Coords
-                -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
-                -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
-                 1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
-                 1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
-            };
-            // setup plane VAO
-            glGenVertexArrays(1, &quadVAO);
-            glGenBuffers(1, &quadVBO);
-            glBindVertexArray(quadVAO);
-            glBindBuffer(GL_ARRAY_BUFFER, quadVBO);
-            glBufferData(GL_ARRAY_BUFFER, sizeof(quadVertices), &quadVertices, GL_STATIC_DRAW);
-            glEnableVertexAttribArray(0);
-            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
-            glEnableVertexAttribArray(1);
-            glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
-        }
-        glBindVertexArray(quadVAO);
+        // Draw the ScreenSpace quad to the screen.
+        glBindVertexArray(QuadVAO);
         glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
         glBindVertexArray(0);
     }
 
     void ModelRenderer::Resize(int Width, int Height) {
+        // Resize the textures and renderbuffer for the GPass frambebuffer.
         glBindTexture(GL_TEXTURE_2D, GPos);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, Width, Height, 0, GL_RGBA, GL_FLOAT, NULL);
         glBindTexture(GL_TEXTURE_2D, GNorm);
@@ -276,5 +228,71 @@ namespace engine::systems {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, Width, Height, 0, GL_RGBA, GL_FLOAT, NULL);
 
         glNamedRenderbufferStorage(DepthRBO, GL_DEPTH_COMPONENT, Width, Height);
+    }
+
+
+    void ModelRenderer::CreateFramebuffer() {
+
+        glCreateFramebuffers(1, &GFBO);
+
+        glCreateTextures(GL_TEXTURE_2D, 1, &GPos);
+        glBindTexture(GL_TEXTURE_2D, GPos);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, 800, 600, 0, GL_RGBA, GL_FLOAT, NULL);
+        glTextureParameteri(GPos, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTextureParameteri(GPos, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glNamedFramebufferTexture(GFBO, GL_COLOR_ATTACHMENT0, GPos, 0);
+
+        glCreateTextures(GL_TEXTURE_2D, 1, &GNorm);
+        glBindTexture(GL_TEXTURE_2D, GNorm);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, 800, 600, 0, GL_RGBA, GL_FLOAT, NULL);
+        glTextureParameteri(GNorm, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTextureParameteri(GNorm, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glNamedFramebufferTexture(GFBO, GL_COLOR_ATTACHMENT1, GNorm, 0);
+
+        glCreateTextures(GL_TEXTURE_2D, 1, &GCol);
+        glBindTexture(GL_TEXTURE_2D, GCol);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 800, 600, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+        glTextureParameteri(GCol, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTextureParameteri(GCol, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glNamedFramebufferTexture(GFBO, GL_COLOR_ATTACHMENT2, GCol, 0);
+
+        unsigned int attachments[3] = {GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2};
+        glNamedFramebufferDrawBuffers(GFBO, 3, attachments);
+
+        glCreateRenderbuffers(1, &DepthRBO);
+        glNamedRenderbufferStorage(DepthRBO, GL_DEPTH_COMPONENT, 800, 600);
+        glNamedFramebufferRenderbuffer(GFBO, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, DepthRBO);
+
+        if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+            LOG_ENGINE_ERROR("Incomplete Framebuffer!");
+    }
+
+    void ModelRenderer::CreateScreenQuad() {
+        // clang-format off
+        float ScreenQuadVerts[] = {
+            // Positions        // TexCoords
+            -1.0f,  1.0f, 0.0f, 0.0f, 1.0f,
+            -1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+             1.0f,  1.0f, 0.0f, 1.0f, 1.0f,
+             1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+        };
+        // clang-format on
+
+        // Create buffers for screen quad
+        glCreateVertexArrays(1, &QuadVAO);
+        glCreateBuffers(1, &QuadVBO);
+
+        glNamedBufferData(QuadVBO, sizeof(ScreenQuadVerts), &ScreenQuadVerts[0], GL_STATIC_DRAW);
+
+        glVertexArrayVertexBuffer(QuadVAO, 0, QuadVBO, 0, 5 * sizeof(float));
+
+        glEnableVertexArrayAttrib(QuadVAO, 0);
+        glEnableVertexArrayAttrib(QuadVAO, 1);
+
+        glVertexArrayAttribFormat(QuadVAO, 0, 3, GL_FLOAT, GL_FALSE, 0);
+        glVertexArrayAttribFormat(QuadVAO, 1, 2, GL_FLOAT, GL_FALSE, 3 * sizeof(float));
+
+        glVertexArrayAttribBinding(QuadVAO, 0, 0);
+        glVertexArrayAttribBinding(QuadVAO, 1, 0);
     }
 }// namespace engine::systems

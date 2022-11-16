@@ -62,12 +62,12 @@ namespace ecstest {
             auto &ET = MainScene->AddComponent<Transform>(E);
             auto &EM = MainScene->AddComponent<Model>(E);
             auto &ES = MainScene->AddComponent<Script>(E);
+            ES.AddScript("res/Application/Scripts/TestThingy.lua");
 
             ET.Position.y -= 2;
 
             EM = engine::RessourceManager::Get<Model>("res/Application/Models/pavement_floor/floor.fbx");
 
-            ES.AddScript("res/Application/Scripts/TestThingy.lua");
             LSR->AnyEntityUpdated(MainScene, E);
         }
 
@@ -88,7 +88,6 @@ namespace ecstest {
             EL.Quadratic = 0.44;
 
             EL.Type = Light::LightType::DirectionalLight;
-            LSR->AnyEntityUpdated(MainScene, E);
         }
 
         // Create camera entity
@@ -210,15 +209,16 @@ namespace ecstest {
             auto &E  = MainScene->AddEntity();
             auto &ET = MainScene->AddComponent<Transform>(E);
             auto &EM = MainScene->AddComponent<Model>(E);
-            /* auto &ES = MainScene->AddComponent<Script>(E); */
+            auto &ES = MainScene->AddComponent<Script>(E);
 
-            ET.Position.y += 5;
+            ET.Position.y += 20;
             ET.Scale.x = 100;
             ET.Scale.z = 100;
 
             EM = engine::RessourceManager::Get<Model>("res/Application/Models/wood_floor/floor.obj");
 
-            /* ES.ScriptPaths.push_back("res/Application/Scripts/TestThingy.lua"); */
+            ES.ScriptPaths.push_back("res/Application/Scripts/TestThingy.lua");
+            MainScene->GetSystem<LuaScriptRunner>()->AnyEntityUpdated(MainScene, E);
         }
         MainScene->GetSystem<LuaScriptRunner>()->OnKeyPressed(MainScene, Keys(key), action);
     }

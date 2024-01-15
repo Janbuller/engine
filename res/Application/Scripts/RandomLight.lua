@@ -27,9 +27,9 @@ end
 function Update(dt)
    Time += dt
 
-   -- local ET = Entity.Transform
-   -- ET.Position.x = StartPos.x + math.cos(Time)/2
-   -- ET.Position.z = StartPos.z + math.sin(Time)/2
+   local ET = Entity.Transform
+   ET.Position.x = StartPos.x + math.cos(Time)/2
+   ET.Position.z = StartPos.z + math.sin(Time)/2
 end
 
 function Exit()

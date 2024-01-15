@@ -24,7 +24,7 @@ namespace engine {
         Entity MainCam;
 
     public:
-        std::vector<Entity> Entities;
+        std::unordered_map<int, Entity> Entities;
 
         EntityGenerator EGen{};
 
@@ -33,26 +33,27 @@ namespace engine {
 
         Entity &AddEntity() {
             auto NewId = EGen.GetNextId();
-            Entities.push_back(Entity{NewId, std::bitset<MAX_COMPONENTS>()});
+            LOG_ENGINE_TRACE("Adding Entity with ID {}", NewId);
+            Entities.insert({NewId, Entity{NewId, std::bitset<MAX_COMPONENTS>()}});
 
             Systems.EntitySignatureChanged(shared_from_this(), Entities[NewId], Entities[NewId].ComponentSignature);
 
-            return Entities.back();
+            return Entities[NewId];
         }
 
         void RemoveEntity(Entity E) {
+            LOG_ENGINE_TRACE("Removing Entity with ID {}", E.Id);
             Systems.EntitySignatureChanged(shared_from_this(), Entities[E.Id], 0);
 
-            Entities.erase(std::find(Entities.begin(), Entities.end(), E));
+            Entities.erase(E.Id);
             EGen.RemoveEntityId(E.Id);
 
-            
             Components.RemoveEntity(E);
             Systems.RemoveEntity(E);
         }
 
         bool HasEntity(Entity E) {
-            return std::find(Entities.begin(), Entities.end(), E) != Entities.end();
+            return Entities.count(E.Id);
         }
 
         template<typename T>

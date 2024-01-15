@@ -127,7 +127,7 @@ namespace engine::systems {
         //
         // x == y --> x == y    (stays same)
         // x ~= y --> x ~= y    (stays same)
-        RE2::GlobalReplace(&contents, "(\\S+)\\s*([^\\s=~])=\\s*(\\w+)", "\\1 = \\1 \\2 \\3");
+        RE2::GlobalReplace(&contents, "(\\S+)\\s*([^\\s=~<>])=\\s*(\\w+)", "\\1 = \\1 \\2 \\3");
 
         // Replaces the keyword global into "g_". This allows for using the
         // word "global" to represent global variabls, while the

@@ -3,6 +3,7 @@
 #include "engine/core/Application.h"
 #include "engine/core/Keys.h"
 #include "engine/ecs/Entity.h"
+#include "engine/ecs/SceneView.h"
 #include "engine/ecs/components/Camera.h"
 #include "engine/ecs/components/Light.h"
 #include "engine/ecs/components/Model.h"
@@ -12,6 +13,7 @@
 #include "engine/ecs/systems/ModelRenderer.h"
 #include "engine/glcore/Shader.h"
 #include "engine/glcore/TextureCubemap.h"
+#include "engine/glcore/TextureData.h"
 #include "engine/glcore/Window.h"
 #include "engine/model/ModelLoader.h"
 #include "engine/ressources/RessourceManager.h"
@@ -22,6 +24,7 @@
 #include <random>
 #include <utility>
 #include <vector>
+#include <glad/glad.h>
 
 namespace ecstest {
     using namespace engine::components;
@@ -51,7 +54,6 @@ namespace ecstest {
         LuaScriptRunnerSignature.set(MainScene->GetComponentId<Script>(), true);
         MainScene->SetSystemSignature<LuaScriptRunner>(LuaScriptRunnerSignature);
 
-
         auto LSR = MainScene->GetSystem<LuaScriptRunner>();
         LSR->SetupComponents(MainScene);
         LSR->InitializeScripting(MainScene);
@@ -78,6 +80,7 @@ namespace ecstest {
             auto &EL = MainScene->AddComponent<Light>(E);
 
             ET.Rotation = glm::rotate(ET.Rotation, 0.66f, glm::vec3{1, 0, 0});
+
             ET.Rotation = glm::rotate(ET.Rotation, 0.4f, glm::vec3{0, 0, 1});
 
             EL.Color     = {0.9, 0.9, 1.0};
@@ -185,8 +188,17 @@ namespace ecstest {
     void GameApp::onKeyPressed(int key, int scancode, int action, int mods) {
         using namespace engine;
 
-        if (MainScene->HasEntity(PointLight)) {
-            /* MainScene->RemoveEntity(PointLight); */
+        if (key == KEY_F7 && action == GLFW_PRESS) {
+            std::vector<Entity> Lights{};
+            auto LightsView = SceneView<Transform, Light>{MainScene};
+            for (const auto &L : LightsView) {
+                auto &EL = MainScene->GetComponent<Light>(L);
+                if(EL.Type == Light::LightType::PointLight)
+                    Lights.push_back(L);
+            }
+            for(const auto &L : Lights) {
+                MainScene->RemoveEntity(L);
+            }
         }
 
         if (key == KEY_R && action == GLFW_PRESS)
@@ -200,9 +212,6 @@ namespace ecstest {
             glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
         auto LSR = MainScene->GetSystem<LuaScriptRunner>();
-        if (key == KEY_F6 && action == GLFW_PRESS) {
-            LSR->AnyEntityUpdated(MainScene, PointLight);
-        }
 
         // Create floor entity
         if (key == KEY_F5 && action == GLFW_PRESS) {
@@ -220,6 +229,28 @@ namespace ecstest {
             ES.ScriptPaths.push_back("res/Application/Scripts/TestThingy.lua");
             MainScene->GetSystem<LuaScriptRunner>()->AnyEntityUpdated(MainScene, E);
         }
+
+        // Create light entity
+        if (key == KEY_F6 && action == GLFW_PRESS) {
+            auto &E    = MainScene->AddEntity();
+            auto &ET   = MainScene->AddComponent<Transform>(E);
+            auto &EL   = MainScene->AddComponent<Light>(E);
+            auto &ES   = MainScene->AddComponent<Script>(E);
+
+            ET.Position = {-1, 1, 0};
+
+            EL.Color     = {1, 0.97, 0.94};
+            EL.Intensity = 5.0;
+
+            EL.Constant  = 1.0;
+            EL.Linear    = 0.14;
+            EL.Quadratic = 0.07;
+
+            EL.Type = Light::LightType::PointLight;
+            ES.AddScript("res/Application/Scripts/RandomLight.lua");
+            LSR->AnyEntityUpdated(MainScene, E);
+        }
+
         MainScene->GetSystem<LuaScriptRunner>()->OnKeyPressed(MainScene, Keys(key), action);
     }
 

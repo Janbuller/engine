@@ -19,43 +19,44 @@ namespace engine {
 
         struct Iterator {
             sptr<Scene> S;
-            unsigned int EntityIdx;
+            std::unordered_map<int, Entity>::const_iterator EntityIterator;
             std::bitset<MAX_COMPONENTS> Signature;
 
-            Iterator(sptr<Scene> S, unsigned int EntityIdx, std::bitset<MAX_COMPONENTS> Signature) : S{S}, EntityIdx{EntityIdx}, Signature{Signature} {}
+            Iterator(sptr<Scene> S, std::unordered_map<int, Entity>::const_iterator EntityIterator, std::bitset<MAX_COMPONENTS> Signature)
+                : S{S}, EntityIterator{EntityIterator}, Signature{Signature} {}
 
             Entity operator*() const {
-                return S->Entities[EntityIdx];
+                return EntityIterator->second;
             }
 
             bool operator==(const Iterator &other) const {
-                return EntityIdx == other.EntityIdx;
+                return EntityIterator == other.EntityIterator;
             }
 
             bool operator!=(const Iterator &other) const {
-                return EntityIdx != other.EntityIdx;
+                return EntityIterator != other.EntityIterator;
             }
 
             Iterator &operator++() {
-                do {
-                    EntityIdx++;
-                } while (EntityIdx < S->Entities.size() && (Signature & S->Entities[EntityIdx].ComponentSignature) != Signature);
-
+                ++EntityIterator;
+                while (EntityIterator != S->Entities.end() && (Signature & EntityIterator->second.ComponentSignature) != Signature) {
+                    ++EntityIterator;
+                }
                 return *this;
             }
         };
 
         const Iterator begin() const {
-            int StartIdx = 0;
-            while (StartIdx < S->Entities.size() && (ComponentSignature & S->Entities[StartIdx].ComponentSignature) != ComponentSignature) {
-                StartIdx++;
+            auto entityIterator = S->Entities.begin();
+            while (entityIterator != S->Entities.end() && (ComponentSignature & entityIterator->second.ComponentSignature) != ComponentSignature) {
+                ++entityIterator;
             }
 
-            return Iterator(S, StartIdx, ComponentSignature);
+            return Iterator(S, entityIterator, ComponentSignature);
         }
 
         const Iterator end() const {
-            return Iterator(S, S->Entities.size(), ComponentSignature);
+            return Iterator(S, S->Entities.end(), ComponentSignature);
         }
     };
 }// namespace engine

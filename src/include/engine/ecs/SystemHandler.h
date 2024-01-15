@@ -67,23 +67,27 @@ namespace engine {
         }
 
         void EntitySignatureChanged(sptr<Scene> Scene, Entity entity, std::bitset<MAX_COMPONENTS> entitySignature) {
+            LOG_ENGINE_TRACE("Entity signature changed for entity id: {}", entity.Id);
             for (const auto &pair : Systems) {
                 const auto &TypeName        = pair.first;
                 const auto &System          = pair.second;
                 const auto &SystemSignature = Signatures[TypeName];
 
-                System->AnyEntityUpdated(Scene, entity);
                 if ((entitySignature & SystemSignature) == SystemSignature) {
                     if(!System->Entities.count(entity)) {
+                        LOG_ENGINE_TRACE("\tAdding entity '{}' to system '{}'", entity.Id, TypeName);
                         System->Entities.insert(entity);
                         System->EntityUpdated(Scene, entity);
                     }
                 } else {
                     if(System->Entities.count(entity)) {
+                        LOG_ENGINE_TRACE("\tRemoving entity '{}' from system '{}'", entity.Id, TypeName);
                         System->Entities.erase(entity);
                         System->EntityUpdated(Scene, entity);
                     }
                 }
+
+                System->AnyEntityUpdated(Scene, entity);
             }
         }
 

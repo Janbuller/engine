@@ -51,6 +51,20 @@ if(NOT glm_POPULATED)
   add_subdirectory(${glm_SOURCE_DIR} ${glm_BINARY_DIR})
 endif()
 
+# Include libfmt #
+#================#
+FetchContent_Declare(
+  libfmt
+  GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+)
+
+FetchContent_GetProperties(libfmt)
+if(NOT libfmt_POPULATED)
+  FetchContent_Populate(libfmt)
+
+  add_subdirectory(${libfmt_SOURCE_DIR} ${libfmt_BINARY_DIR})
+endif()
+
 # Include spdlog #
 #================#
 FetchContent_Declare(
@@ -166,4 +180,4 @@ set_target_properties(ecs-test PROPERTIES
 
 target_include_directories(ecs-test PRIVATE include)
 
-target_link_libraries(ecs-test glfw glm glad spdlog assimp re2::re2 libluajit sol2)
+target_link_libraries(ecs-test glfw glm glad spdlog assimp re2::re2 libluajit sol2 fmt)
